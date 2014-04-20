@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Diagram>
+  <ID>JAVA</ID>
+  <OriginalElement />
+  <nodes>
+    <node x="678.5" y="293.0">splines.BezierSpline</node>
+    <node x="522.0" y="11.5">splines.Point</node>
+    <node x="278.0" y="632.0">splines.SplineRenderer</node>
+    <node x="0.0" y="513.0">splines.SplineLength</node>
+    <node x="669.0" y="0.0">splines.Interval</node>
+    <node x="458.0" y="146.0">splines.Spline</node>
+    <node x="239.0" y="513.0">splines.SplineArea</node>
+    <node x="512.5" y="293.0">splines.BSpline</node>
+    <node x="0.0" y="796.0">splines.BowlMaker</node>
+    <node x="119.5" y="389.0">splines.SplineProperty</node>
+    <node x="0.0" y="632.0">splines.Polynom</node>
+    <node x="346.5" y="293.0">splines.CubicSpline</node>
+  </nodes>
+  <notes>
+    <note x="0.0" y="27.0">
+      <node>splines.Spline</node>
+      <value>For convivients the Spline class should implement the List&lt;Point&gt; interface \nand delegate all methods to the controlPoint list.</value>
+      <edge>
+        <point x="-95.625" y="-48.5" />
+        <point x="489.875" y="121.0" />
+        <point x="251.0" y="121.0" />
+        <point x="0.0" y="21.0" />
+      </edge>
+    </note>
+  </notes>
+  <edges>
+    <edge source="splines.CubicSpline" target="splines.Spline">
+      <point x="0.0" y="-25.5" />
+      <point x="419.5" y="268.0" />
+      <point x="500.5" y="268.0" />
+      <point x="-85.0" y="48.5" />
+    </edge>
+    <edge source="splines.BSpline" target="splines.Spline">
+      <point x="0.0" y="-25.5" />
+      <point x="0.0" y="48.5" />
+    </edge>
+    <edge source="splines.SplineLength" target="splines.SplineProperty">
+      <point x="0.0" y="-37.0" />
+      <point x="109.5" y="488.0" />
+      <point x="174.25" y="488.0" />
+      <point x="-54.75" y="37.0" />
+    </edge>
+    <edge source="splines.SplineArea" target="splines.SplineProperty">
+      <point x="0.0" y="-37.0" />
+      <point x="348.5" y="488.0" />
+      <point x="283.75" y="488.0" />
+      <point x="54.75" y="37.0" />
+    </edge>
+    <edge source="splines.Spline" target="splines.Interval">
+      <point x="95.625" y="-48.5" />
+      <point x="681.125" y="121.0" />
+      <point x="791.5" y="121.0" />
+      <point x="0.0" y="48.0" />
+    </edge>
+    <edge source="splines.BezierSpline" target="splines.Spline">
+      <point x="0.0" y="-25.5" />
+      <point x="751.5" y="268.0" />
+      <point x="670.5" y="268.0" />
+      <point x="85.0" y="48.5" />
+    </edge>
+    <edge source="splines.Spline" target="splines.Point">
+      <point x="31.875" y="-48.5" />
+      <point x="31.75" y="36.5" />
+    </edge>
+  </edges>
+  <settings layout="Hierarchic Group" zoom="0.8431372549019608" x="457.0" y="423.5" />
+  <SelectedNodes />
+  <Categories>
+    <Category>Constructors</Category>
+    <Category>Fields</Category>
+    <Category>Methods</Category>
+    <Category>Properties</Category>
+  </Categories>
+  <SCOPE>All</SCOPE>
+  <VISIBILITY>private</VISIBILITY>
+</Diagram>
+
