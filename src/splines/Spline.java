@@ -9,14 +9,20 @@ public abstract class Spline /*implements List<Point>*/ {
     protected final java.util.List<Point> controlPoints = new ArrayList<Point>();
     private Interval interval;
 
+    /**
+     * Interpolates the spline at the specified index.
+     * @param u The subindex of control points, starting at 0.
+     *          Hence 1.5 would specify is the point exactly between control point 1 and 2.
+     * @return The interpolated point.
+     */
     public abstract Point s(double u);
 
+    /**
+     * Gets the interval for which the spline is defined.
+     * @return The interval.
+     */
     public Interval getInterval() {
         return interval;
-    }
-
-    public void setInterval(Interval interval) {
-        this.interval = interval;
     }
 
     // All methods of the List interface.
