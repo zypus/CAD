@@ -3,11 +3,15 @@ package splines;
 import java.util.*;
 
 /**
- * Created by fabian on 19/04/14.
+ * Author: Fabian Fränz <f.fraenz@t-online.de>
+ * Date: 19/04/14
+ * Project: CAD
+ * Version: 1.0
+ * Description: Abstract class which describes a spline object and keeps track of its control points and the interval the spline spans.
  */
 public abstract class Spline implements List<Point> {
-    protected final java.util.List<Point> controlPoints = new ArrayList<Point>();
-    private Interval interval;
+    protected final java.util.List<Point> controlPoints = new ArrayList<>();
+    private Interval interval = new Interval(1, -1, 1, -1);
 
     /**
      * Interpolates the spline at the specified index.
@@ -24,6 +28,43 @@ public abstract class Spline implements List<Point> {
     public Interval getInterval() {
         return interval;
     }
+
+	/**
+	 * Iterates over all control points and sets the interval accordingly.
+	 */
+	private void computeInterval() {
+
+		if (!isEmpty()) {
+			double left = controlPoints.get(0).getX();
+			double right = controlPoints.get(0).getX();
+			double down = controlPoints.get(0).getY();
+			double up = controlPoints.get(0).getY();
+			for (int i = 1; i < size(); i++) {
+				Point point = controlPoints.get(i);
+				left = (point.getX() < left) ? point.getX() : left;
+				right = (point.getX() > right) ? point.getX() : right;
+				down = (point.getX() < down) ? point.getY() : down;
+				up = (point.getX() > up) ? point.getY() : up;
+			}
+			interval = new Interval(left, right, down, up);
+		} else {
+			interval = new Interval(1,-1,1,-1);
+		}
+	}
+
+	/**
+	 * Increases the interval if the point is not contained in the interval.
+	 * @param point The point which should be contained in the interval.
+	 */
+	private void updateInterval(Point point) {
+		if (!interval.contains(point)) {
+			double left = (point.getX() < interval.getLeftBound()) ? point.getX() : interval.getLeftBound();
+			double right = (point.getX() > interval.getRightBound()) ? point.getX() : interval.getRightBound();
+			double down = (point.getX() < interval.getLowerBound()) ? point.getY() : interval.getLowerBound();
+			double up = (point.getX() > interval.getUpperBound()) ? point.getY() : interval.getUpperBound();
+			interval = new Interval(left, right,down,up);
+		}
+	}
 
     // All methods of the List interface.
 
@@ -59,12 +100,16 @@ public abstract class Spline implements List<Point> {
 
     @Override
     public boolean add(Point point) {
+		updateInterval(point);
         return controlPoints.add(point);
     }
 
     @Override
     public boolean remove(Object o) {
-        return controlPoints.remove(o);
+
+		boolean remove = controlPoints.remove(o);
+		computeInterval();
+		return remove;
     }
 
     @Override
@@ -74,17 +119,26 @@ public abstract class Spline implements List<Point> {
 
     @Override
     public boolean addAll(Collection<? extends Point> c) {
-        return controlPoints.addAll(c);
+
+		boolean all = controlPoints.addAll(c);
+		computeInterval();
+		return all;
     }
 
     @Override
     public boolean addAll(int index, Collection<? extends Point> c) {
-        return controlPoints.addAll(index, c);
+
+		boolean all = controlPoints.addAll(index, c);
+		computeInterval();
+		return all;
     }
 
     @Override
     public boolean removeAll(Collection<?> c) {
-        return controlPoints.retainAll(c);
+
+		boolean removeAll = controlPoints.removeAll(c);
+		computeInterval();
+		return removeAll;
     }
 
     @Override
@@ -95,6 +149,7 @@ public abstract class Spline implements List<Point> {
     @Override
     public void clear() {
         controlPoints.clear();
+		computeInterval();
     }
 
     @Override
@@ -110,11 +165,15 @@ public abstract class Spline implements List<Point> {
     @Override
     public void add(int index, Point element) {
         controlPoints.add(index, element);
+		updateInterval(element);
     }
 
     @Override
     public Point remove(int index) {
-        return controlPoints.remove(index);
+
+		Point remove = controlPoints.remove(index);
+		computeInterval();
+		return remove;
     }
 
     @Override

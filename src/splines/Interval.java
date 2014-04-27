@@ -6,10 +6,10 @@ package splines;
 public class Interval {
     private final double leftBound;
     private final double rightBound;
-    private final double upperBound;
     private final double lowerBound;
+    private final double upperBound;
 
-    public Interval(double leftBound, double rightBound, double upperBound, double lowerBound) {
+    public Interval(double leftBound, double rightBound, double lowerBound, double upperBound) {
         this.leftBound = leftBound;
         this.rightBound = rightBound;
         this.upperBound = upperBound;
@@ -31,4 +31,8 @@ public class Interval {
     public double getLowerBound() {
         return lowerBound;
     }
+
+	public boolean contains(Point point) {
+		return point.getX() >= leftBound && point.getX() <= rightBound && point.getY() >= lowerBound && point.getY() <= upperBound;
+	}
 }
