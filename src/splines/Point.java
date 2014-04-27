@@ -6,7 +6,5 @@ package splines;
 public interface Point {
     double getX();
     double getY();
-    void setX(double x);
-    void setY(double y);
 	Point createPoint(double x,double y);
 }
