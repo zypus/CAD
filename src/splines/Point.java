@@ -8,4 +8,5 @@ public interface Point {
     double getY();
     void setX(double x);
     void setY(double y);
+	Point createPoint(double x,double y);
 }
