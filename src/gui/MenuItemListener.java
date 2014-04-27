@@ -1,9 +1,9 @@
 package gui;
 
-import java.awt.Dimension;
-import java.awt.Font;
-import java.awt.Point;
-import java.awt.Toolkit;
+import javax.swing.*;
+import javax.swing.border.EtchedBorder;
+import javax.swing.border.TitledBorder;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
@@ -13,25 +13,20 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Scanner;
 
-import javax.swing.Box;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.border.EtchedBorder;
-import javax.swing.border.TitledBorder;
-
-public class MenuItemListener implements ActionListener {
+public class MenuItemListener
+		implements ActionListener {
 
 	private static final String fileName = "/polyline.txt";
 
-	private DrawLines drawLinesFrame;
+	private MainFrame drawLinesFrame;
 
-	public MenuItemListener(DrawLines drawLinesFrame) {
+	public MenuItemListener(MainFrame drawLinesFrame) {
+
 		this.drawLinesFrame = drawLinesFrame;
 	}
 
 	public void actionPerformed(ActionEvent e) {
+
 		switch (e.getActionCommand()) {
 		case "Bentley–Ottmann Algorithm":
 			action_BO_Alg();
@@ -59,21 +54,30 @@ public class MenuItemListener implements ActionListener {
 		}
 	}
 
+	private void action_BO_Alg() {
+		// TODO implement function
+	}
+
+	public void action_balaban() {
+		// TODO implement function
+	}
+
 	public void save() {
 		// TODO implement function
 	}
 
 	public void load() {
+
 		Scanner scan;
 		String fileName = JOptionPane.showInputDialog(null,
-				"Enter the name of a file");
+													  "Enter the name of a file");
 
 		try {
 			String canPath = new File(".").getCanonicalPath() + "/";
-			canPath += fileName+".txt";
+			canPath += fileName + ".txt";
 			Path fileSource = Paths.get(canPath);
 			PolyReader pr = new PolyReader(fileSource, false,
-					new ArrayList<Point>());
+										   new ArrayList<Point>());
 
 			pr.read();
 			drawLinesFrame.drawPolyLine(pr.getPoints());
@@ -83,18 +87,12 @@ public class MenuItemListener implements ActionListener {
 	}
 
 	public void action_exit() {
+
 		System.exit(0);
 	}
 
-	public void action_balaban() {
-		// TODO implement function
-	}
-
-	private void action_BO_Alg() {
-		// TODO implement function
-	}
-
 	private void actionCreditsFrame() {
+
 		JFrame frame = new JFrame();
 		JPanel panel = new JPanel();
 		Box panelBox = Box.createVerticalBox();
@@ -130,12 +128,13 @@ public class MenuItemListener implements ActionListener {
 		frame.setVisible(true);
 		Dimension dim = Toolkit.getDefaultToolkit().getScreenSize();
 		frame.setLocation(dim.width / 2 - frame.getSize().width / 2, dim.height
-				/ 2 - frame.getSize().height / 2);
+																	 / 2 - frame.getSize().height / 2);
 		frame.setSize(320, 320);
 
 	}
 
 	private void actionDocumentationFrame() {
+
 		JFrame frame = new JFrame();
 		JPanel panel = new JPanel();
 		Box panelBox = Box.createVerticalBox();

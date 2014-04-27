@@ -10,6 +10,7 @@ public abstract class FileReaderBuffered {
 	private boolean consolePrint;
 
 	public FileReaderBuffered(Path filePath, boolean consolePrint) {
+
 		this.filePath = filePath;
 		this.consolePrint = consolePrint;
 	}
@@ -23,8 +24,9 @@ public abstract class FileReaderBuffered {
 
 			// Reads header
 			strLine = br.readLine();
-			if (strLine != null)
+			if (strLine != null) {
 				processHeaderLine(strLine);
+			}
 
 			// Reads data
 			strLine = br.readLine();
@@ -39,22 +41,24 @@ public abstract class FileReaderBuffered {
 				strLine = br.readLine();
 
 			}
-			 System.out.println("Reading done!");
+			System.out.println("Reading done!");
 			br.close();
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
 	}
 
+	public abstract void processHeaderLine(String strLine);
+
+	public abstract void processLine(String strLine);
+
 	public Path getFilePath() {
+
 		return filePath;
 	}
 
 	public boolean getConsolePrint() {
+
 		return consolePrint;
 	}
-
-	public abstract void processLine(String strLine);
-
-	public abstract void processHeaderLine(String strLine);
 }

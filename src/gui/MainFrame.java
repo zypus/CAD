@@ -1,46 +1,24 @@
 package gui;
 
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Component;
-import java.awt.Dimension;
-import java.awt.FlowLayout;
-import java.awt.Font;
-import java.awt.Point;
-import java.awt.Shape;
-import java.awt.Toolkit;
+import javax.swing.*;
+import javax.swing.border.EtchedBorder;
+import javax.swing.border.TitledBorder;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.geom.Line2D;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.swing.BorderFactory;
-import javax.swing.Box;
-import javax.swing.BoxLayout;
-import javax.swing.ImageIcon;
-import javax.swing.JButton;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-import javax.swing.JMenu;
-import javax.swing.JMenuBar;
-import javax.swing.JMenuItem;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.border.EtchedBorder;
-import javax.swing.border.TitledBorder;
+public class MainFrame
+		extends JFrame {
 
-public class DrawLines extends JFrame {
-
-	private static OutputComponent outputComponent;
-	JPanel panel;
-	static double screenMultiplier = 1;
 	public static Dimension screenSize = Toolkit.getDefaultToolkit()
-			.getScreenSize();
+												.getScreenSize();
+	static double screenMultiplier = 1;
+	private static OutputComponent outputComponent;
 
-	public static void main(String[] args) {
-
-		DrawLines frame = new DrawLines();
+	public MainFrame() {
 
 		JPanel panel = new JPanel();
 		outputComponent = new OutputComponent();
@@ -59,9 +37,10 @@ public class DrawLines extends JFrame {
 		clear.setBackground(Color.LIGHT_GRAY);
 		clear.setFocusPainted(false);
 		paint.addActionListener(new ActionListener() {
-			
+
 			@Override
 			public void actionPerformed(ActionEvent e) {
+
 				outputComponent.setDrawLines(true);
 				paint.setBackground(Color.BLACK);
 				paint.setForeground(Color.WHITE);
@@ -74,30 +53,32 @@ public class DrawLines extends JFrame {
 		paint.setBackground(Color.BLACK);
 		paint.setForeground(Color.WHITE);
 		select.addActionListener(new ActionListener() {
-			
+
 			@Override
 			public void actionPerformed(ActionEvent e) {
+
 				outputComponent.setDrawLines(false);
 				select.setBackground(Color.BLACK);
 				select.setForeground(Color.WHITE);
 				paint.setBackground(Color.GRAY);
-				paint.setForeground(Color.BLACK);	
+				paint.setForeground(Color.BLACK);
 				clear.setBackground(Color.GRAY);
 				clear.setForeground(Color.BLACK);
 			}
 		});
-		
+
 		clear.addActionListener(new ActionListener() {
-			
+
 			@Override
 			public void actionPerformed(ActionEvent e) {
+
 				outputComponent.clear();
-//				clear.setBackground(Color.BLACK);
-//				clear.setForeground(Color.WHITE);
-//				select.setBackground(Color.GRAY);
-//				select.setForeground(Color.BLACK);
-//				paint.setBackground(Color.GRAY);
-//				paint.setForeground(Color.BLACK);	
+				//				clear.setBackground(Color.BLACK);
+				//				clear.setForeground(Color.WHITE);
+				//				select.setBackground(Color.GRAY);
+				//				select.setForeground(Color.BLACK);
+				//				paint.setBackground(Color.GRAY);
+				//				paint.setForeground(Color.BLACK);
 			}
 		});
 		//sidePanel.add(paint);
@@ -113,34 +94,33 @@ public class DrawLines extends JFrame {
 		JLabel label4 = new JLabel(" Krasimir Stoyanov");
 		JLabel label5 = new JLabel(" Stefano Pozzi");
 		sidePanel.setBorder(new TitledBorder(new EtchedBorder()));
-		panelBox.add(Box.createVerticalStrut(10));
+		Component verticalStrut = Box.createVerticalStrut(10);
+		panelBox.add(verticalStrut);
 		panelBox.add(select);
-		panelBox.add(Box.createVerticalStrut(10));
+		panelBox.add(verticalStrut);
 		panelBox.add(paint);
-		panelBox.add(Box.createVerticalStrut(10));
+		panelBox.add(verticalStrut);
 		panelBox.add(clear);
-		panelBox.add(Box.createVerticalStrut(10));
+		panelBox.add(verticalStrut);
 		panelBox.setBorder(new TitledBorder(new EtchedBorder()));
 		panelBox.add(label1);
-		panelBox.add(Box.createVerticalStrut(10));
+		panelBox.add(verticalStrut);
 		panelBox.add(label2);
-		panelBox.add(Box.createVerticalStrut(10));
+		panelBox.add(verticalStrut);
 		panelBox.add(label3);
-		panelBox.add(Box.createVerticalStrut(10));
+		panelBox.add(verticalStrut);
 		panelBox.add(label4);
-		panelBox.add(Box.createVerticalStrut(10));
+		panelBox.add(verticalStrut);
 		panelBox.add(label8);
-		panelBox.add(Box.createVerticalStrut(10));
+		panelBox.add(verticalStrut);
 		panelBox.add(label5);
-		panelBox.add(Box.createVerticalStrut(10));
+		panelBox.add(verticalStrut);
 		panelBox.setAlignmentX(Component.LEFT_ALIGNMENT);
-		JLabel background=new JLabel(new ImageIcon("C:\\Users\\Spoil\\monkey.jpg")); 
-		background.setLayout(new FlowLayout()); 
-		//frame.(background);
+		JLabel background = new JLabel(new ImageIcon("C:\\Users\\Spoil\\monkey.jpg"));
+		background.setLayout(new FlowLayout());
+		//this.(background);
 		sidePanel.add(panelBox);
-		
-		
-		
+
 		JPanel scrollPanel = new JPanel();
 		JScrollPane scroll = new JScrollPane(scrollPanel);
 		scrollPanel.setLayout(new BoxLayout(scrollPanel, BoxLayout.PAGE_AXIS));
@@ -149,8 +129,8 @@ public class DrawLines extends JFrame {
 		scroll.setAlignmentX(Component.LEFT_ALIGNMENT);
 		sidePanel.add(scroll);
 		outputComponent.setScrollPanel(scrollPanel);
-		frame.add(panel, BorderLayout.CENTER);
-		frame.add(sidePanel, BorderLayout.WEST);
+		this.add(panel, BorderLayout.CENTER);
+		this.add(sidePanel, BorderLayout.WEST);
 		// Menu bar init
 		JMenuBar menuBar = new JMenuBar();
 
@@ -188,34 +168,40 @@ public class DrawLines extends JFrame {
 		menuBar.add(menu1);
 		menuBar.add(menu2);
 		menuBar.add(menu4);
-		frame.setJMenuBar(menuBar);
+		this.setJMenuBar(menuBar);
 
 		// Adding listener for menuItems
 		JMenuItem[] menuItems = { mi1_1_1, mi1_2, mi1_3, mi1_6, mi2_1, mi2_2,
-				mi4_1, mi4_2 };
+								  mi4_1, mi4_2 };
 
 		for (JMenuItem item : menuItems) {
-			item.addActionListener(new MenuItemListener(frame));
+			item.addActionListener(new MenuItemListener(this));
 		}
-		frame.setJMenuBar(menuBar);
-		frame.setPreferredSize(new Dimension(screenSize.width,
-				screenSize.height - 40));
-		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		this.setJMenuBar(menuBar);
+		this.setPreferredSize(new Dimension(screenSize.width,
+											 screenSize.height - 40));
+		this.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 		screenSize.height *= screenMultiplier;
 		screenSize.width *= screenMultiplier;
-		frame.setExtendedState(JFrame.MAXIMIZED_BOTH);
-		frame.pack();
-		frame.setVisible(true);
+		this.setExtendedState(JFrame.MAXIMIZED_BOTH);
+		this.pack();
+		this.setVisible(true);
+	}
+
+	private void createToolbar() {
+
 	}
 
 	public void drawPolyLine(ArrayList<Point> points) {
-		List<Shape> shape = new ArrayList<Shape>();
-		for (int i = 0; i < points.size() - 1; i++)
+
+		List<Shape> shape = new ArrayList<>();
+		for (int i = 0; i < points.size() - 1; i++) {
 			shape.add(new Line2D.Double(points.get(i), points
 					.get(i + 1)));
+		}
 		outputComponent.rotateShapes(shape, Math.PI);
 		outputComponent.magnifyShapes(shape);
-		outputComponent.translateShapes(shape, screenSize.width/2, screenSize.height/2 );
+		outputComponent.translateShapes(shape, screenSize.width / 2, screenSize.height / 2);
 		outputComponent.addShapes(shape);
 	}
 
