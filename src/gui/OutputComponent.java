@@ -3,6 +3,7 @@ package gui;
 import intersection.Point;
 import intersection.PolyChecker;
 import intersection.Segment;
+import splines.LinearSpline;
 import splines.Spline;
 
 import javax.swing.*;
@@ -20,14 +21,20 @@ public class OutputComponent
 		extends JComponent {
 
 	private static final Color[] COLORS = { Color.WHITE, Color.BLUE, Color.MAGENTA, Color.ORANGE, Color.PINK, Color.YELLOW };
-	ShowCoordinates showCoo;
-	private List<List<Shape>> shapes = new ArrayList<List<Shape>>();
-	private List<List<Segment>> polygons = new ArrayList<List<Segment>>();
-	private List<Shape> currentShape = null;
+	private static final Color[] SELECTION_COLORS = { Color.GREEN, Color.RED};
+	private static final int SELECTION_THICKNESS = 4;
+	private static final double SELECT_SENSITIVITY = 10;
+	public static final int INDICATOR_SIZE = 16;
+	public static final int DEFAULT_THICKNESS = 2;
+	private int colorCounter = 0;
+	private ShowCoordinates showCoo;
+	private List<List<Shape>> shapes = new ArrayList<>();
+	private List<List<Segment>> polygons = new ArrayList<>();
+	private Spline2D currentSpline = null;
 	private Shape shapeStartIndicator = null;
-	private List<Integer> selectedShapes1 = new ArrayList<Integer>();
-	private List<Integer> selectedShapes2 = new ArrayList<Integer>();
-	private List<List<Point>> intersections = new ArrayList<List<Point>>();
+	private List<Integer> selectedShapes1 = new ArrayList<>();
+	private List<Integer> selectedShapes2 = new ArrayList<>();
+	private List<List<Point>> intersections = new ArrayList<>();
 	private Integer hover = -1;
 	private Point2D mousePoint = new Point2D.Double(0, 0);
 	private String mouseText = "";
@@ -37,12 +44,32 @@ public class OutputComponent
 	private int myHeight;
 	private JPanel scroll = null;
 	private Font font = new Font("Arial", Font.BOLD, 15);
-	private List<Spline> nonSelectedSplines = new ArrayList<>();
-	private List<Spline> selectedSplines = new ArrayList<>();
+	private List<Spline2D> nonSelectedSplines = new ArrayList<>();
+	private List<List<Spline2D>> selectedSplines = new ArrayList<>();
+	private DraggingPoint draggedPoint = null;
+	private SplineType currentSplineType = SplineType.LINEAR;
+	private boolean showControlPointCoords = true;
 
 	public OutputComponent() {
 
 		showCoo = new ShowCoordinates(this);
+
+		selectedSplines.add(new ArrayList<Spline2D>());
+		selectedSplines.add(new ArrayList<Spline2D>());
+
+		// test
+		List<DoublePoint> testControlPoints = new ArrayList<>();
+		testControlPoints.add(new DoublePoint(50, 50));
+		testControlPoints.add(new DoublePoint(100, 100));
+		testControlPoints.add(new DoublePoint(50, 100));
+		testControlPoints.add(new DoublePoint(200, 200));
+		Spline testSpline = new LinearSpline();
+		testSpline.addAll(testControlPoints);
+		Spline2D spline2D = new Spline2D(testSpline, SplineType.LINEAR);
+		spline2D.setColor(Color.GREEN);
+		spline2D.setThickness(2);
+		nonSelectedSplines.add(spline2D);
+		// end test
 
 		MouseAdapter mouseAdapter = new MouseAdapter() {
 
@@ -58,70 +85,45 @@ public class OutputComponent
 						Point2D p;
 						boolean show = showIndicator(e);
 						boolean first = false;
-						if (currentShape == null) {
-							currentShape = new ArrayList<Shape>();
-							shapes.add(currentShape);
-							p = e.getPoint();
+						if (currentSpline == null) {
+							currentSpline = new Spline2D(currentSplineType.createInstance(), currentSplineType);
+							currentSpline.setColor(COLORS[colorCounter]);
+							colorCounter = (colorCounter+1)%COLORS.length;
+							nonSelectedSplines.add(currentSpline);
 							scroll.add(new JLabel("Currently drawn ..."));
 							first = true;
-						} else {
-							p = ((Line2D) currentShape.get(currentShape.size() - 1)).getP2();
 						}
 						if (show && !first) {
-							currentShape.add(new Line2D.Double(p, ((Line2D) currentShape.get(0)).getP1()));
-							polygons.add(createPoly(currentShape));
-							currentShape = null;
+							currentSpline.getSpline().add(new DoublePoint(currentSpline.getSpline().get(0)));
+							currentSpline = null;
 						} else {
-							currentShape.add(new Line2D.Double(p, e.getPoint()));
+							currentSpline.getSpline().add(new DoublePoint(e.getPoint()));
 						}
 					} else if (e.getButton() == MouseEvent.BUTTON3 && isInside) {
 						pressedButton = 2;
-						polygons.add(createPoly(currentShape));
-						currentShape = null;
+						currentSpline = null;
 					}
-				} else {
-					boolean changed = false;
-					for (int s = 0; s < shapes.size(); s++) {
-						for (Shape line : shapes.get(s)) {
-							double length = ((Line2D) line).getP1().distance(((Line2D) line).getP2());
-							double
-									mouseDistance =
-									((Line2D) line).getP1().distance(e.getPoint()) + ((Line2D) line).getP2().distance(e.getPoint());
-							if (mouseDistance <= length + 1) {
-								changed = true;
-								if (((e.getModifiers() & MouseEvent.CTRL_MASK) == MouseEvent.CTRL_MASK)) {
-									if (selectedShapes2.size() > 0 && !((e.getModifiers() & MouseEvent.SHIFT_MASK)
-																		== MouseEvent.SHIFT_MASK)) {
-										selectedShapes2.clear();
-									}
-									//									if (selectedShapes1.contains(s)) {
-									//										selectedShapes1.remove(s);
-									//									}
-									if (selectedShapes2.contains(s)) {
-										selectedShapes2.remove(s);
-									} else {
-										selectedShapes2.add(s);
-									}
-								} else {
-									if (selectedShapes1.size() > 0 && !((e.getModifiers() & MouseEvent.SHIFT_MASK)
-																		== MouseEvent.SHIFT_MASK)) {
-										selectedShapes1.clear();
-									}
-									//									if (selectedShapes2.contains(s)) {
-									//										selectedShapes2.remove(s);
-									//									}
-									if (selectedShapes1.contains(s)) {
-										selectedShapes1.remove(s);
-									} else {
-										selectedShapes1.add(s);
-									}
-								}
+				} else if (isInside) {
+					boolean changed;
+					boolean multiSelect = ((e.getModifiers() & MouseEvent.SHIFT_MASK)
+										   == MouseEvent.SHIFT_MASK);
+					List<Spline2D>
+							selection =
+							selectedSplines.get(((e.getModifiers() & MouseEvent.CTRL_MASK) == MouseEvent.CTRL_MASK) ? 1 : 0);
+					DoublePoint mousePos = new DoublePoint(e.getPoint());
+
+					changed = checkSelection(nonSelectedSplines, selection, mousePos, multiSelect);
+					for (int i = 0; i < selectedSplines.size() && !changed; i++) {
+						changed = checkSelection(selectedSplines.get(i), selection, mousePos, multiSelect);
+					}
+
+					if (!changed) {
+						for (int i = 0; i < selectedSplines.size(); i++) {
+							List<Spline2D> selectioni = selectedSplines.get(i);
+							while (!selectioni.isEmpty()) {
+								nonSelectedSplines.add(selectioni.remove(0));
 							}
 						}
-					}
-					if (!changed) {
-						selectedShapes1.clear();
-						selectedShapes2.clear();
 						intersections.clear();
 					}
 					if (selectedShapes1.size() > 0) {
@@ -141,9 +143,10 @@ public class OutputComponent
 			public void mouseReleased(MouseEvent e) {
 
 				pressedButton = 0;
-				if (showIndicator(e) && currentShape != null && currentShape.size() > 1) {
-					currentShape = null;
+				if (showIndicator(e) && currentSpline != null && currentSpline.getSpline().size() > 1) {
+					currentSpline = null;
 				}
+				draggedPoint = null;
 				repaint();
 			}
 
@@ -159,14 +162,24 @@ public class OutputComponent
 						e.getPoint().getX() >= 0 && e.getPoint().getY() >= 0 && e.getPoint().getX() <= myWidth
 						&& e.getPoint().getY() <= myHeight;
 				if (pressedButton == 1 && isInside) {
+					Spline spline = currentSpline.getSpline();
 					if (showIndicator(e)) {
-						Line2D shape = (Line2D) currentShape.get(currentShape.size() - 1);
-						shape.setLine(shape.getP1(), ((Line2D) currentShape.get(0)).getP1());
+						spline.set(spline.size() - 1, new DoublePoint( spline.get(0)));
 					} else {
-						Line2D shape = (Line2D) currentShape.get(currentShape.size() - 1);
-						shape.setLine(shape.getP1(), e.getPoint());
+						spline.set(spline.size() - 1, new DoublePoint(e.getPoint()));
 					}
 					showCoo.update(e.getX(), e.getY());
+
+					repaint();
+				}
+				if (draggedPoint != null) {
+					Spline2D spline2d = draggedPoint.getSpline2D();
+					if (spline2d.isClosed() && ( draggedPoint.index == 0 || draggedPoint.index == spline2d.getSpline().size()-1)) {
+						spline2d.getSpline().set(0, new DoublePoint(e.getPoint()));
+						spline2d.getSpline().set(spline2d.getSpline().size()-1, new DoublePoint(e.getPoint()));
+					} else{
+						spline2d.getSpline().set(draggedPoint.getIndex(), new DoublePoint(e.getPoint()));
+					}
 
 					repaint();
 				}
@@ -196,18 +209,6 @@ public class OutputComponent
 									if (i != hover) {
 										if (PolyChecker.intersectionCheck(polygons.get(hover), polygons.get(i))) {
 											intersecting = true;
-											//											if (merged.isEmpty()) {
-											//												List<List<Segment>> comb = new ArrayList<List<Segment>>();
-											//												comb.add(polygons.get(i));
-											//												comb.add(polygons.get(hover));
-											//												merged = intersection.PolyChecker.polygoncreator(comb);
-											//											}
-											//											else {
-											//												List<List<Segment>> comb = new ArrayList<List<Segment>>();
-											//												comb.add(merged);
-											//												comb.add(polygons.get(i));
-											//												merged = intersection.PolyChecker.polygoncreator(comb);
-											//											}
 										} else if (!PolyChecker.insideCheck(polygons.get(hover), polygons.get(i))) {
 											inside = true;
 										}
@@ -217,19 +218,6 @@ public class OutputComponent
 								if (selectedShapes2.size() > 0) {
 									for (Integer j : selectedShapes2) {
 										if (PolyChecker.intersectionCheck(polygons.get(hover), polygons.get(j))) {
-											//											intersecting = true;
-											//											if (merged.isEmpty()) {
-											//												List<List<Segment>> comb = new ArrayList<List<Segment>>();
-											//												comb.add(polygons.get(hover));
-											//												comb.add(polygons.get(i));
-											//												merged = intersection.PolyChecker.polygoncreator(comb);
-											//											}
-											//											else {
-											//												List<List<Segment>> comb = new ArrayList<List<Segment>>();
-											//												comb.add(merged);
-											//												comb.add(polygons.get(i));
-											//												merged = intersection.PolyChecker.polygoncreator(comb);
-											//											}
 										} else if (PolyChecker.insideCheck(polygons.get(hover), polygons.get(j))) {
 											inside2 = true;
 										}
@@ -273,14 +261,14 @@ public class OutputComponent
 
 			private boolean showIndicator(MouseEvent e) {
 
-				if (currentShape != null && Math.abs(e.getX() - ((Line2D) currentShape.get(0)).getX1()) < 10
-					&& Math.abs(e.getY() - ((Line2D) currentShape.get(0)).getY1()) < 10) {
+				if (currentSpline != null && Math.abs(e.getX() - currentSpline.getSpline().get(0).getX()) < SELECT_SENSITIVITY
+					&& Math.abs(e.getY() - currentSpline.getSpline().get(0).getY()) < SELECT_SENSITIVITY) {
 					if (shapeStartIndicator == null) {
 						shapeStartIndicator =
-								new Ellipse2D.Double(((Line2D) currentShape.get(0)).getX1() - 8,
-													 ((Line2D) currentShape.get(0)).getY1() - 8,
-													 16,
-													 16);
+								new Ellipse2D.Double(currentSpline.getSpline().get(0).getX() - INDICATOR_SIZE/2,
+													 currentSpline.getSpline().get(0).getY() - INDICATOR_SIZE/2,
+													 INDICATOR_SIZE,
+													 INDICATOR_SIZE);
 					}
 					return true;
 				} else if (shapeStartIndicator != null) {
@@ -304,6 +292,40 @@ public class OutputComponent
 		return poly;
 	}
 
+	private boolean checkSelection(List<Spline2D> checkedSelection, List<Spline2D> selection, DoublePoint mousePos, boolean multiSelect) {
+
+		boolean changed = false;
+		for (int s = 0; s < checkedSelection.size() && !changed; s++) {
+			Spline2D spline2d = checkedSelection.get(s);
+			if (spline2d.getSpline().getInterval().contains(mousePos, SELECT_SENSITIVITY)) {
+				Spline spline = spline2d.getSpline();
+				for (int i = 0; i < spline.size() && !changed; i++) {
+					splines.Point point = spline.get(i);
+					if (Math.abs(point.getX() - mousePos.getX()) < SELECT_SENSITIVITY
+						&& Math.abs(point.getY() - mousePos.getY()) < SELECT_SENSITIVITY) {
+						if (selection.contains(spline2d)) {
+							draggedPoint = new DraggingPoint(spline2d, i);
+						} else {
+							if (multiSelect) {
+								selection.add(checkedSelection.remove(s));
+							} else {
+								for (int j = 0; j < selectedSplines.size(); j++) {
+									List<Spline2D> spline2Ds =  selectedSplines.get(j);
+									while (!spline2Ds.isEmpty()) {
+										nonSelectedSplines.add(spline2Ds.remove(0));
+									}
+								}
+								selection.add(checkedSelection.remove(s));
+							}
+						}
+						changed = true;
+					}
+				}
+			}
+		}
+		return changed;
+	}
+
 	public boolean isDrawLines() {
 
 		return drawLines;
@@ -312,9 +334,8 @@ public class OutputComponent
 	public void setDrawLines(boolean drawLines) {
 
 		this.drawLines = drawLines;
-		if (!drawLines && currentShape != null) {
-			polygons.add(createPoly(currentShape));
-			currentShape = null;
+		if (!drawLines && currentSpline != null) {
+			currentSpline = null;
 		}
 	}
 
@@ -322,7 +343,11 @@ public class OutputComponent
 
 		shapes.clear();
 		polygons.clear();
-		currentShape = null;
+		currentSpline = null;
+		nonSelectedSplines.clear();
+		for (int i = 0; i < selectedSplines.size(); i++) {
+			selectedSplines.get(i).clear();
+		}
 		selectedShapes1.clear();
 		selectedShapes2.clear();
 		intersections.clear();
@@ -338,92 +363,42 @@ public class OutputComponent
 	protected void paintComponent(Graphics g) {
 
 		Graphics2D g2d = (Graphics2D) g;
+		SplineRenderer splineRenderer = new SplineRenderer(g2d);
+
 		g2d.setBackground(Color.BLACK);
 		g2d.clearRect(0, 0, getWidth(), getHeight());
-		int colorCounter = 0;
 		g2d.setStroke(new BasicStroke(2));
-		boolean selected = false;
-		g2d.setFont(font);
-		FontMetrics metric = g2d.getFontMetrics(font);
 		int shapeCount = 0;
-		for (int s = 0; s < shapes.size(); s++) {
-			if (!selectedShapes1.isEmpty() && selectedShapes1.contains(s)) {
-				g2d.setStroke(new BasicStroke(4));
-				g2d.setPaint(Color.GREEN);
-				selected = true;
-			} else if (!selectedShapes2.isEmpty() && selectedShapes2.contains(s)) {
-				g2d.setStroke(new BasicStroke(4));
-				g2d.setPaint(Color.RED);
-				selected = true;
-			} else {
-				g2d.setStroke(new BasicStroke(2));
-				g2d.setPaint(COLORS[colorCounter % COLORS.length]);
-				selected = false;
-			}
-			int centerX = 0;
-			int centerY = 0;
-			int counter = 0;
-			boolean closed = true;
-			for (Shape line : shapes.get(s)) {
-				g2d.draw(line);
-				if (selected) {
-					Color c = g2d.getColor();
-					g2d.setPaint(Color.WHITE);
-					String label = "(" + (int) ((Line2D) line).getX1() + ", " + (int) ((Line2D) line).getY1() + ")";
-					int length = metric.stringWidth(label);
-					//					Path2D path = new Path2D.Double();
-					g2d.drawString(label, (float) ((Line2D) line).getX1() - length / 2, (float) ((Line2D) line).getY1() + 20);
-					centerX += ((Line2D) line).getX1();
-					centerY += ((Line2D) line).getY1();
-					counter++;
-					if (line == shapes.get(s).get(shapes.get(s).size() - 1) && !((Line2D) line).getP2()
-																							   .equals(((Line2D) shapes.get(s)
-																													   .get(0)).getP1())) {
-						label = "(" + (int) ((Line2D) line).getX2() + ", " + (int) ((Line2D) line).getY2() + ")";
-						length = metric.stringWidth(label);
-						g2d.drawString(label, (float) ((Line2D) line).getX2() - length / 2, (float) ((Line2D) line).getY2() + 20);
-						centerX += ((Line2D) line).getX2();
-						centerY += ((Line2D) line).getY2();
-						counter++;
-						closed = false;
-					}
-					g2d.setPaint(c);
-				}
-			}
-			if (selected) {
-				//				Color c = g2d.getColor();
-				//				g2d.setPaint(Color.BLACK);
-				//				g2d.fill(new Rectangle2D.Double(centerX/counter-40, centerY/counter-30, 80, 60));
-				//				g2d.setPaint(Color.WHITE);
-				//				g2d.setStroke(new BasicStroke(2));
-				//				g2d.draw(new Rectangle2D.Double(centerX/counter-40, centerY/counter-30, 80, 60));
-				//				int offset = 0;
-				//				if (closed) {
-				//					String label = "(Area)";
-				//					int length = metric.stringWidth(label);
-				//					g2d.drawString(label, (float)centerX/counter-length/2, centerY/counter-8);
-				//					offset = 16;
-				//				}
-				//				String label = "<- "+polyLength+" ->";
-				//				int length = metric.stringWidth(label);
-				//				g2d.drawString(label, (float)centerX/counter-length/2, centerY/counter+offset);
-				//				g2d.setPaint(c);
-			}
-			colorCounter++;
-			if (shapeCount < ((currentShape == null) ? scroll.getComponentCount() : scroll.getComponentCount() - 1)) {
-				if (!((Line2D) shapes.get(s).get(shapes.get(s).size() - 1)).getP2().equals(((Line2D) shapes.get(s).get(0)).getP1())) {
-					((JLabel) scroll.getComponent(shapeCount)).setText(
-							"open -> Length: " + (int) PolyChecker.parameter(polygons.get(shapeCount)));
-				} else {
-					((JLabel) scroll.getComponent(shapeCount)).setText(
-							"closed -> Length: " + (int) PolyChecker.parameter(polygons.get(shapeCount)) + " Area: "
-							+ (int) PolyChecker.area(polygons.get(shapeCount))
-					);
-				}
-
-			}
-			shapeCount++;
+		for (int i = 0; i < nonSelectedSplines.size(); i++) {
+			Spline2D spline2d = nonSelectedSplines.get(i);
+			g2d.setStroke(new BasicStroke(DEFAULT_THICKNESS));
+			g2d.setPaint(spline2d.getColor());
+			splineRenderer.renderSplineAtPosition(spline2d.getSpline(), 0, 0, false);
 		}
+		for (int i = 0; i < selectedSplines.size(); i++) {
+			List<Spline2D> selection = selectedSplines.get(i);
+			for (int j = 0; j < selection.size(); j++) {
+				Spline2D spline2d = selection.get(j);
+				g2d.setStroke(new BasicStroke(SELECTION_THICKNESS));
+				g2d.setPaint(SELECTION_COLORS[i]);
+				splineRenderer.renderSplineAtPosition(spline2d.getSpline(), 0, 0, true);
+				if (showControlPointCoords) {
+					drawCoords(spline2d, g2d);
+				}
+			}
+		}
+//		if (shapeCount < ((currentSpline == null) ? scroll.getComponentCount() : scroll.getComponentCount() - 1)) {
+//			if (!((Line2D) shapes.get(s).get(shapes.get(s).size() - 1)).getP2().equals(((Line2D) shapes.get(s).get(0)).getP1())) {
+//				((JLabel) scroll.getComponent(shapeCount)).setText(
+//						"open -> Length: " + (int) PolyChecker.parameter(polygons.get(shapeCount)));
+//			} else {
+//				((JLabel) scroll.getComponent(shapeCount)).setText(
+//						"closed -> Length: " + (int) PolyChecker.parameter(polygons.get(shapeCount)) + " Area: "
+//						+ (int) PolyChecker.area(polygons.get(shapeCount))
+//				);
+//			}
+//
+//		}
 		if (shapeStartIndicator != null) {
 			g2d.draw(shapeStartIndicator);
 		}
@@ -436,8 +411,25 @@ public class OutputComponent
 			}
 		}
 		g2d.setPaint(Color.WHITE);
+		g2d.setFont(font);
+		FontMetrics metric = g2d.getFontMetrics(font);
 		int l = metric.stringWidth(mouseText);
 		g2d.drawString(mouseText, (int) mousePoint.getX(), (int) mousePoint.getY());
+
+	}
+
+	private void drawCoords(Spline2D spline2d, Graphics2D g2d) {
+
+		g2d.setFont(font);
+		FontMetrics metric = g2d.getFontMetrics(font);
+		for (splines.Point point : spline2d.getSpline()) {
+			Color c = g2d.getColor();
+			g2d.setPaint(Color.WHITE);
+			String label = "(" + (int) point.getX() + ", " + (int) point.getY() + ")";
+			int length = metric.stringWidth(label);
+			g2d.drawString(label, ((float) point.getX()) - length / 2, ((float) point.getY()) + 20);
+			g2d.setPaint(c);
+		}
 	}
 
 	@Override
@@ -482,12 +474,39 @@ public class OutputComponent
 
 	public void addShapes(List<Shape> shape) {
 
-		if (currentShape != null) {
-			polygons.add(createPoly(currentShape));
-			currentShape = null;
+		if (currentSpline != null) {
+			currentSpline = null;
 		}
-		shapes.add(shape);
-		polygons.add(createPoly(shape));
+		Spline spline = currentSplineType.createInstance();
+		for (int i = 0; i < shape.size(); i++) {
+			Line2D.Double line = (Line2D.Double) shape.get(i);
+			spline.add(new DoublePoint(line.getP1()));
+		}
+		Spline2D spline2d = new Spline2D(spline, currentSplineType);
+		spline2d.setColor(COLORS[colorCounter]);
+		colorCounter = (colorCounter + 1) % COLORS.length;
+		nonSelectedSplines.add(spline2d);
 		repaint();
+	}
+
+	private class DraggingPoint {
+		private Spline2D spline2D;
+		private int index;
+
+		private DraggingPoint(Spline2D spline2D, int index) {
+
+			this.spline2D = spline2D;
+			this.index = index;
+		}
+
+		public Spline2D getSpline2D() {
+
+			return spline2D;
+		}
+
+		public int getIndex() {
+
+			return index;
+		}
 	}
 }

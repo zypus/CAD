@@ -19,7 +19,7 @@ public class MainFrame
 	private static OutputComponent outputComponent;
 
 	public MainFrame() {
-
+		super();
 		JPanel panel = new JPanel();
 		outputComponent = new OutputComponent();
 		panel.add(outputComponent);

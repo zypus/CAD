@@ -17,6 +17,19 @@ public class DoublePoint extends Point2D.Double implements Point {
 		super(x, y);
 	}
 
+	public DoublePoint(Point2D point) {
+		super(point.getX(),point.getY());
+	}
+
+	public DoublePoint(java.awt.Point point) {
+		super(point.getX(), point.getY());
+	}
+
+	public DoublePoint(Point point) {
+
+		super(point.getX(), point.getY());
+	}
+
 	@Override public Point createPoint(double x, double y) {
 		return new DoublePoint(x,y);
 	}

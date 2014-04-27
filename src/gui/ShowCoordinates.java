@@ -40,8 +40,8 @@ public class ShowCoordinates
 			msg = "";
 		} else {
 			if (point2 != null) {
-				msg += "The coordinates are (" + point2.getX() + ", "
-					   + point2.getY() + "). ";
+				msg += "(" + point2.getX() + ", "
+					   + point2.getY() + ") ";
 			}
 		}
 		label.setText(msg);

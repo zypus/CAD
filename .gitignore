@@ -1,3 +1,5 @@
 .idea
 CAD.iml
 CAD.eml
+*.class
+out

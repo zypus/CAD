@@ -35,4 +35,19 @@ public class Interval {
 	public boolean contains(Point point) {
 		return point.getX() >= leftBound && point.getX() <= rightBound && point.getY() >= lowerBound && point.getY() <= upperBound;
 	}
+
+	public boolean contains(Point point, double accuracy) {
+
+		return point.getX() >= leftBound-accuracy && point.getX() <= rightBound+ accuracy && point.getY() >= lowerBound- accuracy && point.getY() <= upperBound+ accuracy;
+	}
+
+	@Override public String toString() {
+
+		return "Interval{" +
+			   "leftBound=" + leftBound +
+			   ", rightBound=" + rightBound +
+			   ", lowerBound=" + lowerBound +
+			   ", upperBound=" + upperBound +
+			   '}';
+	}
 }

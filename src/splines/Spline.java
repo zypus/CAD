@@ -43,8 +43,8 @@ public abstract class Spline implements List<Point> {
 				Point point = controlPoints.get(i);
 				left = (point.getX() < left) ? point.getX() : left;
 				right = (point.getX() > right) ? point.getX() : right;
-				down = (point.getX() < down) ? point.getY() : down;
-				up = (point.getX() > up) ? point.getY() : up;
+				down = (point.getY() < down) ? point.getY() : down;
+				up = (point.getY() > up) ? point.getY() : up;
 			}
 			interval = new Interval(left, right, down, up);
 		} else {
@@ -57,11 +57,13 @@ public abstract class Spline implements List<Point> {
 	 * @param point The point which should be contained in the interval.
 	 */
 	private void updateInterval(Point point) {
-		if (!interval.contains(point)) {
+		if (size() == 1) {
+			interval = new Interval(point.getX(), point.getX(), point.getY(), point.getY());
+		} else if (!interval.contains(point)) {
 			double left = (point.getX() < interval.getLeftBound()) ? point.getX() : interval.getLeftBound();
 			double right = (point.getX() > interval.getRightBound()) ? point.getX() : interval.getRightBound();
-			double down = (point.getX() < interval.getLowerBound()) ? point.getY() : interval.getLowerBound();
-			double up = (point.getX() > interval.getUpperBound()) ? point.getY() : interval.getUpperBound();
+			double down = (point.getY() < interval.getLowerBound()) ? point.getY() : interval.getLowerBound();
+			double up = (point.getY() > interval.getUpperBound()) ? point.getY() : interval.getUpperBound();
 			interval = new Interval(left, right,down,up);
 		}
 	}
@@ -159,7 +161,10 @@ public abstract class Spline implements List<Point> {
 
     @Override
     public Point set(int index, Point element) {
-        return controlPoints.set(index, element);
+
+		Point set = controlPoints.set(index, element);
+		computeInterval();
+		return set;
     }
 
     @Override
