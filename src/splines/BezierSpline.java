@@ -7,24 +7,24 @@ import java.util.ArrayList;
  * Edited by nathan on 26/04/14.
  */
 public class BezierSpline extends Spline {
-	
+
 	public BezierSpline(){}
-	
+
     @Override
     public Point s(double u) {
-    	double t = interval.getXSpan() / u;
+    	double t = getInterval().getXSpan() / u;
     	int k = size()-1;
     	Point p;
-    	
+
     	for (int i=0; i<k; i++){
     		double scale = binom(k,i) * Math.pow(1-t, k-i);
     		p = p.addValue(get(i).manipulate(scale));
     	}
-    	p = p.addValue(get(k).manipulate(t^k));
-    	
+    	p = p.addValue(get(k).manipulate(Math.pow(t,k)));
+
         return p;
     }
-    
+
     private double binom(int n, int k){
     	double coeff = 1;
     	for (int i= n-k+1; i<=n; i++){
