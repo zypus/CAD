@@ -32,6 +32,7 @@ public class Interval {
         return lowerBound;
     }
 
+<<<<<<< HEAD
 	public boolean contains(Point point) {
 		return point.getX() >= leftBound && point.getX() <= rightBound && point.getY() >= lowerBound && point.getY() <= upperBound;
 	}
@@ -50,4 +51,16 @@ public class Interval {
 			   ", upperBound=" + upperBound +
 			   '}';
 	}
+=======
+    public boolean contains(Point point) {
+	return point.getX() >= leftBound && point.getX() <= rightBound && point.getY() >= lowerBound && point.getY() <= upperBound;
+    }
+    public double getXSpan() {
+    	return rightBound - leftBound;
+    }
+    
+    public double getYSpan() {
+    	return upperBound - lowerBound;
+    }
+>>>>>>> FETCH_HEAD
 }
