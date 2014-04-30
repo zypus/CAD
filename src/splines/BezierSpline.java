@@ -12,22 +12,21 @@ public class BezierSpline extends Spline {
 
     @Override
     public Point s(double u) {
-    
     	
+    	u/=3;
     	int intPart = (int) Math.floor(u);
-    	double percent = u - intPart;
+    	if (intPart*3==size()-1){
+    		return get(intPart*3);
+    	}
+    	double t = u - intPart;
     	
     	int leftIndex = intPart;
-    	while(leftIndex%3!=0){
-    		leftIndex-=1;
-    	}
     	
     	Point leftKnot = get(leftIndex);
     	Point rightKnot = get(leftIndex+3);
-    	double t = percent;
     	
     	Point p = leftKnot.createPoint(0,0);
-    	for (int i = 0; i < 3 ; i++){
+    	for (int i = 0; i <= 3 ; i++){
     		p = p.addValue(get(leftIndex+i).manipulate(binom(3,i)*Math.pow(t,i)*Math.pow(1-t,3-i)));
     	}
     	return p;
