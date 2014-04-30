@@ -1,7 +1,5 @@
 package splines;
 
-import java.util.ArrayList;
-
 /**
  * Created by fabian on 19/04/14.
  * Edited by nathan on 26/04/14.
@@ -14,7 +12,7 @@ public class BezierSpline extends Spline {
     public Point s(double u) {
     	double t = getInterval().getXSpan() / u;
     	int k = size()-1;
-    	Point p;
+    	Point p = get(0).createPoint(0,0);
 
     	for (int i=0; i<k; i++){
     		double scale = binom(k,i) * Math.pow(1-t, k-i);

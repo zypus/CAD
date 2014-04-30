@@ -47,7 +47,7 @@ public class OutputComponent
 	private List<Spline2D> nonSelectedSplines = new ArrayList<>();
 	private List<List<Spline2D>> selectedSplines = new ArrayList<>();
 	private DraggingPoint draggedPoint = null;
-	private SplineType currentSplineType = SplineType.LINEAR;
+	private SplineType currentSplineType = SplineType.BEZIER;
 	private boolean showControlPointCoords = true;
 
 	public OutputComponent() {
@@ -65,7 +65,7 @@ public class OutputComponent
 		testControlPoints.add(new DoublePoint(200, 200));
 		Spline testSpline = new LinearSpline();
 		testSpline.addAll(testControlPoints);
-		Spline2D spline2D = new Spline2D(testSpline, SplineType.LINEAR);
+		Spline2D spline2D = new Spline2D(testSpline, SplineType.BEZIER);
 		spline2D.setColor(Color.GREEN);
 		spline2D.setThickness(2);
 		nonSelectedSplines.add(spline2D);
