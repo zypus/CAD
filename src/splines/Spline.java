@@ -68,6 +68,10 @@ public abstract class Spline implements List<Point> {
 		}
 	}
 
+	protected void sizeChanged() {
+
+	}
+
     // All methods of the List interface.
 
     @Override
@@ -103,6 +107,7 @@ public abstract class Spline implements List<Point> {
     @Override
     public boolean add(Point point) {
 		updateInterval(point);
+		sizeChanged();
         return controlPoints.add(point);
     }
 
@@ -111,6 +116,7 @@ public abstract class Spline implements List<Point> {
 
 		boolean remove = controlPoints.remove(o);
 		computeInterval();
+		sizeChanged();
 		return remove;
     }
 
@@ -124,6 +130,7 @@ public abstract class Spline implements List<Point> {
 
 		boolean all = controlPoints.addAll(c);
 		computeInterval();
+		sizeChanged();
 		return all;
     }
 
@@ -132,6 +139,7 @@ public abstract class Spline implements List<Point> {
 
 		boolean all = controlPoints.addAll(index, c);
 		computeInterval();
+		sizeChanged();
 		return all;
     }
 
@@ -140,6 +148,7 @@ public abstract class Spline implements List<Point> {
 
 		boolean removeAll = controlPoints.removeAll(c);
 		computeInterval();
+		sizeChanged();
 		return removeAll;
     }
 
@@ -152,6 +161,7 @@ public abstract class Spline implements List<Point> {
     public void clear() {
         controlPoints.clear();
 		computeInterval();
+		sizeChanged();
     }
 
     @Override
@@ -171,6 +181,7 @@ public abstract class Spline implements List<Point> {
     public void add(int index, Point element) {
         controlPoints.add(index, element);
 		updateInterval(element);
+		sizeChanged();
     }
 
     @Override
@@ -178,6 +189,7 @@ public abstract class Spline implements List<Point> {
 
 		Point remove = controlPoints.remove(index);
 		computeInterval();
+		sizeChanged();
 		return remove;
     }
 
