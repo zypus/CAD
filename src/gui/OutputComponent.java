@@ -3,7 +3,7 @@ package gui;
 import intersection.Point;
 import intersection.PolyChecker;
 import intersection.Segment;
-import splines.BSpline;
+import splines.BezierSpline;
 import splines.Spline;
 
 import javax.swing.*;
@@ -63,7 +63,7 @@ public class OutputComponent
 		testControlPoints.add(new DoublePoint(100, 100));
 		testControlPoints.add(new DoublePoint(50, 100));
 		testControlPoints.add(new DoublePoint(200, 200));
-		Spline testSpline = new BSpline();
+		Spline testSpline = new BezierSpline();
 		testSpline.addAll(testControlPoints);
 		Spline2D spline2D = new Spline2D(testSpline, SplineType.BEZIER);
 		spline2D.setColor(Color.GREEN);

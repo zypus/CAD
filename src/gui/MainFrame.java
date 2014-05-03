@@ -28,12 +28,15 @@ public class MainFrame
 		JPanel sidePanel = new JPanel();
 		sidePanel.setLayout(new BoxLayout(sidePanel, BoxLayout.Y_AXIS));
 		final JButton paint = new JButton("Draw");
+		paint.putClientProperty("JComponent.sizeVariant", "large");
 		paint.setBackground(Color.LIGHT_GRAY);
 		paint.setFocusPainted(false);
 		final JButton select = new JButton("Select");
+		select.putClientProperty("JComponent.sizeVariant", "large");
 		select.setBackground(Color.LIGHT_GRAY);
 		select.setFocusPainted(false);
 		final JButton clear = new JButton("Clear");
+		clear.putClientProperty("JComponent.sizeVariant", "large");
 		clear.setBackground(Color.LIGHT_GRAY);
 		clear.setFocusPainted(false);
 		paint.addActionListener(new ActionListener() {
@@ -44,9 +47,9 @@ public class MainFrame
 				outputComponent.setDrawLines(true);
 				paint.setBackground(Color.BLACK);
 				paint.setForeground(Color.WHITE);
-				select.setBackground(Color.GRAY);
+				select.setBackground(Color.WHITE);
 				select.setForeground(Color.BLACK);
-				clear.setBackground(Color.GRAY);
+				clear.setBackground(Color.WHITE);
 				clear.setForeground(Color.BLACK);
 			}
 		});
@@ -60,9 +63,9 @@ public class MainFrame
 				outputComponent.setDrawLines(false);
 				select.setBackground(Color.BLACK);
 				select.setForeground(Color.WHITE);
-				paint.setBackground(Color.GRAY);
+				paint.setBackground(Color.WHITE);
 				paint.setForeground(Color.BLACK);
-				clear.setBackground(Color.GRAY);
+				clear.setBackground(Color.WHITE);
 				clear.setForeground(Color.BLACK);
 			}
 		});
@@ -184,6 +187,7 @@ public class MainFrame
 		screenSize.height *= screenMultiplier;
 		screenSize.width *= screenMultiplier;
 		this.setExtendedState(JFrame.MAXIMIZED_BOTH);
+		SwingUtilities.updateComponentTreeUI(this);
 		this.pack();
 		this.setVisible(true);
 	}
