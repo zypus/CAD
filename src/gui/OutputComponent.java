@@ -95,6 +95,7 @@ public class OutputComponent
 						}
 						if (show && !first) {
 							currentSpline.getSpline().add(new DoublePoint(currentSpline.getSpline().get(0)));
+							currentSpline.setClosed(true);
 							currentSpline = null;
 						} else {
 							currentSpline.getSpline().add(new DoublePoint(e.getPoint()));
@@ -144,6 +145,7 @@ public class OutputComponent
 
 				pressedButton = 0;
 				if (showIndicator(e) && currentSpline != null && currentSpline.getSpline().size() > 1) {
+					currentSpline.setClosed(true);
 					currentSpline = null;
 				}
 				draggedPoint = null;
