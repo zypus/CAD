@@ -4,6 +4,7 @@ import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.*;
+import java.util.List;
 
 /**
  * Author: Fabian Fränz <f.fraenz@t-online.de>
@@ -25,10 +26,14 @@ public class MultiSelecter extends MouseAdapter implements Drawable {
 		selecterMap.remove(priority);
 	}
 
-	public java.util.List<Selectable> getSelectedObjects() {
+	public List getSelectedObjects() {
 
+		List selectedObjects = null;
 		for (Integer key : selecterMap.keySet()) {
-			selecterMap;
+			selectedObjects = selecterMap.get(key).getSelectedObjects();
+			if (selectedObjects != null) {
+				break;
+			}
 		}
 		return selectedObjects;
 	}
