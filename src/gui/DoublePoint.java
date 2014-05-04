@@ -30,6 +30,11 @@ public class DoublePoint extends Point2D.Double implements Point {
 		super(point.getX(), point.getY());
 	}
 
+	public double distance(Point p2) {
+
+		return super.distance(p2.getX(), p2.getY());
+	}
+
 	@Override public Point manipulate(double z) {
 		return new DoublePoint(getX()*z,getY()*z);
 	}

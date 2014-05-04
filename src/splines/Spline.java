@@ -12,6 +12,7 @@ import java.util.*;
 public abstract class Spline implements List<Point> {
     protected final java.util.List<Point> controlPoints = new ArrayList<>();
     private Interval interval = new Interval(1, -1, 1, -1);
+	private List<SplineObserver> observers = new ArrayList<>();
 
     /**
      * Interpolates the spline at the specified index.
@@ -65,6 +66,26 @@ public abstract class Spline implements List<Point> {
 			double down = (point.getY() < interval.getLowerBound()) ? point.getY() : interval.getLowerBound();
 			double up = (point.getY() > interval.getUpperBound()) ? point.getY() : interval.getUpperBound();
 			interval = new Interval(left, right,down,up);
+		}
+	}
+
+	public void addObserver(SplineObserver observer) {
+
+		if (!observers.contains(observer)) {
+			observers.add(observer);
+		}
+	}
+
+	public void removeObserver(SplineObserver observer) {
+
+		observers.remove(observer);
+	}
+
+	private void notifyObservers() {
+
+		for (int i = 0; i < observers.size(); i++) {
+			SplineObserver observer = observers.get(i);
+			observer.observedSplineChanged();
 		}
 	}
 

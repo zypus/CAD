@@ -11,4 +11,6 @@ public interface Point {
 
 	Point createPoint(double x,double y);
 
+	double distance(Point p2);
+
 }
