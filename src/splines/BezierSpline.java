@@ -13,19 +13,21 @@ public class BezierSpline extends Spline {
     @Override
     public Point s(double u) {
     	
-    	u/=3;
     	int intPart = (int) Math.floor(u);
-    	if (intPart*3==size()-1){
-    		return get(intPart*3);
+    	if (u==size()-1){
+//    		System.out.println("The u "+ u + " End point y "+get(intPart).getY()+ " and the x " + get(intPart).getX());
+    		return get(intPart);
     	}
-    	double t = u - intPart;
+//    	System.out.println("The u " + u + "and the size " + size());
     	
     	int leftIndex = intPart;
-    	
+    	while(leftIndex%3 != 0){
+    		leftIndex--;
+    	};
     	Point leftKnot = get(leftIndex);
-    	Point rightKnot = get(leftIndex+3);
-    	
+    	    	
     	Point p = leftKnot.createPoint(0,0);
+    	double t = (u/3 - (int)Math.floor(u/3));
     	for (int i = 0; i <= 3 ; i++){
     		p = p.addValue(get(leftIndex+i).manipulate(binom(3,i)*Math.pow(t,i)*Math.pow(1-t,3-i)));
     	}
