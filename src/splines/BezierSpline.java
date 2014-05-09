@@ -7,7 +7,6 @@ import java.util.ArrayList;
  * Edited by nathan on 26/04/14.
  */
 public class BezierSpline extends Spline {
-	private final double EPSILON = 1e-10;
 	public BezierSpline(){}
 
     @Override
@@ -18,18 +17,25 @@ public class BezierSpline extends Spline {
     		return get(intPart);
     	}
     	
-    	int leftIndex = intPart;
+    	int LI = getLeftIndex(u);	
+    	double t = (u/3 - (int)Math.floor(u/3));
+    	double x = 0;
+    	double y = 0;
+    	for (int i = 0; i <= 3 ; i++){
+    		x += get(LI+i).getX() * (binom(3,i)*Math.pow(t,i)*Math.pow(1-t,3-i));
+    		y += get(LI+i).getY() * (binom(3,i)*Math.pow(t,i)*Math.pow(1-t,3-i));
+    	}
+    	
+    	return get(0).createPoint(x,y);
+    }
+    
+    private int getLeftIndex(double u){
+    	int leftIndex = (int) Math.floor(u);
     	while(leftIndex%3 != 0){
     		leftIndex--;
     	};
-    	Point leftKnot = get(leftIndex);
-    	    	
-    	Point p = leftKnot.createPoint(0,0);
-    	double t = (u/3 - (int)Math.floor(u/3));
-    	for (int i = 0; i <= 3 ; i++){
-    		p = p.addValue(get(leftIndex+i).manipulate(binom(3,i)*Math.pow(t,i)*Math.pow(1-t,3-i)));
-    	}
-    	return p;
+    	return leftIndex;
+    	
     }
 
     private double binom(int n, int k){
