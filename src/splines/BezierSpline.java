@@ -7,25 +7,25 @@ import java.util.ArrayList;
  * Edited by nathan on 26/04/14.
  */
 public class BezierSpline extends Spline {
-
+	private final double EPSILON = 1e-10;
 	public BezierSpline(){}
 
     @Override
     public Point s(double u) {
-    	
-    	u/=3;
+    	    	
     	int intPart = (int) Math.floor(u);
-    	if (intPart*3==size()-1){
-    		return get(intPart*3);
+    	if (u==size()-1){
+    		return get(intPart);
     	}
-    	double t = u - intPart;
     	
     	int leftIndex = intPart;
-    	
+    	while(leftIndex%3 != 0){
+    		leftIndex--;
+    	};
     	Point leftKnot = get(leftIndex);
-    	Point rightKnot = get(leftIndex+3);
-    	
+    	    	
     	Point p = leftKnot.createPoint(0,0);
+    	double t = (u/3 - (int)Math.floor(u/3));
     	for (int i = 0; i <= 3 ; i++){
     		p = p.addValue(get(leftIndex+i).manipulate(binom(3,i)*Math.pow(t,i)*Math.pow(1-t,3-i)));
     	}
