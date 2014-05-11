@@ -30,9 +30,11 @@ public class CubicSpline extends Spline {
 		double t = u - intPart;    	
 		double y = 0;
 		
-		for (int i = 0;i<3;i++){
-			y += c[i]*Math.pow(t, i);
-		}
+		y = c[3] * Math.pow((t), 3)
+				+ c[2] * Math.pow((t), 2)
+				+ c[1] * (t)
+				+ c[0];
+		
 		double x = fract*(get(intPart+1).getX() - get(intPart).getX()) + get(intPart).getX();
 		
 		return get(0).createPoint(x, y);
@@ -114,6 +116,7 @@ public class CubicSpline extends Spline {
 		if(isClosed){
 			matrix[0][n-1]= 1;
 			matrix[n-1][0] = 1;
+			
 		}
 		else{
 			matrix[0][0] = 2;
