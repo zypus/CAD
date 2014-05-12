@@ -4,7 +4,6 @@ import gui.tools.Tool;
 import gui.tools.ToolDelegate;
 import gui.tools.drag.Draggable;
 import gui.tools.drag.Dragger;
-import gui.tools.draw.BezierSplineDrawer;
 import gui.tools.draw.SplineDrawer;
 import gui.tools.select.PointSelecter;
 import gui.tools.select.Selectable;
@@ -61,7 +60,7 @@ public class OutputComponent
 
 		showCoo = new ShowCoordinates(this);
 
-		drawer = new BezierSplineDrawer();
+		drawer = new SplineDrawer(SplineType.BEZIER);
 		splineSelecter = new Selecter();
 		pointSelecter = new PointSelecter();
 		dragger = new Dragger();
@@ -81,6 +80,11 @@ public class OutputComponent
 			}
 
 			@Override public boolean shouldStart(Tool tool) {
+
+				return true;
+			}
+
+			@Override public boolean shouldFinish(Tool tool) {
 
 				return true;
 			}
@@ -118,6 +122,11 @@ public class OutputComponent
 				return !pointSelecter.hasSelectedObjects();
 			}
 
+			@Override public boolean shouldFinish(Tool tool) {
+
+				return !pointSelecter.hasSelectedObjects();
+			}
+
 			@Override public void didStart(Tool tool) {
 
 			}
@@ -140,6 +149,11 @@ public class OutputComponent
 			@Override public boolean shouldStart(Tool tool) {
 
 				return true;
+			}
+
+			@Override public boolean shouldFinish(Tool tool) {
+
+				return false;
 			}
 
 			@Override public void didStart(Tool tool) {
@@ -270,17 +284,17 @@ public class OutputComponent
 			splineTypeCounter = (splineTypeCounter + 1) % SPLINE_TYPES.length;
 			currentSplineType = SPLINE_TYPES[splineTypeCounter];
 		}
-		if (drawLines && currentSplineType.equals(SplineType.BEZIER)) {
-			SplineDrawer newDrawer = new BezierSplineDrawer();
-			newDrawer.setDelegate(drawer.getDelegate());
-			tools.set(tools.indexOf(drawer), newDrawer);
-			drawer = newDrawer;
-		} else if (drawLines) {
+//		if (drawLines && currentSplineType.equals(SplineType.BEZIER)) {
+//			SplineDrawer newDrawer = new BezierSplineDrawer();
+//			newDrawer.setDelegate(drawer.getDelegate());
+//			tools.set(tools.indexOf(drawer), newDrawer);
+//			drawer = newDrawer;
+//		} else if (drawLines) {
 			SplineDrawer newDrawer = new SplineDrawer(currentSplineType);
 			newDrawer.setDelegate(drawer.getDelegate());
 			tools.set(tools.indexOf(drawer), newDrawer);
 			drawer = newDrawer;
-		}
+//		}
 		drawer.activate();
 		splineSelecter.deactivate();
 		pointSelecter.deactivate();

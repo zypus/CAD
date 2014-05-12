@@ -11,6 +11,9 @@ public interface ToolDelegate {
 	public void didFinish(Tool tool);
 
 	public boolean shouldStart(Tool tool);
+
+	public boolean shouldFinish(Tool tool);
+
 	public void didStart(Tool tool);
 
 	public void didUpdate(Tool tool);

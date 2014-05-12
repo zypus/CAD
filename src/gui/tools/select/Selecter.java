@@ -83,7 +83,7 @@ public class Selecter extends Tool {
 	@Override public void mousePressed(MouseEvent e) {
 
 		super.mousePressed(e);
-		if (isHandlingEvents()) {
+		if (isHandlingEvents() && shouldStart()) {
 			startPoint = new DoublePoint(e.getPoint());
 		}
 	}
@@ -91,7 +91,7 @@ public class Selecter extends Tool {
 	@Override public void mouseReleased(MouseEvent e) {
 
 		super.mouseReleased(e);
-		if (isHandlingEvents()) {
+		if (isHandlingEvents() && shouldFinish() && startPoint != null) {
 			DoublePoint mousePosition = new DoublePoint(e.getPoint());
 			List<Selectable> selection = new ArrayList<>();
 			if (selectionFrame == null) {
@@ -134,7 +134,7 @@ public class Selecter extends Tool {
 				}
 			}
 			boolean shiftSelect = ((e.getModifiers() & MouseEvent.SHIFT_MASK) == MouseEvent.SHIFT_MASK);
-			if ((shiftSelect || selectionFrame != null) && !selection.isEmpty()) {
+			if (shiftSelect && !selection.isEmpty()) {
 				for (Selectable selected : selection) {
 					SelectionType
 							type =
