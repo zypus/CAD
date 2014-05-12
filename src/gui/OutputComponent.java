@@ -272,10 +272,12 @@ public class OutputComponent
 		}
 		if (drawLines && currentSplineType.equals(SplineType.BEZIER)) {
 			SplineDrawer newDrawer = new BezierSplineDrawer();
+			newDrawer.setDelegate(drawer.getDelegate());
 			tools.set(tools.indexOf(drawer), newDrawer);
 			drawer = newDrawer;
 		} else if (drawLines) {
 			SplineDrawer newDrawer = new SplineDrawer(currentSplineType);
+			newDrawer.setDelegate(drawer.getDelegate());
 			tools.set(tools.indexOf(drawer), newDrawer);
 			drawer = newDrawer;
 		}
