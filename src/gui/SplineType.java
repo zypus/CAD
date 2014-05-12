@@ -43,10 +43,10 @@ public enum SplineType {
 
 	public String toString() {
 		switch (this) {
-		case LINEAR: return "LinearSpline";
-		case CUBIC: return "CubicSpline";
-		case B: return  "BSpline";
-		case BEZIER: return  "BezierSpline";
+		case LINEAR: return "Linear Spline";
+		case CUBIC: return "Cubic Spline";
+		case B: return  "B Spline";
+		case BEZIER: return  "Bezier Spline";
 		}
 		return "Invalid";
 	}

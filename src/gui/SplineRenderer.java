@@ -16,6 +16,7 @@ public class SplineRenderer {
 	public static final int STEPS = 10;
 	private static final double KNOT_SIZE = 10;
 	public static final int HANDLE_SIZE = 1;
+	public static final int HANDLE_ALPHA = 175;
 	private final java.awt.Graphics2D context;
 
     protected SplineRenderer(Graphics2D context) {
@@ -32,7 +33,7 @@ public class SplineRenderer {
 										 leftPoint.getY() - KNOT_SIZE / 2,
 										 KNOT_SIZE,
 										 KNOT_SIZE);
-			context.draw(knot);
+			context.fill(knot);
 		}
 		if (spline.size() == 1) {
 			Line2D.Double lineSegment = new Line2D.Double(new Point2D.Double(leftPoint.getX(), leftPoint.getY()),
@@ -41,7 +42,6 @@ public class SplineRenderer {
 			context.draw(lineSegment);
 		} else {
 			int totalSteps = (spline.size() - 1) * STEPS;
-			boolean lastControlPointWasOnSpline = true;
 			for (int s = 1; s <= totalSteps; s++) {
 				double u = (double) s / (double) STEPS;
 
@@ -53,47 +53,23 @@ public class SplineRenderer {
 				boolean isControlPoint = (u == flooredU);
 				if (isControlPoint && displayControlPoints) {
 					Point controlPoint = spline.get(flooredU);
-					boolean isOnSpline = (rightPoint.getX() == controlPoint.getX() && rightPoint.getY() == controlPoint.getY());
-					Ellipse2D.Double knot;
-					Line2D.Double handle = null;
-					if (isOnSpline) {
-						if (!lastControlPointWasOnSpline) {
-							handle = new Line2D.Double(new Point2D.Double(spline.get(flooredU - 1).getX(),
-																		  spline.get(flooredU - 1).getY()),
-													   new Point2D.Double(controlPoint.getX(), controlPoint.getY())
-							);
-						}
-						knot =
-								new Ellipse2D.Double(controlPoint.getX() - KNOT_SIZE / 2,
-													 controlPoint.getY() - KNOT_SIZE / 2,
-													 KNOT_SIZE,
-													 KNOT_SIZE);
-						lastControlPointWasOnSpline = true;
-					} else {
-						if (lastControlPointWasOnSpline) {
-							handle = new Line2D.Double(new Point2D.Double(spline.get(flooredU - 1).getX(),
-																		  spline.get(flooredU - 1).getY()),
-													   new Point2D.Double(controlPoint.getX(), controlPoint.getY())
-							);
-						}
-						knot =
-								new Ellipse2D.Double(controlPoint.getX() - KNOT_SIZE / 2,
-													 controlPoint.getY() - KNOT_SIZE / 2,
-													 KNOT_SIZE,
-													 KNOT_SIZE);
-						lastControlPointWasOnSpline = false;
-					}
-					if (handle != null) {
-						Stroke stroke = context.getStroke();
-						context.setStroke(new BasicStroke(HANDLE_SIZE));
-						context.draw(handle);
-						context.setStroke(stroke);
-					}
-					if (isOnSpline) {
-						context.draw(knot);
-					} else {
-						context.fill(knot);
-					}
+					Line2D.Double handle = new Line2D.Double(new Point2D.Double(spline.get(flooredU - 1).getX(),
+																  spline.get(flooredU - 1).getY()),
+											   new Point2D.Double(controlPoint.getX(), controlPoint.getY())
+					);
+					Ellipse2D.Double knot =
+							new Ellipse2D.Double(controlPoint.getX() - KNOT_SIZE / 2,
+												 controlPoint.getY() - KNOT_SIZE / 2,
+												 KNOT_SIZE,
+												 KNOT_SIZE);
+					Stroke stroke = context.getStroke();
+					Color color = context.getColor();
+					context.setStroke(new BasicStroke(HANDLE_SIZE));
+					context.setColor(new Color(color.getRed(), color.getGreen(), color.getBlue(), HANDLE_ALPHA));
+					context.draw(handle);
+					context.setStroke(stroke);
+					context.setColor(color);
+					context.fill(knot);
 				}
 				leftPoint = rightPoint;
 			}

@@ -1,9 +1,17 @@
 package gui;
 
+import gui.tools.Tool;
+import gui.tools.ToolDelegate;
+import gui.tools.drag.Draggable;
+import gui.tools.drag.Dragger;
+import gui.tools.draw.BezierSplineDrawer;
+import gui.tools.draw.SplineDrawer;
+import gui.tools.select.PointSelecter;
+import gui.tools.select.Selectable;
+import gui.tools.select.Selecter;
 import intersection.Point;
-import intersection.PolyChecker;
 import intersection.Segment;
-import splines.BSpline;
+import splines.BezierSpline;
 import splines.Spline;
 
 import javax.swing.*;
@@ -21,41 +29,144 @@ public class OutputComponent
 		extends JComponent {
 
 	private static final Color[] COLORS = { Color.WHITE, Color.BLUE, Color.MAGENTA, Color.ORANGE, Color.PINK, Color.YELLOW };
-	private static final Color[] SELECTION_COLORS = { Color.GREEN, Color.RED};
+	private static final SplineType[] SPLINE_TYPES = {SplineType.CUBIC, SplineType.B, SplineType.BEZIER};
+	private int splineTypeCounter = 2;
 	private static final int SELECTION_THICKNESS = 4;
 	private static final double SELECT_SENSITIVITY = 10;
 	public static final int INDICATOR_SIZE = 16;
 	public static final int DEFAULT_THICKNESS = 2;
 	private int colorCounter = 0;
 	private ShowCoordinates showCoo;
-	private List<List<Shape>> shapes = new ArrayList<>();
-	private List<List<Segment>> polygons = new ArrayList<>();
 	private Spline2D currentSpline = null;
 	private Shape shapeStartIndicator = null;
-	private List<Integer> selectedShapes1 = new ArrayList<>();
-	private List<Integer> selectedShapes2 = new ArrayList<>();
 	private List<List<Point>> intersections = new ArrayList<>();
 	private Integer hover = -1;
 	private Point2D mousePoint = new Point2D.Double(0, 0);
 	private String mouseText = "";
 	private int pressedButton = 0;
 	private boolean drawLines = true;
-	private int myWidth;
-	private int myHeight;
 	private JPanel scroll = null;
 	private Font font = new Font("Arial", Font.BOLD, 15);
-	private List<Spline2D> nonSelectedSplines = new ArrayList<>();
-	private List<List<Spline2D>> selectedSplines = new ArrayList<>();
-	private DraggingPoint draggedPoint = null;
+	private List<Spline2D> splines = new ArrayList<>();
+	private SplinePoint draggedPoint = null;
 	private SplineType currentSplineType = SplineType.BEZIER;
 	private boolean showControlPointCoords = true;
+	private List<Tool> tools;
+	private Selecter splineSelecter;
+	private Selecter pointSelecter;
+	private Dragger dragger;
+	private SplineDrawer drawer;
 
 	public OutputComponent() {
 
 		showCoo = new ShowCoordinates(this);
 
-		selectedSplines.add(new ArrayList<Spline2D>());
-		selectedSplines.add(new ArrayList<Spline2D>());
+		drawer = new BezierSplineDrawer();
+		splineSelecter = new Selecter();
+		pointSelecter = new PointSelecter();
+		dragger = new Dragger();
+
+
+		pointSelecter.setDelegate(new ToolDelegate() {
+			@Override public void didFinish(Tool tool) {
+
+				Selecter selecter = (Selecter) tool;
+				List<Selectable> selectedObjects = selecter.getSelectedObjects();
+				List<Draggable> draggables = new ArrayList<>();
+				for (Selectable selectedPoint : selectedObjects) {
+					draggables.add((Draggable) selectedPoint);
+				}
+
+				dragger.setDraggables(draggables);
+			}
+
+			@Override public boolean shouldStart(Tool tool) {
+
+				return true;
+			}
+
+			@Override public void didStart(Tool tool) {
+
+			}
+
+			@Override public void didUpdate(Tool tool) {
+
+			}
+
+			@Override public boolean shouldDraw(Tool tool) {
+
+				return !dragger.isDragging();
+			}
+		});
+		splineSelecter.setDelegate(new ToolDelegate() {
+			@Override public void didFinish(Tool tool) {
+				Selecter selecter = (Selecter) tool;
+				List<Selectable> selectedObjects = selecter.getSelectedObjects();
+				pointSelecter.clear();
+				for (Selectable selectable : selectedObjects) {
+					List<Selectable> selectablePoints = new ArrayList<>();
+					Spline2D spline2d = (Spline2D) selectable;
+					for (splines.Point point : spline2d.getSpline()) {
+						selectablePoints.add(new SplinePoint(spline2d, spline2d.getSpline().indexOf(point)));
+					}
+					pointSelecter.addSelectables(selectablePoints);
+				}
+			}
+
+			@Override public boolean shouldStart(Tool tool) {
+
+				return !pointSelecter.hasSelectedObjects();
+			}
+
+			@Override public void didStart(Tool tool) {
+
+			}
+
+			@Override public void didUpdate(Tool tool) {
+
+			}
+
+			@Override public boolean shouldDraw(Tool tool) {
+
+				return !dragger.isDragging();
+			}
+		});
+
+		drawer.setDelegate(new ToolDelegate() {
+			@Override public void didFinish(Tool tool) {
+				currentSpline = null;
+			}
+
+			@Override public boolean shouldStart(Tool tool) {
+
+				return true;
+			}
+
+			@Override public void didStart(Tool tool) {
+
+				SplineDrawer drawer = (SplineDrawer) tool;
+				currentSpline = drawer.getCurrentSpline();
+				splines.add(currentSpline);
+				splineSelecter.addSelectable(currentSpline);
+			}
+
+			@Override public void didUpdate(Tool tool) {
+
+			}
+
+			@Override public boolean shouldDraw(Tool tool) {
+
+				return true;
+			}
+		});
+
+		tools = new ArrayList<>();
+		tools.add(drawer);
+		tools.add(pointSelecter);
+		tools.add(dragger);
+		tools.add(splineSelecter);
+
+		drawer.activate();
 
 		// test
 		List<DoublePoint> testControlPoints = new ArrayList<>();
@@ -63,219 +174,74 @@ public class OutputComponent
 		testControlPoints.add(new DoublePoint(100, 100));
 		testControlPoints.add(new DoublePoint(50, 100));
 		testControlPoints.add(new DoublePoint(200, 200));
-		Spline testSpline = new BSpline();
+		Spline testSpline = new BezierSpline();
 		testSpline.addAll(testControlPoints);
 		Spline2D spline2D = new Spline2D(testSpline, SplineType.BEZIER);
 		spline2D.setColor(Color.GREEN);
 		spline2D.setThickness(2);
-		nonSelectedSplines.add(spline2D);
+		splines.add(spline2D);
+		splineSelecter.addSelectable(spline2D);
 		// end test
 
 		MouseAdapter mouseAdapter = new MouseAdapter() {
 
 			public void mousePressed(MouseEvent e) {
 
-				boolean
-						isInside =
-						e.getPoint().getX() >= 0 && e.getPoint().getY() >= 0 && e.getPoint().getX() <= myWidth
-						&& e.getPoint().getY() <= myHeight;
-				if (drawLines) {
-					if (e.getButton() == MouseEvent.BUTTON1 && isInside) {
-						pressedButton = 1;
-						Point2D p;
-						boolean show = showIndicator(e);
-						boolean first = false;
-						if (currentSpline == null) {
-							currentSpline = new Spline2D(currentSplineType.createInstance(), currentSplineType);
-							currentSpline.setColor(COLORS[colorCounter]);
-							colorCounter = (colorCounter+1)%COLORS.length;
-							nonSelectedSplines.add(currentSpline);
-							scroll.add(new JLabel("Currently drawn ..."));
-							first = true;
-						}
-						if (show && !first) {
-							currentSpline.getSpline().add(new DoublePoint(currentSpline.getSpline().get(0)));
-							currentSpline = null;
-						} else {
-							currentSpline.getSpline().add(new DoublePoint(e.getPoint()));
-						}
-					} else if (e.getButton() == MouseEvent.BUTTON3 && isInside) {
-						pressedButton = 2;
-						currentSpline = null;
-					}
-				} else if (isInside) {
-					boolean changed;
-					boolean multiSelect = ((e.getModifiers() & MouseEvent.SHIFT_MASK)
-										   == MouseEvent.SHIFT_MASK);
-					List<Spline2D>
-							selection =
-							selectedSplines.get(((e.getModifiers() & MouseEvent.CTRL_MASK) == MouseEvent.CTRL_MASK) ? 1 : 0);
-					DoublePoint mousePos = new DoublePoint(e.getPoint());
-
-					changed = checkSelection(nonSelectedSplines, selection, mousePos, multiSelect);
-					for (int i = 0; i < selectedSplines.size() && !changed; i++) {
-						changed = checkSelection(selectedSplines.get(i), selection, mousePos, multiSelect);
-					}
-
-					if (!changed) {
-						for (int i = 0; i < selectedSplines.size(); i++) {
-							List<Spline2D> selectioni = selectedSplines.get(i);
-							while (!selectioni.isEmpty()) {
-								nonSelectedSplines.add(selectioni.remove(0));
-							}
-						}
-						intersections.clear();
-					}
-					if (selectedShapes1.size() > 0) {
-						intersections.clear();
-						for (int i = 0; i < selectedShapes1.size(); i++) {
-							for (int j = i + 1; j < selectedShapes1.size(); j++) {
-								//								System.out.println(polygons.get(selectedShapes1.get(i))+" "+polygons.get(selectedShapes1.get(j)));
-								intersections.add(PolyChecker.findIntersectionPoints(polygons.get(selectedShapes1.get(i)),
-																					 polygons.get(selectedShapes1.get(j))));
-							}
-						}
-					}
+				for (Tool tool : tools) {
+					tool.mousePressed(e);
 				}
 				repaint();
 			}
 
 			public void mouseReleased(MouseEvent e) {
 
-				pressedButton = 0;
-				if (showIndicator(e) && currentSpline != null && currentSpline.getSpline().size() > 1) {
-					currentSpline = null;
+				for (Tool tool : tools) {
+					tool.mouseReleased(e);
 				}
-				draggedPoint = null;
 				repaint();
 			}
 
 			public void mouseExited(MouseEvent e) {
 
 				showCoo.resetLabel();
+				for (Tool tool : tools) {
+					tool.mouseExited(e);
+				}
+			}
+
+			public void mouseEntered(MouseEvent e) {
+
+				for (Tool tool : tools) {
+					tool.mouseEntered(e);
+				}
 			}
 
 			public void mouseDragged(MouseEvent e) {
 
-				boolean
-						isInside =
-						e.getPoint().getX() >= 0 && e.getPoint().getY() >= 0 && e.getPoint().getX() <= myWidth
-						&& e.getPoint().getY() <= myHeight;
-				if (pressedButton == 1 && isInside) {
-					Spline spline = currentSpline.getSpline();
-					if (showIndicator(e)) {
-						spline.set(spline.size() - 1, new DoublePoint( spline.get(0)));
-					} else {
-						spline.set(spline.size() - 1, new DoublePoint(e.getPoint()));
-					}
-					showCoo.update(e.getX(), e.getY());
+				showCoo.update(e.getX(), e.getY());
 
-					repaint();
+				for (Tool tool : tools) {
+					tool.mouseDragged(e);
 				}
-				if (draggedPoint != null) {
-					Spline2D spline2d = draggedPoint.getSpline2D();
-					if (spline2d.isClosed() && ( draggedPoint.index == 0 || draggedPoint.index == spline2d.getSpline().size()-1)) {
-						spline2d.getSpline().set(0, new DoublePoint(e.getPoint()));
-						spline2d.getSpline().set(spline2d.getSpline().size()-1, new DoublePoint(e.getPoint()));
-					} else{
-						spline2d.getSpline().set(draggedPoint.getIndex(), new DoublePoint(e.getPoint()));
-					}
 
-					repaint();
-				}
+				mousePoint = e.getPoint();
+
+				repaint();
 			}
 
 			public void mouseMoved(MouseEvent e) {
 
 				showCoo.update(e.getX(), e.getY());
-				showIndicator(e);
 				mousePoint = e.getPoint();
 				mouseText = "";
-				for (int s = 0; s < shapes.size(); s++) {
-					for (Shape line : shapes.get(s)) {
-						double length = ((Line2D) line).getP1().distance(((Line2D) line).getP2());
-						double
-								mouseDistance =
-								((Line2D) line).getP1().distance(e.getPoint()) + ((Line2D) line).getP2().distance(e.getPoint());
-						if (mouseDistance <= length + 1) {
-							hover = s;
-							if (selectedShapes1.size() > 0 && selectedShapes1.contains(s)) {
-								boolean inside = false;
-								boolean inside2 = false;
-								boolean intersecting = false;
-								List<Segment> merged = new ArrayList<Segment>();
-								List<Segment> merged2 = new ArrayList<Segment>();
-								for (Integer i : selectedShapes1) {
-									if (i != hover) {
-										if (PolyChecker.intersectionCheck(polygons.get(hover), polygons.get(i))) {
-											intersecting = true;
-										} else if (!PolyChecker.insideCheck(polygons.get(hover), polygons.get(i))) {
-											inside = true;
-										}
-									}
 
-								}
-								if (selectedShapes2.size() > 0) {
-									for (Integer j : selectedShapes2) {
-										if (PolyChecker.intersectionCheck(polygons.get(hover), polygons.get(j))) {
-										} else if (PolyChecker.insideCheck(polygons.get(hover), polygons.get(j))) {
-											inside2 = true;
-										}
-									}
-								}
-								merged = polygons.get(selectedShapes1.get(0));
-								for (int m = 1; m < selectedShapes1.size(); m++) {
-									List<List<Segment>> comb = new ArrayList<List<Segment>>();
-									comb.add(merged);
-									comb.add(polygons.get(m));
-									merged = PolyChecker.polygoncreator(comb);
-								}
-								if (inside2) {
-									merged2 = polygons.get(selectedShapes2.get(0));
-									for (int m = 1; m < selectedShapes2.size(); m++) {
-										List<List<Segment>> comb = new ArrayList<List<Segment>>();
-										comb.add(merged2);
-										comb.add(polygons.get(m));
-										merged2 = PolyChecker.polygoncreator(comb);
-									}
-								}
-								if (intersecting) {
-									mouseText += "intersecting, combined area: " + PolyChecker.area(merged);
-								} else if (inside) {
-									mouseText += "inside";
-								} else {
-									if (inside2) {
-										mouseText +=
-												"outside, area: " + (PolyChecker.area(polygons.get(hover)) - PolyChecker.area(merged2));
-									} else {
-										mouseText += "outside";
-									}
-
-								}
-							}
-						}
-					}
+				for (Tool tool : tools) {
+					tool.mouseMoved(e);
 				}
+
 				repaint();
 			}
 
-			private boolean showIndicator(MouseEvent e) {
-
-				if (currentSpline != null && Math.abs(e.getX() - currentSpline.getSpline().get(0).getX()) < SELECT_SENSITIVITY
-					&& Math.abs(e.getY() - currentSpline.getSpline().get(0).getY()) < SELECT_SENSITIVITY) {
-					if (shapeStartIndicator == null) {
-						shapeStartIndicator =
-								new Ellipse2D.Double(currentSpline.getSpline().get(0).getX() - INDICATOR_SIZE/2,
-													 currentSpline.getSpline().get(0).getY() - INDICATOR_SIZE/2,
-													 INDICATOR_SIZE,
-													 INDICATOR_SIZE);
-					}
-					return true;
-				} else if (shapeStartIndicator != null) {
-					shapeStartIndicator = null;
-				}
-				return false;
-			}
 		};
 		addMouseListener(mouseAdapter);
 		addMouseMotionListener(mouseAdapter);
@@ -292,64 +258,50 @@ public class OutputComponent
 		return poly;
 	}
 
-	private boolean checkSelection(List<Spline2D> checkedSelection, List<Spline2D> selection, DoublePoint mousePos, boolean multiSelect) {
-
-		boolean changed = false;
-		for (int s = 0; s < checkedSelection.size() && !changed; s++) {
-			Spline2D spline2d = checkedSelection.get(s);
-			if (spline2d.getSpline().getInterval().contains(mousePos, SELECT_SENSITIVITY)) {
-				Spline spline = spline2d.getSpline();
-				for (int i = 0; i < spline.size() && !changed; i++) {
-					splines.Point point = spline.get(i);
-					if (Math.abs(point.getX() - mousePos.getX()) < SELECT_SENSITIVITY
-						&& Math.abs(point.getY() - mousePos.getY()) < SELECT_SENSITIVITY) {
-						if (selection.contains(spline2d)) {
-							draggedPoint = new DraggingPoint(spline2d, i);
-						} else {
-							if (multiSelect) {
-								selection.add(checkedSelection.remove(s));
-							} else {
-								for (int j = 0; j < selectedSplines.size(); j++) {
-									List<Spline2D> spline2Ds =  selectedSplines.get(j);
-									while (!spline2Ds.isEmpty()) {
-										nonSelectedSplines.add(spline2Ds.remove(0));
-									}
-								}
-								selection.add(checkedSelection.remove(s));
-							}
-						}
-						changed = true;
-					}
-				}
-			}
-		}
-		return changed;
-	}
-
 	public boolean isDrawLines() {
 
 		return drawLines;
 	}
 
-	public void setDrawLines(boolean drawLines) {
+	public SplineType setDrawing() {
 
-		this.drawLines = drawLines;
-		if (!drawLines && currentSpline != null) {
-			currentSpline = null;
+		if (drawer.isActive()) {
+			drawer.finish();
+			splineTypeCounter = (splineTypeCounter + 1) % SPLINE_TYPES.length;
+			currentSplineType = SPLINE_TYPES[splineTypeCounter];
 		}
+		if (drawLines && currentSplineType.equals(SplineType.BEZIER)) {
+			SplineDrawer newDrawer = new BezierSplineDrawer();
+			tools.set(tools.indexOf(drawer), newDrawer);
+			drawer = newDrawer;
+		} else if (drawLines) {
+			SplineDrawer newDrawer = new SplineDrawer(currentSplineType);
+			tools.set(tools.indexOf(drawer), newDrawer);
+			drawer = newDrawer;
+		}
+		drawer.activate();
+		splineSelecter.deactivate();
+		pointSelecter.deactivate();
+		dragger.deactivate();
+		return currentSplineType;
+	}
+
+	public void setSelecting() {
+
+		drawer.deactivate();
+		splineSelecter.activate();
+		pointSelecter.activate();
+		dragger.activate();
 	}
 
 	public void clear() {
 
-		shapes.clear();
-		polygons.clear();
-		currentSpline = null;
-		nonSelectedSplines.clear();
-		for (int i = 0; i < selectedSplines.size(); i++) {
-			selectedSplines.get(i).clear();
-		}
-		selectedShapes1.clear();
-		selectedShapes2.clear();
+		drawer.finish();
+		splines.clear();
+		splineSelecter.clear();
+		pointSelecter.clear();
+		dragger.setDraggables(null);
+
 		intersections.clear();
 		scroll.removeAll();
 		repaint();
@@ -367,25 +319,27 @@ public class OutputComponent
 
 		g2d.setBackground(Color.BLACK);
 		g2d.clearRect(0, 0, getWidth(), getHeight());
+
 		g2d.setStroke(new BasicStroke(2));
 		int shapeCount = 0;
-		for (int i = 0; i < nonSelectedSplines.size(); i++) {
-			Spline2D spline2d = nonSelectedSplines.get(i);
-			g2d.setStroke(new BasicStroke(DEFAULT_THICKNESS));
+		for (int i = 0; i < splines.size(); i++) {
+			Spline2D spline2d = splines.get(i);
 			g2d.setPaint(spline2d.getColor());
-			splineRenderer.renderSplineAtPosition(spline2d.getSpline(), 0, 0, false);
+			g2d.setStroke(new BasicStroke(DEFAULT_THICKNESS));
+			boolean drawControlPoints = false;
+			if (spline2d == currentSpline) {
+				drawControlPoints = true;
+			}
+			splineRenderer.renderSplineAtPosition(spline2d.getSpline(), 0, 0, drawControlPoints);
 		}
-		for (int i = 0; i < selectedSplines.size(); i++) {
-			List<Spline2D> selection = selectedSplines.get(i);
-			for (int j = 0; j < selection.size(); j++) {
-				Spline2D spline2d = selection.get(j);
+		for (int i = 0; i < splineSelecter.getSelectedObjects().size(); i++) {
+				Spline2D spline2d = (Spline2D)splineSelecter.getSelectedObjects().get(i);
 				g2d.setStroke(new BasicStroke(SELECTION_THICKNESS));
-				g2d.setPaint(SELECTION_COLORS[i]);
+				g2d.setPaint(spline2d.getColor());
 				splineRenderer.renderSplineAtPosition(spline2d.getSpline(), 0, 0, true);
 				if (showControlPointCoords) {
 					drawCoords(spline2d, g2d);
 				}
-			}
 		}
 //		if (shapeCount < ((currentSpline == null) ? scroll.getComponentCount() : scroll.getComponentCount() - 1)) {
 //			if (!((Line2D) shapes.get(s).get(shapes.get(s).size() - 1)).getP2().equals(((Line2D) shapes.get(s).get(0)).getP1())) {
@@ -416,6 +370,10 @@ public class OutputComponent
 		int l = metric.stringWidth(mouseText);
 		g2d.drawString(mouseText, (int) mousePoint.getX(), (int) mousePoint.getY());
 
+		for (Tool tool : tools) {
+			tool.draw(g2d);
+		}
+
 	}
 
 	private void drawCoords(Spline2D spline2d, Graphics2D g2d) {
@@ -436,8 +394,8 @@ public class OutputComponent
 	@Transient
 	public Dimension getPreferredSize() {
 
-		myWidth = getParent().getWidth();
-		myHeight = getParent().getHeight();
+		int myWidth = getParent().getWidth();
+		int myHeight = getParent().getHeight();
 		return this.getParent().getSize();
 	}
 
@@ -468,15 +426,12 @@ public class OutputComponent
 			((Line2D.Double) line).x2 = Math.cos(angle) * ((Line2D.Double) line).x2 + Math.sin(angle) * ((Line2D.Double) line).y2;
 			((Line2D.Double) line).y1 = -Math.sin(angle) * ((Line2D.Double) line).x1 + Math.cos(angle) * ((Line2D.Double) line).y1;
 			((Line2D.Double) line).y2 = -Math.sin(angle) * ((Line2D.Double) line).x2 + Math.cos(angle) * ((Line2D.Double) line).y2;
-			;
 		}
 	}
 
 	public void addShapes(List<Shape> shape) {
 
-		if (currentSpline != null) {
-			currentSpline = null;
-		}
+		drawer.finish();
 		Spline spline = currentSplineType.createInstance();
 		for (int i = 0; i < shape.size(); i++) {
 			Line2D.Double line = (Line2D.Double) shape.get(i);
@@ -485,15 +440,41 @@ public class OutputComponent
 		Spline2D spline2d = new Spline2D(spline, currentSplineType);
 		spline2d.setColor(COLORS[colorCounter]);
 		colorCounter = (colorCounter + 1) % COLORS.length;
-		nonSelectedSplines.add(spline2d);
+		splines.add(spline2d);
+		splineSelecter.addSelectable(spline2d);
 		repaint();
 	}
 
-	private class DraggingPoint {
+	private class SplinePoint
+			implements Selectable, Draggable {
+
 		private Spline2D spline2D;
 		private int index;
+		SelectionType selectionStatus = SelectionType.UNSELECTED;
 
-		private DraggingPoint(Spline2D spline2D, int index) {
+		@Override public List<splines.Point> getSelectablePoints() {
+
+			List<splines.Point> points = new ArrayList<>();
+			points.add(getPoint());
+			return points;
+		}
+
+		@Override public boolean onlySelectableOnPoints() {
+
+			return true;
+		}
+
+		@Override public void setSelectionStatus(SelectionType selected) {
+
+			selectionStatus = selected;
+		}
+
+		@Override public SelectionType getSelectionStatus() {
+
+			return selectionStatus;
+		}
+
+		private SplinePoint(Spline2D spline2D, int index) {
 
 			this.spline2D = spline2D;
 			this.index = index;
@@ -507,6 +488,17 @@ public class OutputComponent
 		public int getIndex() {
 
 			return index;
+		}
+
+		@Override public void shift(splines.Point p) {
+
+			splines.Point shiftedPoint = getPoint().addValue(p);
+			spline2D.getSpline().set(index, shiftedPoint);
+		}
+
+		@Override public splines.Point getPoint() {
+
+			return spline2D.getSpline().get(index);
 		}
 	}
 }
