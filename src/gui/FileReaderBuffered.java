@@ -61,4 +61,5 @@ public abstract class FileReaderBuffered {
 
 		return consolePrint;
 	}
+
 }

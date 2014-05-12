@@ -1,8 +1,11 @@
 package gui;
 
+import gui.tools.select.Selectable;
 import splines.Point;
 
 import java.awt.geom.Point2D;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Author: Fabian Fränz <f.fraenz@t-online.de>
@@ -11,7 +14,9 @@ import java.awt.geom.Point2D;
  * Version: 1.0
  * Description: Class that wraps the Point2D.Double class and provides the interface of spline.Point.
  */
-public class DoublePoint extends Point2D.Double implements Point {
+public class DoublePoint extends Point2D.Double implements Point, Selectable {
+
+	SelectionType selectionStatus = SelectionType.UNSELECTED;
 
 	public DoublePoint(double x, double y) {
 		super(x, y);
@@ -45,5 +50,31 @@ public class DoublePoint extends Point2D.Double implements Point {
 
 	@Override public Point createPoint(double x, double y) {
 		return new DoublePoint(x,y);
+	}
+
+	@Override public Point sub(Point p) {
+
+		return new DoublePoint(getX()-p.getX(),getY()-p.getY());
+	}
+
+	@Override public List<Point> getSelectablePoints() {
+
+		List<Point> points = new ArrayList<>();
+		points.add(this);
+		return points;
+	}
+
+	@Override public boolean onlySelectableOnPoints() {
+
+		return true;
+	}
+
+	@Override public void setSelectionStatus(SelectionType selected) {
+		selectionStatus = selected;
+	}
+
+	@Override public SelectionType getSelectionStatus() {
+
+		return selectionStatus;
 	}
 }

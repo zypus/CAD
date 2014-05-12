@@ -1,5 +1,6 @@
-package gui;
+package gui.tools.select;
 
+import gui.SelectionType;
 import splines.Point;
 
 import java.util.List;
@@ -13,9 +14,7 @@ import java.util.List;
  */
 public interface Selectable {
 
-	SelectionType selectionStatus = SelectionType.UNSELECTED;
-
-	List<Point> selectablePoints();
+	List<Point> getSelectablePoints();
 	boolean onlySelectableOnPoints();
 	void setSelectionStatus(SelectionType selected);
 

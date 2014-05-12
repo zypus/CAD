@@ -13,4 +13,6 @@ public interface Point {
 
 	double distance(Point p2);
 
+	Point sub(Point p);
+
 }

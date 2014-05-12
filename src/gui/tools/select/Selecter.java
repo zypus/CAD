@@ -1,9 +1,11 @@
-package gui;
+package gui.tools.select;
 
+import gui.DoublePoint;
+import gui.SelectionType;
+import gui.tools.Tool;
 import splines.Point;
 
 import java.awt.*;
-import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Rectangle2D;
 import java.util.ArrayList;
@@ -17,33 +19,53 @@ import java.util.List;
  * Version: 1.0
  * Description: Class used to select selectable objects.
  */
-public class Selecter<T extends Selectable> extends MouseAdapter implements Drawable {
+public class Selecter extends Tool {
 
-	private List<T> selectableObjects = new ArrayList<>();
-	private List<T> selectedObjects = new ArrayList<>();
+	protected List<Selectable> selectableObjects = new ArrayList<>();
+	protected List<Selectable> selectedObjects = new ArrayList<>();
 	private boolean active;
-	private double selectionSensitivity = 10;
-	private Rectangle2D selectionFrame = null;
+	protected double selectionSensitivity = 10;
+	protected Rectangle2D selectionFrame = null;
 	private Point startPoint = null;
 
-	public void addSelectable(T selectable) {
+	public void addSelectable(Selectable selectable) {
 
 		if (!selectableObjects.contains(selectable)) {
 			selectableObjects.add(selectable);
 		}
 	}
 
-	public void addSelectables(Collection<T> selectables) {
+	public void addSelectables(Collection<Selectable> selectables) {
 
 		selectableObjects.addAll(selectables);
 	}
 
-	public void removeSelectable(T selectable) {
+	public void removeSelectable(Selectable selectable) {
 		selectableObjects.remove(selectable);
 		selectedObjects.remove(selectable);
 	}
 
-	public List<T> getSelectedObjects() {
+	public void setSelectableObjects(List<Selectable> selectableObjects) {
+
+		if (selectableObjects == null) {
+			this.selectableObjects = new ArrayList<>();
+		}
+		else {
+			this.selectableObjects = selectableObjects;
+		}
+	}
+
+	public void clear() {
+		selectableObjects.clear();
+		selectedObjects.clear();
+	}
+
+	public boolean hasSelectedObjects() {
+
+		return !selectedObjects.isEmpty();
+	}
+
+	public List<Selectable> getSelectedObjects() {
 
 		return selectedObjects;
 	}
@@ -61,7 +83,7 @@ public class Selecter<T extends Selectable> extends MouseAdapter implements Draw
 	@Override public void mousePressed(MouseEvent e) {
 
 		super.mousePressed(e);
-		if (active) {
+		if (isHandlingEvents()) {
 			startPoint = new DoublePoint(e.getPoint());
 		}
 	}
@@ -69,13 +91,13 @@ public class Selecter<T extends Selectable> extends MouseAdapter implements Draw
 	@Override public void mouseReleased(MouseEvent e) {
 
 		super.mouseReleased(e);
-		if (active) {
+		if (isHandlingEvents()) {
 			DoublePoint mousePosition = new DoublePoint(e.getPoint());
-			List<T> selection = new ArrayList<>();
+			List<Selectable> selection = new ArrayList<>();
 			if (selectionFrame == null) {
 				for (int i = 0; i < selectableObjects.size() && selection.isEmpty(); i++) {
-					T selectable = selectableObjects.get(i);
-					List<Point> selectablePoints = selectable.selectablePoints();
+					Selectable selectable = selectableObjects.get(i);
+					List<Point> selectablePoints = selectable.getSelectablePoints();
 					for (int j = 0; j < selectablePoints.size() && selection.isEmpty(); j++) {
 						Point point = selectablePoints.get(j);
 						if (selectable.onlySelectableOnPoints()) {
@@ -97,8 +119,8 @@ public class Selecter<T extends Selectable> extends MouseAdapter implements Draw
 					}
 				}
 			} else {
-				for (T selectable : selectableObjects) {
-					List<Point> selectablePoints = selectable.selectablePoints();
+				for (Selectable selectable : selectableObjects) {
+					List<Point> selectablePoints = selectable.getSelectablePoints();
 					boolean included = true;
 					for (int j = 0; j < selectablePoints.size() && included; j++) {
 						Point point = selectablePoints.get(j);
@@ -112,8 +134,8 @@ public class Selecter<T extends Selectable> extends MouseAdapter implements Draw
 				}
 			}
 			boolean shiftSelect = ((e.getModifiers() & MouseEvent.SHIFT_MASK) == MouseEvent.SHIFT_MASK);
-			if (shiftSelect && !selection.isEmpty()) {
-				for (T selected : selection) {
+			if ((shiftSelect || selectionFrame != null) && !selection.isEmpty()) {
+				for (Selectable selected : selection) {
 					SelectionType
 							type =
 							(selected.getSelectionStatus() == SelectionType.UNSELECTED) ?
@@ -128,21 +150,23 @@ public class Selecter<T extends Selectable> extends MouseAdapter implements Draw
 				}
 			} else if (!selection.isEmpty()) {
 				selectedObjects.clear();
-				for (T selected : selection) {
+				for (Selectable selected : selection) {
 					selected.setSelectionStatus(SelectionType.SELECTED);
 					selectedObjects.add(selected);
 				}
 			} else {
 				selectedObjects.clear();
 			}
+			finished();
 		}
+		selectionFrame = null;
 		startPoint = null;
 	}
 
 	@Override public void mouseDragged(MouseEvent e) {
 
 		super.mouseDragged(e);
-		if (active && startPoint != null) {
+		if (isHandlingEvents() && startPoint != null) {
 			double width = e.getPoint().getX()-startPoint.getX();
 			double height = e.getPoint().getY() - startPoint.getY();
 			Point upperLeftPoint = new DoublePoint(startPoint);
@@ -156,23 +180,14 @@ public class Selecter<T extends Selectable> extends MouseAdapter implements Draw
 		}
 	}
 
-	@Override public void mouseEntered(MouseEvent e) {
-
-		super.mouseEntered(e);
-		active = true;
-	}
-
-	@Override public void mouseExited(MouseEvent e) {
-
-		super.mouseExited(e);
-		active = false;
-	}
-
+	@Override
 	public void draw(Graphics2D g2) {
-		if (selectionFrame != null) {
-			g2.setColor(Color.WHITE);
-			g2.setStroke(new BasicStroke(2));
-			g2.draw(selectionFrame);
+		if (shouldDraw()) {
+			if (selectionFrame != null) {
+				g2.setColor(Color.WHITE);
+				g2.setStroke(new BasicStroke(2));
+				g2.draw(selectionFrame);
+			}
 		}
 	}
 

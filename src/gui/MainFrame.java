@@ -27,7 +27,7 @@ public class MainFrame
 
 		JPanel sidePanel = new JPanel();
 		sidePanel.setLayout(new BoxLayout(sidePanel, BoxLayout.Y_AXIS));
-		final JButton paint = new JButton("Draw");
+		final JButton paint = new JButton("Draw "+SplineType.BEZIER.toString());
 		paint.putClientProperty("JComponent.sizeVariant", "large");
 		paint.setBackground(Color.LIGHT_GRAY);
 		paint.setFocusPainted(false);
@@ -44,7 +44,8 @@ public class MainFrame
 			@Override
 			public void actionPerformed(ActionEvent e) {
 
-				outputComponent.setDrawLines(true);
+				SplineType type = outputComponent.setDrawing();
+				paint.setText("Draw "+type.toString());
 				paint.setBackground(Color.BLACK);
 				paint.setForeground(Color.WHITE);
 				select.setBackground(Color.WHITE);
@@ -60,7 +61,7 @@ public class MainFrame
 			@Override
 			public void actionPerformed(ActionEvent e) {
 
-				outputComponent.setDrawLines(false);
+				outputComponent.setSelecting();
 				select.setBackground(Color.BLACK);
 				select.setForeground(Color.WHITE);
 				paint.setBackground(Color.WHITE);

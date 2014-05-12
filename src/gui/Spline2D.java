@@ -1,10 +1,13 @@
 package gui;
 
+import gui.tools.select.Selectable;
 import splines.Point;
 import splines.Spline;
 import splines.SplineObserver;
 
 import java.awt.*;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Author: Fabian Fränz <f.fraenz@t-online.de>
@@ -13,7 +16,7 @@ import java.awt.*;
  * Version: 1.0
  * Description: Class that encapsulates a spline and properties which are used for rendering the spline.
  */
-public class Spline2D implements SplineObserver {
+public class Spline2D implements SplineObserver, Selectable {
 	private Spline spline;
 	private Color color;
 	private double thickness;
@@ -22,10 +25,12 @@ public class Spline2D implements SplineObserver {
 	private int interpolationDensity = 10;
 	private boolean closed = false;
 	private boolean changed = true;
+	SelectionType selectionStatus = SelectionType.UNSELECTED;
 
 	public Spline2D(Spline spline, SplineType type) {
 
 		this.spline = spline;
+		this.spline.addObserver(this);
 		this.type = type;
 	}
 
@@ -74,7 +79,7 @@ public class Spline2D implements SplineObserver {
 
 		if (interpolatedPoints == null || changed) {
 			int totalSteps = (spline.size() - 1) * interpolationDensity;
-			interpolatedPoints.clear();
+			interpolatedPoints = new ArrayList<>();
 			for (int s = 0; s <= totalSteps; s++) {
 				double u = (double) s / (double) interpolationDensity;
 				Point interpolatedPoint = spline.s(u);
@@ -100,5 +105,24 @@ public class Spline2D implements SplineObserver {
 
 	@Override public void observedSplineChanged() {
 		changed = true;
+	}
+
+	@Override public List<Point> getSelectablePoints() {
+
+		return getInterpolatedPoints();
+	}
+
+	@Override public boolean onlySelectableOnPoints() {
+
+		return false;
+	}
+
+	@Override public void setSelectionStatus(SelectionType selected) {
+		selectionStatus = selected;
+	}
+
+	@Override public SelectionType getSelectionStatus() {
+
+		return selectionStatus;
 	}
 }
