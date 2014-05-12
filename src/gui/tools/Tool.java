@@ -18,6 +18,20 @@ public class Tool extends MouseAdapter implements Drawable {
 	private ToolDelegate delegate = null;
 	private boolean draw = true;
 
+	@Override public void mousePressed(MouseEvent e) {
+
+		super.mousePressed(e);
+	}
+
+	protected boolean shouldStart() {
+		return delegate == null || delegate.shouldStart(this);
+	}
+
+	protected boolean shouldFinish() {
+
+		return delegate == null || delegate.shouldFinish(this);
+	}
+
 	public boolean isActive() {
 
 		return active;
@@ -47,7 +61,7 @@ public class Tool extends MouseAdapter implements Drawable {
 
 	public boolean isHandlingEvents() {
 
-		return active && handleEvents && (delegate == null || delegate.shouldStart(this));
+		return active && handleEvents;
 	}
 
 	@Override public void draw(Graphics2D g2) {

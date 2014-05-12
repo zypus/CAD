@@ -1,6 +1,7 @@
 package gui.tools.select;
 
 import gui.DoublePoint;
+import gui.SelectionType;
 import gui.tools.ToolConstants;
 
 import java.awt.*;
@@ -20,7 +21,7 @@ public class PointSelecter extends Selecter {
 	@Override public void mousePressed(MouseEvent e) {
 
 		super.mousePressed(e);
-		if (isHandlingEvents()) {
+		if (isHandlingEvents() && shouldStart()) {
 			DoublePoint mousePosition = new DoublePoint(e.getPoint());
 			java.util.List<Selectable> selection = new ArrayList<>();
 			for (int i = 0; i < selectableObjects.size() && selection.isEmpty(); i++) {
@@ -47,7 +48,11 @@ public class PointSelecter extends Selecter {
 				}
 			}
 			if (!selection.isEmpty()) {
-				selectedObjects.add(selection.get(0));
+				Selectable selectable = selection.get(0);
+				if (selectable.getSelectionStatus().equals(SelectionType.UNSELECTED)) {
+					selectedObjects.clear();
+					selectedObjects.add(selectable);
+				}
 			}
 			finished();
 		}

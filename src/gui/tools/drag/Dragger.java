@@ -39,7 +39,7 @@ public class Dragger extends Tool {
 
 		super.mousePressed(e);
 		dragging = false;
-		if (isHandlingEvents()) {
+		if (isHandlingEvents() && shouldStart()) {
 			DoublePoint mousePosition = new DoublePoint(e.getPoint());
 			for (Draggable draggable : draggables) {
 				if (mousePosition.distance(draggable.getPoint()) < ToolConstants.SELECT_SENSITIVITY) {

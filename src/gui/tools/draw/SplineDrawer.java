@@ -40,7 +40,7 @@ public class SplineDrawer extends Tool {
 	@Override public void mousePressed(MouseEvent e) {
 
 		super.mousePressed(e);
-		if (isHandlingEvents()) {
+		if (isHandlingEvents() && shouldStart()) {
 			if (e.getButton() == MouseEvent.BUTTON1) {
 				Point2D p;
 				boolean show = showIndicator(e);
@@ -89,7 +89,7 @@ public class SplineDrawer extends Tool {
 	@Override public void mouseReleased(MouseEvent e) {
 
 		super.mouseReleased(e);
-		if (isHandlingEvents()) {
+		if (isHandlingEvents() && shouldFinish()) {
 			if (showIndicator(e) && currentSpline != null && currentSpline.getSpline().size() > 1) {
 				currentSpline.setClosed(true);
 				splineIsFinished = true;
@@ -118,7 +118,7 @@ public class SplineDrawer extends Tool {
 
 		super.draw(g2);
 		if (shouldDraw()) {
-			if (splineStartIndicator != null) {
+			if (splineStartIndicator != null && currentSpline != null) {
 				g2.setStroke(ToolConstants.INDICATOR_STROKE);
 				g2.setColor(currentSpline.getColor());
 				g2.draw(splineStartIndicator);
