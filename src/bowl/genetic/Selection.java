@@ -10,17 +10,17 @@ import java.util.List;
  * Description:
  */
 public abstract class Selection {
-	private int amountOfSelected;
+	private double percentage;
 
 	public abstract List<Individual> select(List<Individual> population);
 
-	public int getAmountOfSelected() {
+	public double getPercentage() {
 
-		return amountOfSelected;
+		return percentage;
 	}
 
-	public void setAmountOfSelected(int amountOfSelected) {
+	public void setPercentage(double percentage) {
 
-		this.amountOfSelected = amountOfSelected;
+		this.percentage = percentage;
 	}
 }
