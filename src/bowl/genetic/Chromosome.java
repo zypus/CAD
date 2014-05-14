@@ -1,5 +1,7 @@
 package bowl.genetic;
 
+import java.util.List;
+
 /**
  * Author: Fabian Fränz <f.fraenz@t-online.de>
  * Date: 13/05/14
@@ -34,5 +36,6 @@ public abstract class Chromosome {
 
 	public abstract Gen getGenAtIndex(int index);
 	public abstract void setGenAtIndex(Gen gen, int index);
+	public abstract List<? extends Gen> getGens();
 
 }

@@ -19,7 +19,7 @@ public class SplineRenderer {
 	public static final int HANDLE_ALPHA = 175;
 	private final java.awt.Graphics2D context;
 
-    protected SplineRenderer(Graphics2D context) {
+    public SplineRenderer(Graphics2D context) {
         this.context = context;
     }
 

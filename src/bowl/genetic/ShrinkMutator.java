@@ -2,22 +2,22 @@ package bowl.genetic;
 
 /**
  * Author: Fabian Fränz <f.fraenz@t-online.de>
- * Date: 13/05/14
+ * Date: 14/05/14
  * Project: CAD
  * Version: 1.0
  * Description: TODO Add description.
  */
-public class SinglePointMutator
-		extends Mutator {
+public class ShrinkMutator extends Mutator {
 
-	public SinglePointMutator(double chance) {
+	public ShrinkMutator(double chance) {
 
 		setChangeChance(chance);
 	}
 
 	@Override protected void mutation(Chromosome c) {
 
-		int mutationPoint = random.nextInt(c.size());
-		c.getGenAtIndex(mutationPoint).randomize();
+		if (c.size() > 1) {
+			c.getGens().remove(c.size());
+		}
 	}
 }

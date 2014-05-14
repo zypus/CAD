@@ -11,11 +11,16 @@ import java.util.Random;
  */
 
 public class RandomSingleCrossover
-		implements Crossover {
+		extends Crossover {
 
 	private Random random = new Random(System.currentTimeMillis());
 
-	@Override public Chromosome cross(Chromosome c1, Chromosome c2) {
+	public RandomSingleCrossover(double chance) {
+
+		setChangeChance(chance);
+	}
+
+	@Override public Chromosome crossing(Chromosome c1, Chromosome c2) {
 
 		Chromosome newChromosome = c1.duplicate();
 		int crossoverPoint = random.nextInt(newChromosome.size());
