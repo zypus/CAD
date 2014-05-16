@@ -5,6 +5,8 @@ import gui.Spline2D;
 import gui.SplineRenderer;
 import gui.SplineType;
 import gui.tools.Drawable;
+import splines.*;
+import splines.Point;
 
 import java.awt.*;
 
@@ -38,10 +40,23 @@ public class Bowl
 	@Override public void draw(Graphics2D g2) {
 
 		SplineType type = ((BowlChromosome) getChromosome()).getType();
-		Spline2D spline2d = new Spline2D((splines.Spline) getChromosome().expressGenotype(), type);
+		Spline spline = (splines.Spline) getChromosome().expressGenotype();
+		Spline2D firstHalf = new Spline2D(spline, type);
+		Spline2D secondHalf = new Spline2D(otherHalf(spline), type);
 		SplineRenderer renderer = new SplineRenderer(g2);
 		g2.setStroke(new BasicStroke(2));
 		g2.setColor(Color.WHITE);
-		renderer.renderSplineAtPosition(spline2d.getSpline(),0,0,false);
+		renderer.renderSplineAtPosition(firstHalf.getSpline(),0,0,false);
+		renderer.renderSplineAtPosition(secondHalf.getSpline(),0,0,false);
+	}
+
+	private Spline otherHalf(Spline halfBowl) {
+		Spline otherHalf = type.createInstance();
+		for (int i = halfBowl.size()-1; i >= 0; i--) {
+			Point point = halfBowl.get(i);
+			Point mirroredPoint = point.createPoint(-point.getX(), point.getY());
+			otherHalf.add(mirroredPoint);
+		}
+		return otherHalf;
 	}
 }

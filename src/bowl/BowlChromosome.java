@@ -41,6 +41,7 @@ public class BowlChromosome extends Chromosome {
 
 		Spline spline = type.createInstance();
 		DoublePoint point = new DoublePoint(0, 0);
+		spline.add(point);
 		for (BowlGen gen : gens) {
 			Vector vector = gen.getPhenotype();
 			point = (DoublePoint) point.addValue(new DoublePoint(vector.getX(), vector.getY()));
