@@ -3,8 +3,9 @@ package bowl;
 import bowl.genetic.FitnessEvaluator;
 import bowl.genetic.Individual;
 import gui.Spline2D;
-import splines.*;
 import splines.Point;
+import splines.Spline;
+import splines.SplineProperty;
 
 import java.awt.*;
 
@@ -18,43 +19,77 @@ import java.awt.*;
 public class BowlEvaluator
 		implements FitnessEvaluator {
 
-	@Override public void evalutate(Individual individual) {
-		Spline spline = (Spline)individual.getPhenotype();
+	private SplineProperty nominatorProperty;
+	private SplineProperty denominatorProperty;
+
+	public BowlEvaluator(SplineProperty nominatorProperty, SplineProperty denominatorProperty) {
+
+		this.nominatorProperty = nominatorProperty;
+		this.denominatorProperty = denominatorProperty;
+	}
+
+	@Override public void evaluate(Individual individual) {
+		Spline spline = (Spline) individual.getPhenotype();
 		if (isMonotone(spline)) {
-			double area = new SplineArea().getValue(spline);
-			double length = new SplineLength().getValue(spline);
-			double ratio = area / length;
+			double nominator = Math.abs(nominatorProperty.getValue(spline));
+			double denominator = Math.abs(denominatorProperty.getValue(spline));
+			double ratio = nominator / denominator;
 			Spline2D spline2d = new Spline2D(spline, ((BowlChromosome) individual.getChromosome()).getType());
 			Rectangle.Double boundingBox = spline2d.getBoundingBox();
 			double boundingBoxArea = boundingBox.width * boundingBox.height;
-			individual.setFitness(ratio / boundingBoxArea);
+			if (boundingBoxArea < 50000) {
+				individual.setFitness(ratio);
+				Bowl bowl = (Bowl) individual;
+				bowl.setCustomInfo(
+						nominatorProperty.getName() + ": " + nominator + "\n" + denominatorProperty.getName() + ": " + denominator
+						+ "\nRatio: "
+						+ ratio
+				);
+			} else {
+				individual.setFitness(0);
+				Bowl bowl = (Bowl) individual;
+				bowl.setCustomInfo("To big.");
+			}
 		} else {
 			individual.setFitness(0);
+			Bowl bowl = (Bowl) individual;
+			bowl.setCustomInfo("Not a bowl.");
 		}
 	}
 
 	private boolean isMonotone(Spline spline) {
 
 		double stepsize = 0.05;
+		int midPoint = (spline.size() - 1) / 2;
 		if (spline.size() <= 1) {
 			return true;
 		}
-		Point point1 = spline.s(0);
-		Point point2 = spline.s(stepsize);
-		int sign = (int)Math.signum(point1.getY()-point2.getY());
+		Point point1 = spline.s(midPoint);
+		Point point2 = spline.s(midPoint+stepsize);
+		int sign1 = (int) Math.signum(point1.getY()-point2.getY());
+		int sign2 = (int) Math.signum(point1.getX() - point2.getX());
 		point1 = point2;
-		int iterations = (int)((spline.size() - 1)/stepsize);
+		int iterations = (int)(midPoint/stepsize);
 		for (int i = 2 ; i <= iterations; i++) {
-			double u = i*stepsize;
+			double u = midPoint+i*stepsize;
 			point2 = spline.s(u);
-			int nextSign = (int) Math.signum(point1.getY() - point2.getY());
-			if (nextSign != 0) {
-				if (sign == 0) {
-					sign = nextSign;
-				} else if (sign != nextSign) {
+			int nextSign1 = (int) Math.signum(point1.getY() - point2.getY());
+			if (nextSign1 != 0) {
+				if (sign1 == 0) {
+					sign1 = nextSign1;
+				} else if (sign1 != nextSign1) {
 					return false;
 				}
 			}
+			int nextSign2 = (int) Math.signum(point1.getX() - point2.getX());
+			if (nextSign2 != 0) {
+				if (sign2 == 0) {
+					sign2 = nextSign2;
+				} else if (sign2 != nextSign2) {
+					return false;
+				}
+			}
+			point1 = point2;
 		}
 		return true;
 	}

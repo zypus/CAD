@@ -5,10 +5,11 @@ import gui.Spline2D;
 import gui.SplineRenderer;
 import gui.SplineType;
 import gui.tools.Drawable;
-import splines.*;
 import splines.Point;
+import splines.Spline;
 
 import java.awt.*;
+import java.util.Random;
 
 /**
  * Author: Fabian Fränz <f.fraenz@t-online.de>
@@ -18,13 +19,17 @@ import java.awt.*;
  * Description: TODO Add description.
  */
 public class Bowl
-		extends Individual implements Drawable {
+		extends Individual
+		implements Drawable {
+
+	private static Random random = new Random(System.currentTimeMillis());
 
 	private SplineType type;
+	private String customInfo = "";
 
 	public Bowl(SplineType type) {
 		this.type = type;
-		setChromosome(new BowlChromosome(1, type));
+		setChromosome(new BowlChromosome(random.nextInt(5)+1, type));
 	}
 
 	@Override public Object getPhenotype() {
@@ -37,26 +42,42 @@ public class Bowl
 		return new Bowl(type);
 	}
 
+	@Override public Individual dubplicate() {
+
+		Bowl dublicatedBowl = new Bowl(type);
+		dublicatedBowl.setCustomInfo(customInfo);
+		dublicatedBowl.setChromosome(getChromosome().duplicate());
+		return dublicatedBowl;
+	}
+
 	@Override public void draw(Graphics2D g2) {
 
 		SplineType type = ((BowlChromosome) getChromosome()).getType();
 		Spline spline = (splines.Spline) getChromosome().expressGenotype();
-		Spline2D firstHalf = new Spline2D(spline, type);
-		Spline2D secondHalf = new Spline2D(otherHalf(spline), type);
+		Spline2D bowl = new Spline2D(spline, type);
 		SplineRenderer renderer = new SplineRenderer(g2);
 		g2.setStroke(new BasicStroke(2));
 		g2.setColor(Color.WHITE);
-		renderer.renderSplineAtPosition(firstHalf.getSpline(),0,0,false);
-		renderer.renderSplineAtPosition(secondHalf.getSpline(),0,0,false);
+		Point midPoint = spline.s((spline.size()-1)/2);
+		// render bowl
+		renderer.renderSplineAtPosition(bowl.getSpline(), -midPoint.getX(), -midPoint.getY(), false);
 	}
 
-	private Spline otherHalf(Spline halfBowl) {
-		Spline otherHalf = type.createInstance();
-		for (int i = halfBowl.size()-1; i >= 0; i--) {
-			Point point = halfBowl.get(i);
-			Point mirroredPoint = point.createPoint(-point.getX(), point.getY());
-			otherHalf.add(mirroredPoint);
-		}
-		return otherHalf;
+	public boolean isUpsideDown() {
+
+		Spline spline = (splines.Spline) getChromosome().expressGenotype();
+		Point p1 = spline.get((spline.size()-1)/2);
+		Point p2 = spline.get(spline.size()-1);
+		return p1.getY() > p2.getY();
+	}
+
+	public String getCustomInfo() {
+
+		return customInfo;
+	}
+
+	public void setCustomInfo(String customInfo) {
+
+		this.customInfo = customInfo;
 	}
 }

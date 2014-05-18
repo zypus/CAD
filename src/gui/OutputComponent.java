@@ -1,5 +1,6 @@
 package gui;
 
+import bowl.BowlMaker;
 import gui.tools.Tool;
 import gui.tools.ToolDelegate;
 import gui.tools.drag.Draggable;
@@ -8,13 +9,15 @@ import gui.tools.draw.SplineDrawer;
 import gui.tools.select.PointSelecter;
 import gui.tools.select.Selectable;
 import gui.tools.select.Selecter;
+import gui.tools.select.SelectionObserver;
 import intersection.Point;
 import intersection.Segment;
-import splines.BezierSpline;
 import splines.Spline;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Ellipse2D;
@@ -28,7 +31,7 @@ public class OutputComponent
 		extends JComponent {
 
 	private static final Color[] COLORS = { Color.WHITE, Color.BLUE, Color.MAGENTA, Color.ORANGE, Color.PINK, Color.YELLOW };
-	private static final SplineType[] SPLINE_TYPES = {SplineType.CUBIC, SplineType.B, SplineType.BEZIER};
+	private static final SplineType[] SPLINE_TYPES = {SplineType.CUBIC, SplineType.LINEAR, SplineType.BEZIER};
 	private int splineTypeCounter = 2;
 	private static final int SELECTION_THICKNESS = 4;
 	private static final double SELECT_SENSITIVITY = 10;
@@ -55,8 +58,31 @@ public class OutputComponent
 	private Selecter pointSelecter;
 	private Dragger dragger;
 	private SplineDrawer drawer;
+	private BowlMaker bowlMaker;
+	private Panel3d panel3d;
+	private boolean bowlMakerEnabled = false;
+	private MouseAdapter mouseAdapter;
+	private MouseRotationAdapter mouseRotationAdapter;
 
 	public OutputComponent() {
+
+	}
+
+	public void setup() {
+
+		setOpaque(false);
+
+		panel3d = new Panel3d();
+		mouseRotationAdapter = panel3d.getMouseRotationAdapter();
+		getParent().add(panel3d, new Integer(1), 0);
+		getParent().addComponentListener(new ComponentAdapter() {
+			@Override public void componentResized(ComponentEvent e) {
+
+				super.componentResized(e);
+				panel3d.setBounds(0, 0, e.getComponent().getWidth(), e.getComponent().getHeight());
+			}
+		});
+
 
 		showCoo = new ShowCoordinates(this);
 
@@ -182,22 +208,26 @@ public class OutputComponent
 
 		drawer.activate();
 
-		// test
-		List<DoublePoint> testControlPoints = new ArrayList<>();
-		testControlPoints.add(new DoublePoint(50, 50));
-		testControlPoints.add(new DoublePoint(100, 100));
-		testControlPoints.add(new DoublePoint(50, 100));
-		testControlPoints.add(new DoublePoint(200, 200));
-		Spline testSpline = new BezierSpline();
-		testSpline.addAll(testControlPoints);
-		Spline2D spline2D = new Spline2D(testSpline, SplineType.BEZIER);
-		spline2D.setColor(Color.GREEN);
-		spline2D.setThickness(2);
-		splines.add(spline2D);
-		splineSelecter.addSelectable(spline2D);
-		// end test
+//		// test
+//		List<DoublePoint> testControlPoints = new ArrayList<>();
+//		testControlPoints.add(new DoublePoint(50, 50));
+//		testControlPoints.add(new DoublePoint(100, 100));
+//		testControlPoints.add(new DoublePoint(50, 100));
+//		testControlPoints.add(new DoublePoint(200, 200));
+//		Spline testSpline = new BezierSpline();
+//		testSpline.addAll(testControlPoints);
+//		Spline2D spline2D = new Spline2D(testSpline, SplineType.BEZIER);
+//		spline2D.setColor(Color.GREEN);
+//		spline2D.setThickness(2);
+//		splines.add(spline2D);
+//		splineSelecter.addSelectable(spline2D);
+//		// end test
 
-		MouseAdapter mouseAdapter = new MouseAdapter() {
+		bowlMaker = new BowlMaker(panel3d);
+
+		add(bowlMaker);
+
+		mouseAdapter = new MouseAdapter() {
 
 			public void mousePressed(MouseEvent e) {
 
@@ -296,9 +326,12 @@ public class OutputComponent
 			drawer = newDrawer;
 //		}
 		drawer.activate();
+		splineSelecter.clear();
+		pointSelecter.clear();
 		splineSelecter.deactivate();
 		pointSelecter.deactivate();
 		dragger.deactivate();
+		repaint();
 		return currentSplineType;
 	}
 
@@ -308,6 +341,7 @@ public class OutputComponent
 		splineSelecter.activate();
 		pointSelecter.activate();
 		dragger.activate();
+		repaint();
 	}
 
 	public void clear() {
@@ -319,22 +353,32 @@ public class OutputComponent
 		dragger.setDraggables(null);
 
 		intersections.clear();
-		scroll.removeAll();
 		repaint();
 	}
 
-	public void setScrollPanel(JPanel scroll) {
-
-		this.scroll = scroll;
+	public void toggleBowlMaker(boolean toggle) {
+		if (toggle) {
+			add(bowlMaker);
+			bowlMaker.makeBowl();
+			removeMouseListener(mouseAdapter);
+			addMouseListener(mouseRotationAdapter);
+		} else {
+			remove(bowlMaker);
+			addMouseListener(mouseAdapter);
+			removeMouseListener(mouseRotationAdapter);
+		}
+		repaint();
 	}
 
 	protected void paintComponent(Graphics g) {
 
+		super.paintComponent(g);
+
 		Graphics2D g2d = (Graphics2D) g;
 		SplineRenderer splineRenderer = new SplineRenderer(g2d);
 
-		g2d.setBackground(Color.BLACK);
-		g2d.clearRect(0, 0, getWidth(), getHeight());
+//		g2d.setBackground(new Color(0,0,0,255));
+//		g2d.clearRect(0, 0, getWidth(), getHeight());
 
 		g2d.setStroke(new BasicStroke(2));
 		int shapeCount = 0;
@@ -461,6 +505,11 @@ public class OutputComponent
 		repaint();
 	}
 
+	public void BowlMakerVisualisation(boolean dim) {
+
+		bowlMaker.set3d(dim);
+	}
+
 	private class SplinePoint
 			implements Selectable, Draggable {
 
@@ -516,5 +565,15 @@ public class OutputComponent
 
 			return spline2D.getSpline().get(index);
 		}
+
 	}
+
+	public void addSelectionObserver(SelectionObserver observer) {
+		splineSelecter.attachSelectionObserver(observer);
+	}
+
+	public void removeSelectionObserver(SelectionObserver observer) {
+		splineSelecter.detachSelectionObserver(observer);
+	}
+
 }

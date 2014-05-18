@@ -8,8 +8,7 @@ import splines.Point;
 import java.awt.*;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Rectangle2D;
-import java.util.ArrayList;
-import java.util.Collection;
+import java.util.*;
 import java.util.List;
 
 /**
@@ -27,6 +26,22 @@ public class Selecter extends Tool {
 	protected double selectionSensitivity = 10;
 	protected Rectangle2D selectionFrame = null;
 	private Point startPoint = null;
+	private Set<SelectionObserver> selectionObservers = new HashSet<>();
+
+	public void attachSelectionObserver(SelectionObserver observer) {
+		selectionObservers.add(observer);
+	}
+
+	public void detachSelectionObserver(SelectionObserver observer) {
+
+		selectionObservers.remove(observer);
+	}
+
+	private void notifySelectionObservers() {
+		for (SelectionObserver observer : selectionObservers) {
+			observer.update(getSelectedObjects());
+		}
+	}
 
 	public void addSelectable(Selectable selectable) {
 
@@ -56,8 +71,9 @@ public class Selecter extends Tool {
 	}
 
 	public void clear() {
-		selectableObjects.clear();
+		//selectableObjects.clear();
 		selectedObjects.clear();
+		notifySelectionObservers();
 	}
 
 	public boolean hasSelectedObjects() {
@@ -158,6 +174,7 @@ public class Selecter extends Tool {
 				selectedObjects.clear();
 			}
 			finished();
+			notifySelectionObservers();
 		}
 		selectionFrame = null;
 		startPoint = null;

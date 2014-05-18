@@ -4,9 +4,11 @@ import bowl.genetic.Chromosome;
 import bowl.genetic.Gen;
 import gui.DoublePoint;
 import gui.SplineType;
+import splines.Point;
 import splines.Spline;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -41,12 +43,17 @@ public class BowlChromosome extends Chromosome {
 
 		Spline spline = type.createInstance();
 		DoublePoint point = new DoublePoint(0, 0);
-		spline.add(point);
+		DoublePoint point2 = new DoublePoint(0, 0);
+		LinkedList<Point> phenotype = new LinkedList<>();
+		phenotype.add(point);
 		for (BowlGen gen : gens) {
-			Vector vector = gen.getPhenotype();
+			Vector vector = gen.getGenotype();
 			point = (DoublePoint) point.addValue(new DoublePoint(vector.getX(), vector.getY()));
-			spline.add(point);
+			phenotype.addLast(point);
+			point2 = (DoublePoint) point2.addValue(new DoublePoint(-vector.getX(), vector.getY()));
+			phenotype.addFirst(point2);
 		}
+		spline.addAll(phenotype);
 
 		return spline;
 	}
