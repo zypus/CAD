@@ -18,7 +18,7 @@ public class GrowMutator extends Mutator {
 	@Override protected void mutation(Chromosome c) {
 
 		Gen gen = c.getGens().get(0).duplicate();
-		gen.randomize();
+//		gen.randomize();
 		((List<Gen>)c.getGens()).add(gen);
 	}
 }

@@ -17,7 +17,7 @@ public class ShrinkMutator extends Mutator {
 	@Override protected void mutation(Chromosome c) {
 
 		if (c.size() > 1) {
-			c.getGens().remove(c.size());
+			c.getGens().remove(c.size()-1);
 		}
 	}
 }

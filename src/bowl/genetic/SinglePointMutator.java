@@ -10,9 +10,10 @@ package bowl.genetic;
 public class SinglePointMutator
 		extends Mutator {
 
-	public SinglePointMutator(double chance) {
+	public SinglePointMutator(double chance, int multiplicity) {
 
 		setChangeChance(chance);
+		setMultiplicity(multiplicity);
 	}
 
 	@Override protected void mutation(Chromosome c) {
