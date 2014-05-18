@@ -59,7 +59,7 @@ public class BowlEvaluator
 
 	private boolean isMonotone(Spline spline) {
 
-		double stepsize = 0.05;
+		double stepsize = 0.25;
 		int midPoint = (spline.size() - 1) / 2;
 		if (spline.size() <= 1) {
 			return true;
@@ -73,14 +73,14 @@ public class BowlEvaluator
 		for (int i = 2 ; i <= iterations; i++) {
 			double u = midPoint+i*stepsize;
 			point2 = spline.s(u);
-			int nextSign1 = (int) Math.signum(point1.getY() - point2.getY());
-			if (nextSign1 != 0) {
-				if (sign1 == 0) {
-					sign1 = nextSign1;
-				} else if (sign1 != nextSign1) {
-					return false;
-				}
-			}
+//			int nextSign1 = (int) Math.signum(point1.getY() - point2.getY());
+//			if (nextSign1 != 0) {
+//				if (sign1 == 0) {
+//					sign1 = nextSign1;
+//				} else if (sign1 != nextSign1) {
+//					return false;
+//				}
+//			}
 			int nextSign2 = (int) Math.signum(point1.getX() - point2.getX());
 			if (nextSign2 != 0) {
 				if (sign2 == 0) {

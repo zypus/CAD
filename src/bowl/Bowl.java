@@ -60,7 +60,7 @@ public class Bowl
 		g2.setColor(Color.WHITE);
 		Point midPoint = spline.s((spline.size()-1)/2);
 		// render bowl
-		renderer.renderSplineAtPosition(bowl.getSpline(), -midPoint.getX(), -midPoint.getY(), false);
+		renderer.renderSplineAtPosition(bowl.getSpline(), -midPoint.getX(), 10-midPoint.getY(), false);
 	}
 
 	public boolean isUpsideDown() {

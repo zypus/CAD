@@ -51,7 +51,7 @@ public class BowlFactory {
 		for (int i = 1; i <= iterations; i++) {
 			double u = centralPoint+i*stepSize;
 			// rebase
-			interpolatedPoints.add(spline.s(u).addValue(midPoint.manipulate(-1)).manipulate(0.01));
+			interpolatedPoints.add(spline.s(u).addValue(midPoint.manipulate(-1)).manipulate(0.005));
 		}
 
 		Vector3d midVector = new Vector3d(0, 0, 0);

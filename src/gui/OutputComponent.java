@@ -13,6 +13,10 @@ import gui.tools.select.SelectionObserver;
 import intersection.Point;
 import intersection.Segment;
 import splines.Spline;
+import splines.SplineArea;
+import splines.SplineLength;
+import splines.SplineSolidOfRevolution;
+import splines.SplineSurfaceOfRevolution;
 
 import javax.swing.*;
 import java.awt.*;
@@ -63,6 +67,7 @@ public class OutputComponent
 	private boolean bowlMakerEnabled = false;
 	private MouseAdapter mouseAdapter;
 	private MouseRotationAdapter mouseRotationAdapter;
+	private boolean ratioToggle = false;
 
 	public OutputComponent() {
 
@@ -359,14 +364,20 @@ public class OutputComponent
 	public void toggleBowlMaker(boolean toggle) {
 		if (toggle) {
 			add(bowlMaker);
-			bowlMaker.makeBowl();
+			if (ratioToggle) {
+				bowlMaker.makeBowl(new SplineLength(), new SplineArea());
+			} else {
+				bowlMaker.makeBowl(new SplineSolidOfRevolution(), new SplineSurfaceOfRevolution());
+			}
 			removeMouseListener(mouseAdapter);
 			addMouseListener(mouseRotationAdapter);
 		} else {
 			remove(bowlMaker);
 			addMouseListener(mouseAdapter);
 			removeMouseListener(mouseRotationAdapter);
+			panel3d.drawBowl(null);
 		}
+		bowlMakerEnabled = toggle;
 		repaint();
 	}
 
@@ -380,58 +391,60 @@ public class OutputComponent
 //		g2d.setBackground(new Color(0,0,0,255));
 //		g2d.clearRect(0, 0, getWidth(), getHeight());
 
-		g2d.setStroke(new BasicStroke(2));
-		int shapeCount = 0;
-		for (int i = 0; i < splines.size(); i++) {
-			Spline2D spline2d = splines.get(i);
-			g2d.setPaint(spline2d.getColor());
-			g2d.setStroke(new BasicStroke(DEFAULT_THICKNESS));
-			boolean drawControlPoints = false;
-			if (spline2d == currentSpline) {
-				drawControlPoints = true;
+		if (!bowlMakerEnabled) {
+			g2d.setStroke(new BasicStroke(2));
+			int shapeCount = 0;
+			for (int i = 0; i < splines.size(); i++) {
+				Spline2D spline2d = splines.get(i);
+				g2d.setPaint(spline2d.getColor());
+				g2d.setStroke(new BasicStroke(DEFAULT_THICKNESS));
+				boolean drawControlPoints = false;
+				if (spline2d == currentSpline) {
+					drawControlPoints = true;
+				}
+				splineRenderer.renderSplineAtPosition(spline2d.getSpline(), 0, 0, drawControlPoints);
 			}
-			splineRenderer.renderSplineAtPosition(spline2d.getSpline(), 0, 0, drawControlPoints);
-		}
-		for (int i = 0; i < splineSelecter.getSelectedObjects().size(); i++) {
-				Spline2D spline2d = (Spline2D)splineSelecter.getSelectedObjects().get(i);
+			for (int i = 0; i < splineSelecter.getSelectedObjects().size(); i++) {
+				Spline2D spline2d = (Spline2D) splineSelecter.getSelectedObjects().get(i);
 				g2d.setStroke(new BasicStroke(SELECTION_THICKNESS));
 				g2d.setPaint(spline2d.getColor());
 				splineRenderer.renderSplineAtPosition(spline2d.getSpline(), 0, 0, true);
 				if (showControlPointCoords) {
 					drawCoords(spline2d, g2d);
 				}
-		}
-//		if (shapeCount < ((currentSpline == null) ? scroll.getComponentCount() : scroll.getComponentCount() - 1)) {
-//			if (!((Line2D) shapes.get(s).get(shapes.get(s).size() - 1)).getP2().equals(((Line2D) shapes.get(s).get(0)).getP1())) {
-//				((JLabel) scroll.getComponent(shapeCount)).setText(
-//						"open -> Length: " + (int) PolyChecker.parameter(polygons.get(shapeCount)));
-//			} else {
-//				((JLabel) scroll.getComponent(shapeCount)).setText(
-//						"closed -> Length: " + (int) PolyChecker.parameter(polygons.get(shapeCount)) + " Area: "
-//						+ (int) PolyChecker.area(polygons.get(shapeCount))
-//				);
-//			}
-//
-//		}
-		if (shapeStartIndicator != null) {
-			g2d.draw(shapeStartIndicator);
-		}
-		if (!intersections.isEmpty()) {
-			for (List<Point> inters : intersections) {
-				for (Point inter : inters) {
-					g2d.setPaint(Color.WHITE);
-					g2d.draw(new Ellipse2D.Double(inter.getX() - 4, inter.getY() - 4, 8, 8));
+			}
+			//		if (shapeCount < ((currentSpline == null) ? scroll.getComponentCount() : scroll.getComponentCount() - 1)) {
+			//			if (!((Line2D) shapes.get(s).get(shapes.get(s).size() - 1)).getP2().equals(((Line2D) shapes.get(s).get(0)).getP1())) {
+			//				((JLabel) scroll.getComponent(shapeCount)).setText(
+			//						"open -> Length: " + (int) PolyChecker.parameter(polygons.get(shapeCount)));
+			//			} else {
+			//				((JLabel) scroll.getComponent(shapeCount)).setText(
+			//						"closed -> Length: " + (int) PolyChecker.parameter(polygons.get(shapeCount)) + " Area: "
+			//						+ (int) PolyChecker.area(polygons.get(shapeCount))
+			//				);
+			//			}
+			//
+			//		}
+			if (shapeStartIndicator != null) {
+				g2d.draw(shapeStartIndicator);
+			}
+			if (!intersections.isEmpty()) {
+				for (List<Point> inters : intersections) {
+					for (Point inter : inters) {
+						g2d.setPaint(Color.WHITE);
+						g2d.draw(new Ellipse2D.Double(inter.getX() - 4, inter.getY() - 4, 8, 8));
+					}
 				}
 			}
-		}
-		g2d.setPaint(Color.WHITE);
-		g2d.setFont(font);
-		FontMetrics metric = g2d.getFontMetrics(font);
-		int l = metric.stringWidth(mouseText);
-		g2d.drawString(mouseText, (int) mousePoint.getX(), (int) mousePoint.getY());
+			g2d.setPaint(Color.WHITE);
+			g2d.setFont(font);
+			FontMetrics metric = g2d.getFontMetrics(font);
+			int l = metric.stringWidth(mouseText);
+			g2d.drawString(mouseText, (int) mousePoint.getX(), (int) mousePoint.getY());
 
-		for (Tool tool : tools) {
-			tool.draw(g2d);
+			for (Tool tool : tools) {
+				tool.draw(g2d);
+			}
 		}
 
 	}
@@ -505,9 +518,22 @@ public class OutputComponent
 		repaint();
 	}
 
-	public void BowlMakerVisualisation(boolean dim) {
+	public void bowlMakerVisualisation(boolean dim) {
 
 		bowlMaker.set3d(dim);
+	}
+
+	public boolean isVisualingIn3D() {
+		return bowlMaker.get3d();
+	}
+
+	public void bowlMakerRatio(boolean toggle) {
+
+		ratioToggle = toggle;
+	}
+
+	public boolean getBowlMakerRatio() {
+		return ratioToggle;
 	}
 
 	private class SplinePoint

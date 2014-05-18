@@ -21,6 +21,12 @@ public class ParametrizedSimpleDifference implements ParametrizedDifferentiator 
 	@Override public double differentiate(Function fx, Function fy, double u) {
 
 
-		return (fy.evaluate(u+h/2)-fy.evaluate(u-h/2))/(fx.evaluate(u + h / 2) - fx.evaluate(u - h / 2));
+		double result = (fy.evaluate(u + h / 2) - fy.evaluate(u - h / 2)) / (fx.evaluate(u + h / 2) - fx.evaluate(u - h / 2));
+		if (result < 0) {
+			return Math.max(-100, result);
+		} else {
+			return Math.min(100, result);
+		}
+
 	}
 }

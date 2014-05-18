@@ -67,7 +67,7 @@ public class SplineSurfaceOfRevolution implements SplineProperty {
 
 			@Override public double evaluate(double u) {
 
-				return fy.evaluate(u)*Math.sqrt(1 + Math.pow( differentiator.differentiate(fy,fx,u), 2));
+				return fy.evaluate(u)*Math.sqrt(Math.pow(differentiator.differentiate(fx, fy, u), 2) + Math.pow( differentiator.differentiate(fy,fx,u), 2));
 			}
 		};
 		return 2 * Math.PI * integrator.integrate(integral, fy,(spline.size() - 1) / 2, spline.size() - 1, steps);

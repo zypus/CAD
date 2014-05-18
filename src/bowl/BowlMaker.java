@@ -15,8 +15,7 @@ import bowl.genetic.SinglePointMutator;
 import gui.Panel3d;
 import gui.SplineType;
 import splines.Spline;
-import splines.SplineSolidOfRevolution;
-import splines.SplineSurfaceOfRevolution;
+import splines.SplineProperty;
 
 import javax.swing.JComponent;
 import java.awt.Color;
@@ -59,7 +58,7 @@ public class BowlMaker extends JComponent {
 		return threeD;
 	}
 
-	public void makeBowl() {
+	public void makeBowl(SplineProperty nominator, SplineProperty denominator) {
 
 		List<Crossover> crossovers = new ArrayList<>();
 		crossovers.add(new RandomSingleCrossover(1.0));
@@ -71,7 +70,7 @@ public class BowlMaker extends JComponent {
 
 		Bowl template = new Bowl(type);
 
-		BowlEvaluator evaluator = new BowlEvaluator(new SplineSolidOfRevolution(), new SplineSurfaceOfRevolution());
+		BowlEvaluator evaluator = new BowlEvaluator(nominator, denominator);
 
 		Selection selection = new ElitistSelection(0.1);
 
@@ -136,9 +135,9 @@ public class BowlMaker extends JComponent {
 				}
 			}
 			// render info
-			g2.translate(size.getWidth() / 2 + 10, size.getHeight() / 2);
+			g2.translate(size.getWidth() / 2 +5, size.getHeight() / 2);
 			drawInfo(currentBowl.getCustomInfo(), g2);
-			g2.translate(-size.getWidth() / 2 - 10, -size.getHeight() / 2);
+			g2.translate(-size.getWidth() / 2 - 5, -size.getHeight() / 2);
 		}
 	}
 
