@@ -12,10 +12,15 @@ import java.util.List;
  */
 public class ElitistSelection extends Selection {
 
+	public ElitistSelection(double selectPercentage) {
+
+		setPercentage(selectPercentage);
+	}
+
 	@Override public List<Individual> select(List<Individual> population) {
 
 		List<Individual> selectedIndividuals = new ArrayList<>();
-		for (int i = 0; i < getAmountOfSelected(); i++) {
+		for (int i = 0; i < (int)(population.size()*getPercentage()); i++) {
 			if (i < population.size()) {
 				selectedIndividuals.add(population.get(i));
 			}

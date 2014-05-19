@@ -125,4 +125,26 @@ public class Spline2D implements SplineObserver, Selectable {
 
 		return selectionStatus;
 	}
+
+	public Rectangle.Double getBoundingBox() {
+
+		double minX = 999999;
+		double minY = 999999;
+		double maxX = 0;
+		double maxY = 0;
+		for (int i = 0; i < getInterpolatedPoints().size(); i++) {
+			Point p = getInterpolatedPoints().get(i);
+			if (p.getX() < minX) {
+				minX = p.getX();
+			}if (p.getY() < minY) {
+				minY = p.getY();
+
+			}if (p.getX() > maxX) {
+				maxX = p.getX();
+			}if (p.getY() > maxY) {
+				maxY = p.getY();
+			}
+		}
+		return new Rectangle.Double(minX, minY, maxX - minX, maxY - minY);
+	}
 }

@@ -9,7 +9,7 @@ package bowl.genetic;
  */
 public interface Gen<P> {
 
-	P getPhenotype();
+	P getGenotype();
 	void randomize();
 	Gen<P> duplicate();
 }

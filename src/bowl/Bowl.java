@@ -2,11 +2,14 @@ package bowl;
 
 import bowl.genetic.Individual;
 import gui.Spline2D;
+import gui.SplineRenderer;
 import gui.SplineType;
 import gui.tools.Drawable;
-import gui.tools.draw.SplineDrawer;
+import splines.Point;
+import splines.Spline;
 
 import java.awt.*;
+import java.util.Random;
 
 /**
  * Author: Fabian Fränz <f.fraenz@t-online.de>
@@ -16,7 +19,18 @@ import java.awt.*;
  * Description: TODO Add description.
  */
 public class Bowl
-		extends Individual implements Drawable {
+		extends Individual
+		implements Drawable {
+
+	private static Random random = new Random(System.currentTimeMillis());
+
+	private SplineType type;
+	private String customInfo = "";
+
+	public Bowl(SplineType type) {
+		this.type = type;
+		setChromosome(new BowlChromosome(random.nextInt(5)+1, type));
+	}
 
 	@Override public Object getPhenotype() {
 
@@ -25,13 +39,44 @@ public class Bowl
 
 	@Override public Individual createIndividual() {
 
-		return new Bowl();
+		return new Bowl(type);
+	}
+
+	@Override public Individual dubplicate() {
+
+		Bowl dublicatedBowl = new Bowl(type);
+		dublicatedBowl.setCustomInfo(customInfo);
+		dublicatedBowl.setChromosome(getChromosome().duplicate());
+		return dublicatedBowl;
 	}
 
 	@Override public void draw(Graphics2D g2) {
 
-		SplineType type = ((BowlChromosome) getChromosome()).getType();
-		Spline2D spline2d = new Spline2D((splines.Spline) getChromosome().expressGenotype(), type);
-		SplineDrawer drawer = new SplineDrawer(type);
+		Spline spline = (splines.Spline) getPhenotype();
+		Spline2D bowl = new Spline2D(spline, type);
+		SplineRenderer renderer = new SplineRenderer(g2);
+		g2.setStroke(new BasicStroke(2));
+		g2.setColor(Color.WHITE);
+		Point midPoint = spline.s((spline.size()-1)/2);
+		// render bowl
+		renderer.renderSplineAtPosition(bowl.getSpline(), -midPoint.getX(), 10-midPoint.getY(), false);
+	}
+
+	public boolean isUpsideDown() {
+
+		Spline spline = (splines.Spline) getPhenotype();
+		Point p1 = spline.get((spline.size()-1)/2);
+		Point p2 = spline.get(spline.size()-1);
+		return p1.getY() > p2.getY();
+	}
+
+	public String getCustomInfo() {
+
+		return customInfo;
+	}
+
+	public void setCustomInfo(String customInfo) {
+
+		this.customInfo = customInfo;
 	}
 }

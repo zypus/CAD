@@ -32,6 +32,8 @@ public abstract class Individual {
 		this.chromosome = chromosome;
 	}
 
+	public abstract Individual dubplicate();
+
 	public abstract Object getPhenotype();
 
 	public abstract Individual createIndividual();

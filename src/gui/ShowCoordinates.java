@@ -37,7 +37,7 @@ public class ShowCoordinates
 
 		String msg = "";
 		if ((point1 == null) && (point2 == null)) {
-			msg = "";
+			msg = "( Untracked )";
 		} else {
 			if (point2 != null) {
 				msg += "(" + point2.getX() + ", "

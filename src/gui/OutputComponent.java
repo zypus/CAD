@@ -1,5 +1,6 @@
 package gui;
 
+import bowl.BowlMaker;
 import gui.tools.Tool;
 import gui.tools.ToolDelegate;
 import gui.tools.drag.Draggable;
@@ -8,13 +9,19 @@ import gui.tools.draw.SplineDrawer;
 import gui.tools.select.PointSelecter;
 import gui.tools.select.Selectable;
 import gui.tools.select.Selecter;
+import gui.tools.select.SelectionObserver;
 import intersection.Point;
 import intersection.Segment;
-import splines.BezierSpline;
 import splines.Spline;
+import splines.SplineArea;
+import splines.SplineLength;
+import splines.SplineSolidOfRevolution;
+import splines.SplineSurfaceOfRevolution;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Ellipse2D;
@@ -28,7 +35,7 @@ public class OutputComponent
 		extends JComponent {
 
 	private static final Color[] COLORS = { Color.WHITE, Color.BLUE, Color.MAGENTA, Color.ORANGE, Color.PINK, Color.YELLOW };
-	private static final SplineType[] SPLINE_TYPES = {SplineType.CUBIC, SplineType.B, SplineType.BEZIER};
+	private static final SplineType[] SPLINE_TYPES = {SplineType.CUBIC, SplineType.LINEAR, SplineType.BEZIER};
 	private int splineTypeCounter = 2;
 	private static final int SELECTION_THICKNESS = 4;
 	private static final double SELECT_SENSITIVITY = 10;
@@ -55,8 +62,32 @@ public class OutputComponent
 	private Selecter pointSelecter;
 	private Dragger dragger;
 	private SplineDrawer drawer;
+	private BowlMaker bowlMaker;
+	private Panel3d panel3d;
+	private boolean bowlMakerEnabled = false;
+	private MouseAdapter mouseAdapter;
+	private MouseRotationAdapter mouseRotationAdapter;
+	private boolean ratioToggle = false;
 
 	public OutputComponent() {
+
+	}
+
+	public void setup() {
+
+		setOpaque(false);
+
+		panel3d = new Panel3d();
+		mouseRotationAdapter = panel3d.getMouseRotationAdapter();
+		getParent().add(panel3d, new Integer(1), 0);
+		getParent().addComponentListener(new ComponentAdapter() {
+			@Override public void componentResized(ComponentEvent e) {
+
+				super.componentResized(e);
+				panel3d.setBounds(0, 0, e.getComponent().getWidth(), e.getComponent().getHeight());
+			}
+		});
+
 
 		showCoo = new ShowCoordinates(this);
 
@@ -182,22 +213,26 @@ public class OutputComponent
 
 		drawer.activate();
 
-		// test
-		List<DoublePoint> testControlPoints = new ArrayList<>();
-		testControlPoints.add(new DoublePoint(50, 50));
-		testControlPoints.add(new DoublePoint(100, 100));
-		testControlPoints.add(new DoublePoint(50, 100));
-		testControlPoints.add(new DoublePoint(200, 200));
-		Spline testSpline = new BezierSpline();
-		testSpline.addAll(testControlPoints);
-		Spline2D spline2D = new Spline2D(testSpline, SplineType.BEZIER);
-		spline2D.setColor(Color.GREEN);
-		spline2D.setThickness(2);
-		splines.add(spline2D);
-		splineSelecter.addSelectable(spline2D);
-		// end test
+//		// test
+//		List<DoublePoint> testControlPoints = new ArrayList<>();
+//		testControlPoints.add(new DoublePoint(50, 50));
+//		testControlPoints.add(new DoublePoint(100, 100));
+//		testControlPoints.add(new DoublePoint(50, 100));
+//		testControlPoints.add(new DoublePoint(200, 200));
+//		Spline testSpline = new BezierSpline();
+//		testSpline.addAll(testControlPoints);
+//		Spline2D spline2D = new Spline2D(testSpline, SplineType.BEZIER);
+//		spline2D.setColor(Color.GREEN);
+//		spline2D.setThickness(2);
+//		splines.add(spline2D);
+//		splineSelecter.addSelectable(spline2D);
+//		// end test
 
-		MouseAdapter mouseAdapter = new MouseAdapter() {
+		bowlMaker = new BowlMaker(panel3d);
+
+		add(bowlMaker);
+
+		mouseAdapter = new MouseAdapter() {
 
 			public void mousePressed(MouseEvent e) {
 
@@ -296,9 +331,12 @@ public class OutputComponent
 			drawer = newDrawer;
 //		}
 		drawer.activate();
+		splineSelecter.clear();
+		pointSelecter.clear();
 		splineSelecter.deactivate();
 		pointSelecter.deactivate();
 		dragger.deactivate();
+		repaint();
 		return currentSplineType;
 	}
 
@@ -308,6 +346,7 @@ public class OutputComponent
 		splineSelecter.activate();
 		pointSelecter.activate();
 		dragger.activate();
+		repaint();
 	}
 
 	public void clear() {
@@ -319,75 +358,94 @@ public class OutputComponent
 		dragger.setDraggables(null);
 
 		intersections.clear();
-		scroll.removeAll();
 		repaint();
 	}
 
-	public void setScrollPanel(JPanel scroll) {
-
-		this.scroll = scroll;
+	public void toggleBowlMaker(boolean toggle) {
+		if (toggle) {
+			add(bowlMaker);
+			if (ratioToggle) {
+				bowlMaker.makeBowl(new SplineLength(), new SplineArea());
+			} else {
+				bowlMaker.makeBowl(new SplineSolidOfRevolution(), new SplineSurfaceOfRevolution());
+			}
+			removeMouseListener(mouseAdapter);
+			addMouseListener(mouseRotationAdapter);
+		} else {
+			bowlMaker.stop();
+			remove(bowlMaker);
+			addMouseListener(mouseAdapter);
+			removeMouseListener(mouseRotationAdapter);
+			panel3d.drawBowl(null);
+		}
+		bowlMakerEnabled = toggle;
+		repaint();
 	}
 
 	protected void paintComponent(Graphics g) {
 
+		super.paintComponent(g);
+
 		Graphics2D g2d = (Graphics2D) g;
 		SplineRenderer splineRenderer = new SplineRenderer(g2d);
 
-		g2d.setBackground(Color.BLACK);
-		g2d.clearRect(0, 0, getWidth(), getHeight());
+//		g2d.setBackground(new Color(0,0,0,255));
+//		g2d.clearRect(0, 0, getWidth(), getHeight());
 
-		g2d.setStroke(new BasicStroke(2));
-		int shapeCount = 0;
-		for (int i = 0; i < splines.size(); i++) {
-			Spline2D spline2d = splines.get(i);
-			g2d.setPaint(spline2d.getColor());
-			g2d.setStroke(new BasicStroke(DEFAULT_THICKNESS));
-			boolean drawControlPoints = false;
-			if (spline2d == currentSpline) {
-				drawControlPoints = true;
+		if (!bowlMakerEnabled) {
+			g2d.setStroke(new BasicStroke(2));
+			int shapeCount = 0;
+			for (int i = 0; i < splines.size(); i++) {
+				Spline2D spline2d = splines.get(i);
+				g2d.setPaint(spline2d.getColor());
+				g2d.setStroke(new BasicStroke(DEFAULT_THICKNESS));
+				boolean drawControlPoints = false;
+				if (spline2d == currentSpline) {
+					drawControlPoints = true;
+				}
+				splineRenderer.renderSplineAtPosition(spline2d.getSpline(), 0, 0, drawControlPoints);
 			}
-			splineRenderer.renderSplineAtPosition(spline2d.getSpline(), 0, 0, drawControlPoints);
-		}
-		for (int i = 0; i < splineSelecter.getSelectedObjects().size(); i++) {
-				Spline2D spline2d = (Spline2D)splineSelecter.getSelectedObjects().get(i);
+			for (int i = 0; i < splineSelecter.getSelectedObjects().size(); i++) {
+				Spline2D spline2d = (Spline2D) splineSelecter.getSelectedObjects().get(i);
 				g2d.setStroke(new BasicStroke(SELECTION_THICKNESS));
 				g2d.setPaint(spline2d.getColor());
 				splineRenderer.renderSplineAtPosition(spline2d.getSpline(), 0, 0, true);
 				if (showControlPointCoords) {
 					drawCoords(spline2d, g2d);
 				}
-		}
-//		if (shapeCount < ((currentSpline == null) ? scroll.getComponentCount() : scroll.getComponentCount() - 1)) {
-//			if (!((Line2D) shapes.get(s).get(shapes.get(s).size() - 1)).getP2().equals(((Line2D) shapes.get(s).get(0)).getP1())) {
-//				((JLabel) scroll.getComponent(shapeCount)).setText(
-//						"open -> Length: " + (int) PolyChecker.parameter(polygons.get(shapeCount)));
-//			} else {
-//				((JLabel) scroll.getComponent(shapeCount)).setText(
-//						"closed -> Length: " + (int) PolyChecker.parameter(polygons.get(shapeCount)) + " Area: "
-//						+ (int) PolyChecker.area(polygons.get(shapeCount))
-//				);
-//			}
-//
-//		}
-		if (shapeStartIndicator != null) {
-			g2d.draw(shapeStartIndicator);
-		}
-		if (!intersections.isEmpty()) {
-			for (List<Point> inters : intersections) {
-				for (Point inter : inters) {
-					g2d.setPaint(Color.WHITE);
-					g2d.draw(new Ellipse2D.Double(inter.getX() - 4, inter.getY() - 4, 8, 8));
+			}
+			//		if (shapeCount < ((currentSpline == null) ? scroll.getComponentCount() : scroll.getComponentCount() - 1)) {
+			//			if (!((Line2D) shapes.get(s).get(shapes.get(s).size() - 1)).getP2().equals(((Line2D) shapes.get(s).get(0)).getP1())) {
+			//				((JLabel) scroll.getComponent(shapeCount)).setText(
+			//						"open -> Length: " + (int) PolyChecker.parameter(polygons.get(shapeCount)));
+			//			} else {
+			//				((JLabel) scroll.getComponent(shapeCount)).setText(
+			//						"closed -> Length: " + (int) PolyChecker.parameter(polygons.get(shapeCount)) + " Area: "
+			//						+ (int) PolyChecker.area(polygons.get(shapeCount))
+			//				);
+			//			}
+			//
+			//		}
+			if (shapeStartIndicator != null) {
+				g2d.draw(shapeStartIndicator);
+			}
+			if (!intersections.isEmpty()) {
+				for (List<Point> inters : intersections) {
+					for (Point inter : inters) {
+						g2d.setPaint(Color.WHITE);
+						g2d.draw(new Ellipse2D.Double(inter.getX() - 4, inter.getY() - 4, 8, 8));
+					}
 				}
 			}
-		}
-		g2d.setPaint(Color.WHITE);
-		g2d.setFont(font);
-		FontMetrics metric = g2d.getFontMetrics(font);
-		int l = metric.stringWidth(mouseText);
-		g2d.drawString(mouseText, (int) mousePoint.getX(), (int) mousePoint.getY());
+			g2d.setPaint(Color.WHITE);
+			g2d.setFont(font);
+			FontMetrics metric = g2d.getFontMetrics(font);
+			int l = metric.stringWidth(mouseText);
+			g2d.drawString(mouseText, (int) mousePoint.getX(), (int) mousePoint.getY());
 
-		for (Tool tool : tools) {
-			tool.draw(g2d);
+			for (Tool tool : tools) {
+				tool.draw(g2d);
+			}
 		}
 
 	}
@@ -461,6 +519,24 @@ public class OutputComponent
 		repaint();
 	}
 
+	public void bowlMakerVisualisation(boolean dim) {
+
+		bowlMaker.set3d(dim);
+	}
+
+	public boolean isVisualingIn3D() {
+		return bowlMaker.get3d();
+	}
+
+	public void bowlMakerRatio(boolean toggle) {
+
+		ratioToggle = toggle;
+	}
+
+	public boolean getBowlMakerRatio() {
+		return ratioToggle;
+	}
+
 	private class SplinePoint
 			implements Selectable, Draggable {
 
@@ -516,5 +592,15 @@ public class OutputComponent
 
 			return spline2D.getSpline().get(index);
 		}
+
 	}
+
+	public void addSelectionObserver(SelectionObserver observer) {
+		splineSelecter.attachSelectionObserver(observer);
+	}
+
+	public void removeSelectionObserver(SelectionObserver observer) {
+		splineSelecter.detachSelectionObserver(observer);
+	}
+
 }

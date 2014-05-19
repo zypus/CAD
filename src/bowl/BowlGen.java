@@ -15,29 +15,29 @@ public class BowlGen implements Gen<Vector> {
 
 	private static Random random = new Random(System.currentTimeMillis());
 
-	private Vector phenotype;
+	private Vector genotype;
 
 	public  BowlGen() {
 
 	}
 
-	public BowlGen(Vector phenotype) {
-		this.phenotype = phenotype;
+	public BowlGen(Vector genotype) {
+		this.genotype = genotype;
 	}
 
-	@Override public Vector getPhenotype() {
+	@Override public Vector getGenotype() {
 
-		return phenotype;
+		return genotype;
 	}
 
 	@Override public Gen<Vector> duplicate() {
 
-		Vector duplicatedPhenotype = new Vector(phenotype.getX(), phenotype.getY());
-		return new BowlGen(duplicatedPhenotype);
+		Vector duplicatedGenotype = new Vector(genotype.getX(), genotype.getY());
+		return new BowlGen(duplicatedGenotype);
 	}
 
 	@Override public void randomize() {
 
-		phenotype = new Vector(random.nextDouble() * 10.0, random.nextDouble() * 10.0);
+		genotype = new Vector(random.nextDouble() * 200.0 - 100, random.nextDouble() * 200.0 - 100);
 	}
 }
