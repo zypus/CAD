@@ -52,8 +52,7 @@ public class Bowl
 
 	@Override public void draw(Graphics2D g2) {
 
-		SplineType type = ((BowlChromosome) getChromosome()).getType();
-		Spline spline = (splines.Spline) getChromosome().expressGenotype();
+		Spline spline = (splines.Spline) getPhenotype();
 		Spline2D bowl = new Spline2D(spline, type);
 		SplineRenderer renderer = new SplineRenderer(g2);
 		g2.setStroke(new BasicStroke(2));
@@ -65,7 +64,7 @@ public class Bowl
 
 	public boolean isUpsideDown() {
 
-		Spline spline = (splines.Spline) getChromosome().expressGenotype();
+		Spline spline = (splines.Spline) getPhenotype();
 		Point p1 = spline.get((spline.size()-1)/2);
 		Point p2 = spline.get(spline.size()-1);
 		return p1.getY() > p2.getY();

@@ -21,7 +21,7 @@ public class SplineFunctionX
 
 	@Override public double evaluate(double u) {
 
-		return spline.s(u).getY();
+		return spline.s(u).getX();
 	}
 
 	@Override public boolean isBounded() {

@@ -53,8 +53,8 @@ public class BowlChromosome extends Chromosome {
 			point2 = (DoublePoint) point2.addValue(new DoublePoint(-vector.getX(), vector.getY()));
 			phenotype.addFirst(point2);
 		}
-		phenotype.addLast(new DoublePoint(phenotype.getLast().getX(), 100));
-		phenotype.addFirst(new DoublePoint(phenotype.getFirst().getX(), 100));
+//		phenotype.addLast(new DoublePoint(phenotype.getLast().getX(), 100));
+//		phenotype.addFirst(new DoublePoint(phenotype.getFirst().getX(), 100));
 		spline.addAll(phenotype);
 
 		return spline;

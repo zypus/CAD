@@ -372,6 +372,7 @@ public class OutputComponent
 			removeMouseListener(mouseAdapter);
 			addMouseListener(mouseRotationAdapter);
 		} else {
+			bowlMaker.stop();
 			remove(bowlMaker);
 			addMouseListener(mouseAdapter);
 			removeMouseListener(mouseRotationAdapter);

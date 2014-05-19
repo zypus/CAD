@@ -1,11 +1,11 @@
 package splines;
 
+import gui.DoublePoint;
 import util.Function;
-import util.differentiation.*;
-import util.integration.Integrator;
+import util.differentiation.ParametrizedDifferentiator;
+import util.differentiation.ParametrizedSimpleDifference;
 import util.integration.ParametrizedIntegrator;
 import util.integration.ParametrizedSimpsonsRule;
-import util.integration.SimpsonsRule;
 
 /**
  * Author: Fabian Fränz <f.fraenz@t-online.de>
@@ -18,48 +18,20 @@ public class SplineSurfaceOfRevolution implements SplineProperty {
 
 	public static void main(String[] args) {
 
-		final Function f = new Function() {
-			double r = 5;
+		Spline spline = new BezierSpline();
+		spline.add(new DoublePoint(-100, 100));
+		spline.add(new DoublePoint(0, 0));
+		spline.add(new DoublePoint(100, 100));
 
-			@Override public double evaluate(double y) {
-
-				return Math.sqrt(Math.pow(r, 2) - Math.pow(y, 2));
-			}
-
-			@Override public boolean isBounded() {
-
-				return true;
-			}
-
-			@Override public double leftBound() {
-
-				return -5;
-			}
-
-			@Override public double rightBound() {
-
-				return 5;
-			}
-		};
-		int steps = 50;
-		Integrator integrator = new SimpsonsRule();
-		Function integral = new Function() {
-
-			Differentiator diff = new PointDifference(0.1);
-
-			@Override public double evaluate(double y) {
-
-				return f.evaluate(y) * Math.sqrt(1 + Math.pow(diff.differentiate(f, y), 2));
-			}
-		};
-		System.out.println(2 * Math.PI * integrator.integrate(integral, -5, 5, steps));
+		System.out.println(new SplineSurfaceOfRevolution().getValue(spline));
+		System.out.println(Math.PI*100*Math.sqrt(Math.pow(50, 2)+ Math.pow(100, 2)));
 	}
 
 	@Override public double getValue(Spline spline) {
 
 		int steps = spline.size()*20;
-		final SplineFunctionY fy = new SplineFunctionY(spline);
 		final SplineFunctionX fx = new SplineFunctionX(spline);
+		final SplineFunctionY fy = new SplineFunctionY(spline);
 		ParametrizedIntegrator integrator = new ParametrizedSimpsonsRule();
 		Function integral = new Function() {
 
@@ -67,10 +39,10 @@ public class SplineSurfaceOfRevolution implements SplineProperty {
 
 			@Override public double evaluate(double u) {
 
-				return fy.evaluate(u)*Math.sqrt(Math.pow(differentiator.differentiate(fx, fy, u), 2) + Math.pow( differentiator.differentiate(fy,fx,u), 2));
+				return fx.evaluate(u)*Math.sqrt(Math.pow(differentiator.differentiate(fx, fy, u), 2) + Math.pow( differentiator.differentiate(fy,fx,u), 2));
 			}
 		};
-		return 2 * Math.PI * integrator.integrate(integral, fy,(spline.size() - 1) / 2, spline.size() - 1, steps);
+		return 2 * Math.PI * integrator.integrate(integral, fy,(spline.size() - 1) / 2.0, spline.size() - 1, steps);
 	}
 
 	@Override public String getName() {

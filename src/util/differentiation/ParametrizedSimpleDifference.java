@@ -20,8 +20,18 @@ public class ParametrizedSimpleDifference implements ParametrizedDifferentiator 
 
 	@Override public double differentiate(Function fx, Function fy, double u) {
 
-
-		double result = (fy.evaluate(u + h / 2) - fy.evaluate(u - h / 2)) / (fx.evaluate(u + h / 2) - fx.evaluate(u - h / 2));
+		double result;
+		if (fx.isBounded() && u - h / 2 < fx.leftBound()) {
+			result = (fy.evaluate(u + h) - fy.evaluate(u)) / (fx.evaluate(u + h) - fx.evaluate(u));
+		}
+		// five-point backward difference
+		else if (fx.isBounded() && u + h / 2 > fx.rightBound()) {
+			result = (fy.evaluate(u) - fy.evaluate(u - h)) / (fx.evaluate(u) - fx.evaluate(u - h));
+		}
+		// five-point centered difference
+		else {
+			result = (fy.evaluate(u + h / 2) - fy.evaluate(u - h / 2)) / (fx.evaluate(u + h / 2) - fx.evaluate(u - h / 2));
+		}
 		if (result < 0) {
 			return Math.max(-100, result);
 		} else {

@@ -74,7 +74,7 @@ public class EvolutionChamber {
 
 		// create next generation
 		while (population.size() < populationSize) {
-			Chromosome offspringChromosome = selected.get(random.nextInt(selected.size())).getChromosome();
+			Chromosome offspringChromosome = selected.get(random.nextInt(selected.size())).getChromosome().duplicate();
 			for (Crossover crossover : crossovers) {
 				offspringChromosome = offspringChromosome.crossover(crossover,
 																	selected.get(random.nextInt(selected.size())).getChromosome());

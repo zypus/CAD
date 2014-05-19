@@ -20,7 +20,7 @@ public class SplineFunctionY extends Function {
 
 	@Override public double evaluate(double u) {
 
-		return spline.s(u).getX();
+		return spline.s(u).getY();
 	}
 
 	@Override public boolean isBounded() {
