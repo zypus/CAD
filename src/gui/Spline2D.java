@@ -126,7 +126,7 @@ public class Spline2D implements SplineObserver, Selectable {
 		return selectionStatus;
 	}
 
-	public Rectangle.Double getBoundingBox() {
+	@Override public Rectangle.Double getBoundingBox() {
 
 		double minX = 999999;
 		double minY = 999999;

@@ -3,6 +3,7 @@ package gui.tools.select;
 import gui.SelectionType;
 import splines.Point;
 
+import java.awt.Rectangle;
 import java.util.List;
 
 /**
@@ -17,6 +18,7 @@ public interface Selectable {
 	List<Point> getSelectablePoints();
 	boolean onlySelectableOnPoints();
 	void setSelectionStatus(SelectionType selected);
+	Rectangle.Double getBoundingBox();
 
 	SelectionType getSelectionStatus();
 }

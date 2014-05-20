@@ -27,7 +27,7 @@ public class BowlHillClimber implements BowlCreator {
 	private Spline currentBestSpline = null;
 	private double num;
 	private double den;
-	private double currentRatio = -1;
+	private double currentRatio;
 	private int temperature = 30;
 	protected SplineType type;
 
@@ -38,14 +38,17 @@ public class BowlHillClimber implements BowlCreator {
 		this.numerator = numerator;
 		this.denominator = denominator;
 		this.type = type;
-		currentBestSpline = type.createInstance();
-		currentBestSpline.add(new DoublePoint(0, 0));
-		currentBestSpline.add(new DoublePoint(random.nextInt(200), random.nextInt(200)));
-		currentBestSpline.add(new DoublePoint(random.nextInt(200), random.nextInt(200)));
-//		currentBestSpline.add(new DoublePoint(random.nextInt(200), random.nextInt(200)));
-		num = numerator.getValue(currentBestSpline);
-		den = denominator.getValue(currentBestSpline);
-		currentRatio = num / den * ((isMonotone(currentBestSpline)) ? 1 : 0);
+		currentRatio = 0;
+		while (currentRatio == 0 ) {
+			currentBestSpline = type.createInstance();
+			currentBestSpline.add(new DoublePoint(0, 0));
+			currentBestSpline.add(new DoublePoint(random.nextInt(200), random.nextInt(200)));
+			currentBestSpline.add(new DoublePoint(random.nextInt(200), random.nextInt(200)));
+			//		currentBestSpline.add(new DoublePoint(random.nextInt(200), random.nextInt(200)));
+			num = numerator.getValue(currentBestSpline);
+			den = denominator.getValue(currentBestSpline);
+			currentRatio = num / den * ((isMonotone(currentBestSpline)) ? 1 : 0);
+		}
 	}
 
 	public boolean advance() {
@@ -56,26 +59,23 @@ public class BowlHillClimber implements BowlCreator {
 		for (int i = 1; i < currentBestSpline.size() && !climbed; i++) {
 			Point point = currentBestSpline.get(i);
 			for (int x = -1; x <= 1 && !climbed; x++) {
-				for (int tx = 1; tx < temperature && !climbed && (x != 0 || tx == 1); tx++) {
-					for (int y = -1; y <= 1 && !climbed; y++) {
-						for (int ty = 1; ty < temperature && !climbed && (y != 0 || ty == 1); ty++) {
-							testedSpline.set(i, new DoublePoint(point.getX() + x * INCREMENT * tx, point.getY() * y * INCREMENT * ty));
-							Spline2D spline2d = new Spline2D(testedSpline, type);
-							Rectangle.Double rectangle = spline2d.getBoundingBox();
-							if (rectangle.width < 300 && rectangle.height < 300) {
-								double tempNum = numerator.getValue(testedSpline);
-								double tempDen = denominator.getValue(testedSpline);
-								double
-										newRatio =
-										tempNum / tempDen * ((isMonotone(testedSpline)) ? 1 : 0);
-								if (newRatio != 0 && newRatio > currentRatio) {
-									currentRatio = newRatio;
-									num = tempNum;
-									den = tempDen;
-									currentBestSpline = testedSpline;
-									climbed = true;
-								}
-							}
+				for (int y = -1; y <= 1 && !climbed; y++) {
+					testedSpline.set(i, new DoublePoint(point.getX() + x * INCREMENT * temperature, point.getY() * y * INCREMENT * temperature));
+					Spline completedSpline = makeSplineComplete(testedSpline);
+					Spline2D spline2d = new Spline2D(completedSpline, type);
+					Rectangle.Double rectangle = spline2d.getBoundingBox();
+					if (rectangle.width < 300 && rectangle.height < 300) {
+						double tempNum = numerator.getValue(completedSpline);
+						double tempDen = denominator.getValue(completedSpline);
+						double
+								newRatio =
+								tempNum / tempDen * ((isMonotone(completedSpline)) ? 1 : 0);
+						if (newRatio != 0 && newRatio > currentRatio) {
+							currentRatio = newRatio;
+							num = tempNum;
+							den = tempDen;
+							currentBestSpline = testedSpline;
+							climbed = true;
 						}
 					}
 				}
@@ -88,8 +88,8 @@ public class BowlHillClimber implements BowlCreator {
 
 	protected boolean isMonotone(Spline spline) {
 
-		double stepsize = 0.1;
-		int midPoint = 0;
+		double stepsize = 0.25;
+		int midPoint = (spline.size()-1)/2;
 		if (spline.size() <= 1) {
 			return true;
 		}
@@ -123,16 +123,21 @@ public class BowlHillClimber implements BowlCreator {
 		return true;
 	}
 
-	public Spline getCurrentBestSpline() {
+	private Spline makeSplineComplete(Spline s) {
 
 		Spline spline = type.createInstance();
-		for (int i = currentBestSpline.size() - 1; i > 0; i--) {
-			Point point = currentBestSpline.get(i);
+		for (int i = s.size() - 1; i > 0; i--) {
+			Point point = s.get(i);
 			spline.add(new DoublePoint(-point.getX(), point.getY()));
 		}
-		spline.addAll(currentBestSpline);
+		spline.addAll(s);
 
 		return spline;
+	}
+
+	public Spline getCurrentBestSpline() {
+
+		return makeSplineComplete(currentBestSpline);
 	}
 
 	@Override public List<Bowl> getResult() {
@@ -140,12 +145,17 @@ public class BowlHillClimber implements BowlCreator {
 		List<Bowl> bowls = new ArrayList<>();
 		HillBowl bowl = new HillBowl(type, getCurrentBestSpline());
 		bowl.setCustomInfo(
-				numerator.getName() + ": " + (int)(num/100) + "\n" + denominator.getName() + ": " + (int)(den/100)
+				numerator.getName() + ": " + (int)(num*100)/100.0 + "\n" + denominator.getName() + ": " + (int)(den*100)/100.0
 				+ "\nRatio: "
-				+ currentRatio
+				+ (int)(currentRatio*100)/100.0
 		);
 		bowls.add(bowl);
 		return bowls;
+	}
+
+	@Override public String getInfo() {
+
+		return "";
 	}
 
 	public class HillBowl extends Bowl {

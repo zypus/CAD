@@ -3,6 +3,7 @@ package gui;
 import gui.tools.select.Selectable;
 import splines.Point;
 
+import java.awt.Rectangle;
 import java.awt.geom.Point2D;
 import java.util.ArrayList;
 import java.util.List;
@@ -71,6 +72,11 @@ public class DoublePoint extends Point2D.Double implements Point, Selectable {
 
 	@Override public void setSelectionStatus(SelectionType selected) {
 		selectionStatus = selected;
+	}
+
+	@Override public Rectangle.Double getBoundingBox() {
+
+		return null;
 	}
 
 	@Override public SelectionType getSelectionStatus() {

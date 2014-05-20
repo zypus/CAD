@@ -144,6 +144,10 @@ public class Selecter extends Tool {
 							included = false;
 						}
 					}
+					Rectangle.Double boundingBox = selectable.getBoundingBox();
+					if (boundingBox != null && !included && selectionFrame.contains(boundingBox)) {
+						included = true;
+					}
 					if (included) {
 						selection.add(selectable);
 					}

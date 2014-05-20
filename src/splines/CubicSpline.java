@@ -56,7 +56,6 @@ public class CubicSpline
 			return get(0).createPoint(xVal + get(i).getX(), yVal);
 		}
 
-		setCoefficients();
 		double t = s[i] + fract * (s[i + 1] - s[i]);
 
 		double yVal = yCoeff[i][0] * Math.pow(t, 3) + yCoeff[i][1] * Math.pow(t, 2) + yCoeff[i][2] * (t) + yCoeff[i][3];
@@ -66,9 +65,12 @@ public class CubicSpline
 	}
 
 	@Override
-	protected void sizeChanged() {
+	protected void changed() {
 
 		n = size();
+		if (n > 2) {
+			setCoefficients();
+		}
 	}
 
 	private boolean isClosed() {

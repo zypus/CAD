@@ -89,7 +89,7 @@ public abstract class Spline implements List<Point> {
 		}
 	}
 
-	protected void sizeChanged() {
+	protected void changed() {
 
 	}
 
@@ -129,7 +129,7 @@ public abstract class Spline implements List<Point> {
     public boolean add(Point point) {
 		boolean add = controlPoints.add(point);
 		updateInterval(point);
-		sizeChanged();
+		changed();
 		notifyObservers();
 		return add;
     }
@@ -139,7 +139,7 @@ public abstract class Spline implements List<Point> {
 
 		boolean remove = controlPoints.remove(o);
 		computeInterval();
-		sizeChanged();
+		changed();
 		notifyObservers();
 		return remove;
     }
@@ -154,7 +154,7 @@ public abstract class Spline implements List<Point> {
 
 		boolean all = controlPoints.addAll(c);
 		computeInterval();
-		sizeChanged();
+		changed();
 		notifyObservers();
 		return all;
     }
@@ -164,7 +164,7 @@ public abstract class Spline implements List<Point> {
 
 		boolean all = controlPoints.addAll(index, c);
 		computeInterval();
-		sizeChanged();
+		changed();
 		notifyObservers();
 		return all;
     }
@@ -174,7 +174,7 @@ public abstract class Spline implements List<Point> {
 
 		boolean removeAll = controlPoints.removeAll(c);
 		computeInterval();
-		sizeChanged();
+		changed();
 		notifyObservers();
 		return removeAll;
     }
@@ -188,7 +188,7 @@ public abstract class Spline implements List<Point> {
     public void clear() {
         controlPoints.clear();
 		computeInterval();
-		sizeChanged();
+		changed();
 		notifyObservers();
     }
 
@@ -201,6 +201,7 @@ public abstract class Spline implements List<Point> {
     public Point set(int index, Point element) {
 
 		Point set = controlPoints.set(index, element);
+		changed();
 		computeInterval();
 		notifyObservers();
 		return set;
@@ -210,7 +211,7 @@ public abstract class Spline implements List<Point> {
     public void add(int index, Point element) {
         controlPoints.add(index, element);
 		updateInterval(element);
-		sizeChanged();
+		changed();
 		notifyObservers();
     }
 
@@ -219,7 +220,7 @@ public abstract class Spline implements List<Point> {
 
 		Point remove = controlPoints.remove(index);
 		computeInterval();
-		sizeChanged();
+		changed();
 		notifyObservers();
 		return remove;
     }

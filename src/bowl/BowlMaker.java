@@ -42,10 +42,12 @@ public class BowlMaker extends JComponent {
 	private List<? extends Individual> result;
 
 	private boolean threeD = false;
+	private boolean geneticHill = false;
 	private Panel3d panel;
-	private SplineType type = SplineType.BEZIER;
+	private SplineType type = SplineType.CUBIC;
 
 	private Thread creationThread;
+
 
 	public BowlMaker(Panel3d panel) {
 
@@ -60,18 +62,28 @@ public class BowlMaker extends JComponent {
 		return threeD;
 	}
 
+	public boolean isGeneticHill() {
+
+		return geneticHill;
+	}
+
+	public void setGeneticHill(boolean geneticHill) {
+
+		this.geneticHill = geneticHill;
+	}
+
 	public void makeBowl(SplineProperty numerator, SplineProperty denominator) {
 
-		BowlHillClimber climber = new BowlHillClimber();
+		BowlHillClimber climber = new RandomBowlHillClimber();
 
 
 		List<Crossover> crossovers = new ArrayList<>();
 		crossovers.add(new RandomSingleCrossover(1.0));
 
 		List<Mutator> mutators = new ArrayList<>();
-		mutators.add(new SinglePointMutator(0.2, 3));
-		mutators.add(new ShrinkMutator(0.1));
-		mutators.add(new GrowMutator(0.2));
+		mutators.add(new SinglePointMutator(0.1, 5));
+		mutators.add(new ShrinkMutator(0.05));
+		mutators.add(new GrowMutator(0.05));
 
 		Bowl template = new Bowl(type);
 
@@ -95,16 +107,21 @@ public class BowlMaker extends JComponent {
 			@Override public boolean advance() {
 
 				evolutionChamber.advanceEvolution();
-				return generationCounter++ < 20;
+				return generationCounter++ < 1000;
 			}
 
 			@Override public List<Individual> getResult() {
 
 				return evolutionChamber.getEvolutionResult();
 			}
+
+			@Override public String getInfo() {
+
+				return "Generation: "+(generationCounter-1)+"\n";
+			}
 		};
 
-		final BowlCreator creator = genetic;
+		final BowlCreator creator = (geneticHill) ? genetic : climber;
 		creator.setup(numerator, denominator, type);
 
 		creationThread = new Thread(new Runnable() {
@@ -114,38 +131,24 @@ public class BowlMaker extends JComponent {
 				boolean advance = creator.advance();
 				result = creator.getResult();
 				currentBowl = (Bowl) result.get(0);
+				info = creator.getInfo();
 				repaint();
 				while (advance && !Thread.currentThread().isInterrupted()) {
 					advance = creator.advance();
 					result = creator.getResult();
+					info = creator.getInfo();
+//					for (Object o : result) {
+//						currentBowl = (Bowl) o;
+//						repaint();
+//											try {
+//												Thread.sleep(10);
+//											} catch (InterruptedException e) {
+//												e.printStackTrace();
+//											}
+//					}
 					currentBowl = (Bowl)result.get(0);
 					repaint();
-//					try {
-//						Thread.sleep(50);
-//					} catch (InterruptedException e) {
-//						e.printStackTrace();
-//					}
 				}
-//				for (int i = 0; i < 20; i++) {
-//					currentGeneration = i;
-//					evolutionChamber.advanceEvolution();
-//					result = evolutionChamber.getEvolutionResult();
-//					for (int j = 0; j < result.size(); j++) {
-//						currentBowl = (Bowl) result.get(j);
-//						info = "Generation: "+i+"\n";
-//						info += "Suspect: "+(j+1)+" / "+result.size()+"\n";
-//						repaint();
-//						try {
-//							Thread.sleep(50);
-//						} catch (InterruptedException e) {
-//							e.printStackTrace();
-//						}
-//					}
-//				}
-				currentBowl = (Bowl) result.get(0);
-				info = "Generation: " + currentGeneration + "\n";
-				info += "Suspect: Best individual\n";
-				repaint();
 			}
 		});
 		creationThread.start();
