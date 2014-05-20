@@ -22,7 +22,7 @@ public abstract class Chromosome {
 
 		Chromosome crossedChromosome = this;
 		for (int i = 0; i < chromosomes.length; i++) {
-			Chromosome chromosome = chromosomes[i];
+			Chromosome chromosome = chromosomes[i].duplicate();
 			crossedChromosome = crossover.cross(crossedChromosome, chromosome);
 		}
 		return crossedChromosome;

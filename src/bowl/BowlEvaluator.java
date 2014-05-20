@@ -36,14 +36,13 @@ public class BowlEvaluator
 			double ratio = nominator / denominator;
 			Spline2D spline2d = new Spline2D(spline, ((BowlChromosome) individual.getChromosome()).getType());
 			Rectangle.Double boundingBox = spline2d.getBoundingBox();
-			double boundingBoxArea = boundingBox.width * boundingBox.height;
-			if (boundingBoxArea < 50000) {
+			if (boundingBox.width < 300 && boundingBox.height < 300) {
 				individual.setFitness(ratio);
 				Bowl bowl = (Bowl) individual;
 				bowl.setCustomInfo(
-						nominatorProperty.getName() + ": " + nominator + "\n" + denominatorProperty.getName() + ": " + denominator
+						nominatorProperty.getName() + ": " + (int)(nominator*100)/100.0 + "\n" + denominatorProperty.getName() + ": " + (int)(denominator*100)/100.0
 						+ "\nRatio: "
-						+ ratio
+						+ (int)(ratio*100)/100.0
 				);
 			} else {
 				individual.setFitness(0);

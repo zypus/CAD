@@ -4,9 +4,17 @@ import gui.tools.select.Selectable;
 import gui.tools.select.SelectionObserver;
 import splines.SplineArea;
 import splines.SplineLength;
+import splines.SplineObserver;
 
-import javax.swing.*;
-import java.awt.*;
+import javax.swing.JComponent;
+import java.awt.BasicStroke;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.FontMetrics;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.Rectangle;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -19,13 +27,20 @@ import java.util.List;
  */
 public class InfoPanel
 		extends JComponent
-		implements SelectionObserver {
+		implements SelectionObserver, SplineObserver {
 
+	Spline2D currentlyDrawnSpline = null;
 	List<Spline2D> splines = new ArrayList<>();
 
 	@SuppressWarnings("unchecked") @Override public void update(List<? extends Selectable> selectables) {
 
+		for (Spline2D spline : splines) {
+			spline.getSpline().removeObserver(this);
+		}
 		splines = (List<Spline2D>) selectables;
+		for (Spline2D spline : splines) {
+			spline.getSpline().addObserver(this);
+		}
 		getParent().repaint();
 	}
 
@@ -42,7 +57,14 @@ public class InfoPanel
 		Graphics2D g2 = (Graphics2D) g;
 
 		int offset = 0;
-		for (Spline2D spline2d : splines) {
+		for (int i = (currentlyDrawnSpline != null) ?-1: 0; i < splines.size(); i++) {
+			Spline2D spline2d;
+			if (i == -1) {
+				spline2d = currentlyDrawnSpline;
+			}
+			else {
+				spline2d = splines.get(i);
+			}
 			g2.setStroke(new BasicStroke(2));
 			g2.setColor(spline2d.getColor());
 			g2.fill(new Rectangle.Double(0, offset, 200, 50));
@@ -69,5 +91,27 @@ public class InfoPanel
 			}
 			offset += 52;
 		}
+	}
+
+	public Spline2D getCurrentlyDrawnSpline() {
+
+		return currentlyDrawnSpline;
+	}
+
+	public void setCurrentlyDrawnSpline(Spline2D currentlyDrawnSpline) {
+
+		if (currentlyDrawnSpline == null) {
+			if (this.currentlyDrawnSpline != null) {
+				this.currentlyDrawnSpline.getSpline().removeObserver(this);
+			}
+			this.currentlyDrawnSpline = null;
+		} else {
+			this.currentlyDrawnSpline = currentlyDrawnSpline;
+			currentlyDrawnSpline.getSpline().addObserver(this);
+		}
+	}
+
+	@Override public void observedSplineChanged() {
+		repaint();
 	}
 }

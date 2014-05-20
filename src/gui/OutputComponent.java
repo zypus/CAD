@@ -18,8 +18,17 @@ import splines.SplineLength;
 import splines.SplineSolidOfRevolution;
 import splines.SplineSurfaceOfRevolution;
 
-import javax.swing.*;
-import java.awt.*;
+import javax.swing.JComponent;
+import javax.swing.JPanel;
+import java.awt.BasicStroke;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.FontMetrics;
+import java.awt.Graphics;
+import java.awt.Graphics2D;
+import java.awt.Rectangle;
+import java.awt.Shape;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.event.MouseAdapter;
@@ -137,7 +146,7 @@ public class OutputComponent
 			@Override public void didFinish(Tool tool) {
 				Selecter selecter = (Selecter) tool;
 				List<Selectable> selectedObjects = selecter.getSelectedObjects();
-				pointSelecter.clear();
+				pointSelecter.setSelectableObjects(null);
 				for (Selectable selectable : selectedObjects) {
 					List<Selectable> selectablePoints = new ArrayList<>();
 					Spline2D spline2d = (Spline2D) selectable;
@@ -354,7 +363,9 @@ public class OutputComponent
 		drawer.finish();
 		splines.clear();
 		splineSelecter.clear();
+		splineSelecter.setSelectableObjects(null);
 		pointSelecter.clear();
+		pointSelecter.setSelectableObjects(null);
 		dragger.setDraggables(null);
 
 		intersections.clear();
@@ -537,6 +548,10 @@ public class OutputComponent
 		return ratioToggle;
 	}
 
+	public void toggleBowlGeneticHill(boolean toggle) {
+		bowlMaker.setGeneticHill(toggle);
+	}
+
 	private class SplinePoint
 			implements Selectable, Draggable {
 
@@ -559,6 +574,11 @@ public class OutputComponent
 		@Override public void setSelectionStatus(SelectionType selected) {
 
 			selectionStatus = selected;
+		}
+
+		@Override public Rectangle.Double getBoundingBox() {
+
+			return null;
 		}
 
 		@Override public SelectionType getSelectionStatus() {

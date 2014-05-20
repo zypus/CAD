@@ -20,4 +20,6 @@ public interface BowlCreator {
 
 	List<? extends Individual> getResult();
 
+	String getInfo();
+
 }

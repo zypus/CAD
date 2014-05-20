@@ -154,6 +154,23 @@ public class MainFrame
 			}
 		});
 
+		final JButton goh = new JButton("Using hill climber");
+		goh.putClientProperty("JComponent.sizeVariant", "small");
+		goh.setBackground(Color.LIGHT_GRAY);
+		goh.setFocusPainted(false);
+		goh.addActionListener(new ActionListener() {
+
+			boolean toggle = false;
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+
+				toggle = !toggle;
+				outputComponent.toggleBowlGeneticHill(toggle);
+				goh.setText((toggle) ? "Using genetic" : "Using hill climber");
+			}
+		});
+
 		final JButton rat = new JButton("Optimize Volume/Surface");
 		rat.putClientProperty("JComponent.sizeVariant", "small");
 		rat.setBackground(Color.LIGHT_GRAY);
@@ -201,6 +218,8 @@ public class MainFrame
 		panelBox.add(bowl);
 		panelBox.add(verticalStrut);
 		panelBox.add(dim);
+		panelBox.add(verticalStrut);
+		panelBox.add(goh);
 		panelBox.add(verticalStrut);
 		panelBox.add(rat);
 		panelBox.add(verticalStrut);

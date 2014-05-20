@@ -1,6 +1,7 @@
 package bowl;
 
 import gui.SplineType;
+import splines.Point;
 import splines.Spline;
 import splines.SplineProperty;
 
@@ -17,7 +18,7 @@ import java.util.List;
 public class RandomBowlHillClimber extends BowlHillClimber {
 
 	private Spline bestSpline;
-	private final int MAX_TRIES = 100;
+	private final int MAX_TRIES = 1000;
 	private int trial = 0;
 
 	@Override public void setup(SplineProperty numerator, SplineProperty denominator, SplineType type) {
@@ -58,11 +59,53 @@ public class RandomBowlHillClimber extends BowlHillClimber {
 		double den = denominator.getValue(bestSpline);
 		double ratio = num/den * ((isMonotone(bestSpline)) ? 1 : 0);
 		bowl.setCustomInfo(
-				numerator.getName() + ": " + (int)(num/100) + "\n" + denominator.getName() + ": " + (int)(den/100)
+				numerator.getName() + ": " + (int)(num*100)/100.0 + "\n" + denominator.getName() + ": " + (int)(den*100)/100.0
 				+ "\nRatio: "
 				+ (int)(ratio*100)/100.0
 		);
 		bowls.add(bowl);
 		return bowls;
+	}
+
+	@Override public String getInfo() {
+
+		return "Try: "+trial+" / "+MAX_TRIES+"\n";
+	}
+
+	@Override protected boolean isMonotone(Spline spline) {
+
+		double stepsize = 0.25;
+		int midPoint = (spline.size()-1)/2;
+		if (spline.size() <= 1) {
+			return true;
+		}
+		Point point1 = spline.s(midPoint);
+		Point point2 = spline.s(midPoint + stepsize);
+		int sign1 = (int) Math.signum(point1.getY() - point2.getY());
+		int sign2 = (int) Math.signum(point1.getX() - point2.getX());
+		point1 = point2;
+		int iterations = (int) (midPoint / stepsize);
+		for (int i = 2; i <= iterations; i++) {
+			double u = midPoint + i * stepsize;
+			point2 = spline.s(u);
+			int nextSign1 = (int) Math.signum(point1.getY() - point2.getY());
+			if (nextSign1 != 0) {
+				if (sign1 == 0) {
+					sign1 = nextSign1;
+				} else if (sign1 != nextSign1) {
+					return false;
+				}
+			}
+			int nextSign2 = (int) Math.signum(point1.getX() - point2.getX());
+			if (nextSign2 != 0) {
+				if (sign2 == 0) {
+					sign2 = nextSign2;
+				} else if (sign2 != nextSign2) {
+					return false;
+				}
+			}
+			point1 = point2;
+		}
+		return true;
 	}
 }
