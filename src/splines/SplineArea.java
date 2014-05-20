@@ -2,6 +2,7 @@ package splines;
 
 import java.awt.Rectangle;
 import java.util.ArrayList;
+import splines.CubicSpline;
 
 import util.integration.ParametrizedTrapezoidRule;
 import gui.Spline2D;
@@ -17,12 +18,28 @@ public class SplineArea implements SplineProperty {
 		this.spline = spline;
 
 		ArrayList<Double> reflexU = getIntervals();
-		double length = 0;
+		double area = 0;
 		for(int i = 0;i<reflexU.size()-1;i++){
-			length += areaOfInterval(reflexU.get(i),reflexU.get(i+1));
+			area += areaOfInterval(reflexU.get(i),reflexU.get(i+1));
 			System.out.println("this is an interval ");
 		}
-		return Math.abs(length);
+		
+		if(spline instanceof CubicSpline){
+			CubicSpline c = (CubicSpline)spline;
+			if(c.isClosed()){
+				area = 0;
+				for(int i=0;i<reflexU.size()-1;i++){
+					if(i%2==0){
+						area += areaOfInterval(reflexU.get(i),reflexU.get(i+1));
+					}
+					else
+						area -= areaOfInterval(reflexU.get(i),reflexU.get(i+1));
+				}
+				area-=areaOfInterval(reflexU.get(reflexU.size()-1),reflexU.get(0));
+			}
+		}
+		
+		return Math.abs(area);
 	}
 	
 	private double areaOfInterval(double uMin, double uMax){
@@ -58,7 +75,7 @@ public class SplineArea implements SplineProperty {
 		double xGap = spline.s(0).getX() + spline.s(increment).getX();
 		Point p = spline.s(increment);
 		
-		reflexPoints.add(0.0);
+		reflexPoints.add(0.0);				
 		for (double i = 2*increment;i< length; i += increment){
 			Point q = spline.s(i);
 			double newGap = q.getX() - p.getX();
@@ -66,10 +83,20 @@ public class SplineArea implements SplineProperty {
 			if (!sameSign(xGap, newGap)){
 				reflexPoints.add(i-increment);
 			}
+			
 			xGap = newGap;
 			p = q;			
 		}
 		reflexPoints.add((double)spline.size()-1);
+		
+		if(spline instanceof CubicSpline){
+			CubicSpline c = (CubicSpline) spline;
+			if (c.isClosed()){
+				reflexPoints.remove(0);
+				reflexPoints.remove(reflexPoints.size()-1);
+			}
+		}
+		System.out.println(reflexPoints);
 
 		return reflexPoints;
 	}
