@@ -20,7 +20,7 @@ public abstract class Chromosome {
 	}
 	public Chromosome crossover(Crossover crossover, Chromosome ... chromosomes) {
 
-		Chromosome crossedChromosome = this;
+		Chromosome crossedChromosome = this.duplicate();
 		for (int i = 0; i < chromosomes.length; i++) {
 			Chromosome chromosome = chromosomes[i].duplicate();
 			crossedChromosome = crossover.cross(crossedChromosome, chromosome);

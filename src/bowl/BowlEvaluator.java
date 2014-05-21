@@ -36,7 +36,7 @@ public class BowlEvaluator
 			double ratio = nominator / denominator;
 			Spline2D spline2d = new Spline2D(spline, ((BowlChromosome) individual.getChromosome()).getType());
 			Rectangle.Double boundingBox = spline2d.getBoundingBox();
-			if (boundingBox.width < 300 && boundingBox.height < 300) {
+			if (boundingBox.width < 300 && boundingBox.height < 300 && ratio < 100 && ratio >= 0) {
 				individual.setFitness(ratio);
 				Bowl bowl = (Bowl) individual;
 				bowl.setCustomInfo(
@@ -87,6 +87,9 @@ public class BowlEvaluator
 				} else if (sign2 != nextSign2) {
 					return false;
 				}
+			}
+			if (point1.getX() == point2.getX() && point1.getY() == point2.getY()) {
+				return false;
 			}
 			point1 = point2;
 		}

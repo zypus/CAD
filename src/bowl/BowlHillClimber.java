@@ -39,15 +39,20 @@ public class BowlHillClimber implements BowlCreator {
 		this.denominator = denominator;
 		this.type = type;
 		currentRatio = 0;
-		while (currentRatio == 0 ) {
+		Rectangle.Double rectangle = new Rectangle.Double();
+		while (currentRatio == 0 || rectangle.width > 300 || rectangle.height > 300) {
 			currentBestSpline = type.createInstance();
 			currentBestSpline.add(new DoublePoint(0, 0));
-			currentBestSpline.add(new DoublePoint(random.nextInt(200), random.nextInt(200)));
-			currentBestSpline.add(new DoublePoint(random.nextInt(200), random.nextInt(200)));
+			currentBestSpline.add(new DoublePoint(random.nextInt(150), random.nextInt(300)));
+			currentBestSpline.add(new DoublePoint(random.nextInt(150), random.nextInt(300)));
 			//		currentBestSpline.add(new DoublePoint(random.nextInt(200), random.nextInt(200)));
 			num = numerator.getValue(currentBestSpline);
 			den = denominator.getValue(currentBestSpline);
 			currentRatio = num / den * ((isMonotone(currentBestSpline)) ? 1 : 0);
+			Spline completedSpline = makeSplineComplete(currentBestSpline);
+			Spline2D spline2d = new Spline2D(completedSpline, type);
+			rectangle = spline2d.getBoundingBox();
+			currentRatio /= rectangle.width*rectangle.height/1000;
 		}
 	}
 
@@ -70,7 +75,9 @@ public class BowlHillClimber implements BowlCreator {
 						double
 								newRatio =
 								tempNum / tempDen * ((isMonotone(completedSpline)) ? 1 : 0);
+						newRatio /= rectangle.width * rectangle.height / 1000;
 						if (newRatio != 0 && newRatio > currentRatio) {
+							System.out.println("rectangle = " + rectangle);
 							currentRatio = newRatio;
 							num = tempNum;
 							den = tempDen;
@@ -81,9 +88,11 @@ public class BowlHillClimber implements BowlCreator {
 				}
 			}
 		}
-		temperature--;
+		if (temperature > 1) {
+			temperature--;
+		}
 
-		return climbed;
+		return temperature > 1 || climbed;
 	}
 
 	protected boolean isMonotone(Spline spline) {

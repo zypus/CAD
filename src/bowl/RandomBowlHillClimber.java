@@ -1,10 +1,12 @@
 package bowl;
 
+import gui.Spline2D;
 import gui.SplineType;
 import splines.Point;
 import splines.Spline;
 import splines.SplineProperty;
 
+import java.awt.Rectangle;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -32,12 +34,18 @@ public class RandomBowlHillClimber extends BowlHillClimber {
 		boolean advance = super.advance();
 
 		Spline spline = super.getCurrentBestSpline();
+		Spline2D spline2d = new Spline2D(spline, type);
+		Rectangle.Double rectangle = spline2d.getBoundingBox();
+		Spline2D spline2d2 = new Spline2D(bestSpline, type);
+		Rectangle.Double rectangle2 = spline2d2.getBoundingBox();
 		double num = numerator.getValue(bestSpline);
 		double den = denominator.getValue(bestSpline);
 		double ratio = num / den * ((isMonotone(bestSpline)) ? 1 : 0);
+		ratio /= rectangle2.width * rectangle2.height / 1000;
 		double num1 = numerator.getValue(spline);
 		double den2 = denominator.getValue(spline);
 		double ratio2 = num1 / den2 * ((isMonotone(spline)) ? 1 : 0);
+		ratio2 /= rectangle.width * rectangle.height / 1000;
 
 		if (ratio2 > ratio) {
 			bestSpline = spline;
@@ -58,6 +66,9 @@ public class RandomBowlHillClimber extends BowlHillClimber {
 		double num = numerator.getValue(bestSpline);
 		double den = denominator.getValue(bestSpline);
 		double ratio = num/den * ((isMonotone(bestSpline)) ? 1 : 0);
+		Spline2D spline2d = new Spline2D(bestSpline, type);
+		Rectangle.Double rectangle = spline2d.getBoundingBox();
+		ratio /= rectangle.width * rectangle.height / 1000;
 		bowl.setCustomInfo(
 				numerator.getName() + ": " + (int)(num*100)/100.0 + "\n" + denominator.getName() + ": " + (int)(den*100)/100.0
 				+ "\nRatio: "

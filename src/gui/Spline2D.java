@@ -81,7 +81,7 @@ public class Spline2D implements SplineObserver, Selectable {
 			int totalSteps = (spline.size() - 1) * interpolationDensity;
 			interpolatedPoints = new ArrayList<>();
 			for (int s = 0; s <= totalSteps; s++) {
-				double u = (double) s / (double) interpolationDensity;
+				double u = (double) s / (double) totalSteps * (spline.size()-1);
 				Point interpolatedPoint = spline.s(u);
 				interpolatedPoints.add(interpolatedPoint);
 			}
@@ -130,8 +130,8 @@ public class Spline2D implements SplineObserver, Selectable {
 
 		double minX = 999999;
 		double minY = 999999;
-		double maxX = 0;
-		double maxY = 0;
+		double maxX = -999999;
+		double maxY = -999999;
 		for (int i = 0; i < getInterpolatedPoints().size(); i++) {
 			Point p = getInterpolatedPoints().get(i);
 			if (p.getX() < minX) {

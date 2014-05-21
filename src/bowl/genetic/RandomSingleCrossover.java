@@ -22,13 +22,18 @@ public class RandomSingleCrossover
 
 	@Override public Chromosome crossing(Chromosome c1, Chromosome c2) {
 
+//		System.out.println("c1 = " + c1.size());
+//		System.out.println("c2 = " + c2.size());
 		Chromosome newChromosome = c1.duplicate();
+		assert newChromosome != c1;
 		int crossoverPoint = random.nextInt(Math.min(c1.size(), c2.size()));
 		for (int i = crossoverPoint; i < newChromosome.size(); i++) {
 			if (i < c2.size()) {
-				newChromosome.setGenAtIndex(c2.getGenAtIndex(i), i);
+				newChromosome.setGenAtIndex(c2.getGenAtIndex(i).duplicate(), i);
 			}
 		}
+		assert c1.size() == newChromosome.size();
+//		System.out.println("newChromosome = " + newChromosome.size());
 		return newChromosome;
 	}
 }

@@ -81,7 +81,7 @@ public class BowlMaker extends JComponent {
 		crossovers.add(new RandomSingleCrossover(1.0));
 
 		List<Mutator> mutators = new ArrayList<>();
-		mutators.add(new SinglePointMutator(0.1, 5));
+		mutators.add(new SinglePointMutator(0.2, 3));
 		mutators.add(new ShrinkMutator(0.05));
 		mutators.add(new GrowMutator(0.05));
 

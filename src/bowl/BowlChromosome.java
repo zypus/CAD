@@ -48,9 +48,11 @@ public class BowlChromosome extends Chromosome {
 		phenotype.add(point);
 		for (BowlGen gen : gens) {
 			Vector vector = gen.getGenotype();
-			point = (DoublePoint) point.addValue(new DoublePoint(vector.getX(), vector.getY()));
+//			point = (DoublePoint) point.addValue(new DoublePoint(vector.getX(), vector.getY()));
+			point = new DoublePoint(vector.getX(), vector.getY());
 			phenotype.addLast(point);
-			point2 = (DoublePoint) point2.addValue(new DoublePoint(-vector.getX(), vector.getY()));
+//			point2 = (DoublePoint) point2.addValue(new DoublePoint(-vector.getX(), vector.getY()));
+			point2 = new DoublePoint(-vector.getX(), vector.getY());
 			phenotype.addFirst(point2);
 		}
 //		phenotype.addLast(new DoublePoint(phenotype.getLast().getX(), 100));

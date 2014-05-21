@@ -60,25 +60,27 @@ public class EvolutionChamber {
 		List<Individual> selected = selection.select(population);
 		population.clear();
 		population.addAll(selected);
-		for (int i = 0; i < population.size(); i++) {
-			Individual individual = population.get(i);
-			for (Filter filter : filters) {
-				boolean keep = filter.keep(individual);
-				if (!keep) {
-					population.remove(i);
-					i--;
-					break;
-				}
-			}
-		}
+//		for (int i = 0; i < population.size(); i++) {
+//			Individual individual = population.get(i);
+//			for (Filter filter : filters) {
+//				boolean keep = filter.keep(individual);
+//				if (!keep) {
+//					population.remove(i);
+//					i--;
+//					break;
+//				}
+//			}
+//		}
 
 		// create next generation
 		while (population.size() < populationSize) {
-			Chromosome offspringChromosome = selected.get(random.nextInt(selected.size())).getChromosome().duplicate();
+			Chromosome offspringChromosome = selected.get(random.nextInt(selected.size())).getChromosome();
+//			System.out.println("offspringChromosome before = " + offspringChromosome.size());
 			for (Crossover crossover : crossovers) {
 				offspringChromosome = offspringChromosome.crossover(crossover,
 																	selected.get(random.nextInt(selected.size())).getChromosome());
 			}
+//			System.out.println("offspringChromosome after = " + offspringChromosome.size());
 			offspringChromosome.mutate(mutators.toArray(new Mutator[1]));
 			Individual offspring = individualTemplate.createIndividual();
 			offspring.setChromosome(offspringChromosome);

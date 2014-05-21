@@ -19,6 +19,8 @@ public class SinglePointMutator
 	@Override protected void mutation(Chromosome c) {
 
 		int mutationPoint = random.nextInt(c.size());
-		c.getGenAtIndex(mutationPoint).randomize();
+		Gen newGen = c.getGenAtIndex(mutationPoint).duplicate();
+		newGen.randomize();
+		c.setGenAtIndex(newGen, mutationPoint);
 	}
 }
