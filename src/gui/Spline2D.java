@@ -25,6 +25,18 @@ public class Spline2D implements SplineObserver, Selectable {
 	private int interpolationDensity = 10;
 	private boolean closed = false;
 	private boolean changed = true;
+	private boolean filled = false;
+
+	public boolean isFilled() {
+
+		return filled;
+	}
+
+	public void setFilled(boolean filled) {
+
+		this.filled = filled;
+	}
+
 	SelectionType selectionStatus = SelectionType.UNSELECTED;
 
 	public Spline2D(Spline spline, SplineType type) {
@@ -146,5 +158,17 @@ public class Spline2D implements SplineObserver, Selectable {
 			}
 		}
 		return new Rectangle.Double(minX, minY, maxX - minX, maxY - minY);
+	}
+
+	public void switchToType(SplineType splineType) {
+		Spline spline1 = splineType.createInstance();
+		spline1.addAll(spline);
+		List<SplineObserver> observers = spline.getObservers();
+		for (SplineObserver observer : observers) {
+			spline1.addObserver(observer);
+		}
+		spline = spline1;
+		type = splineType;
+		changed = true;
 	}
 }

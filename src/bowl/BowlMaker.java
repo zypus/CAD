@@ -4,13 +4,11 @@ import bowl.genetic.Crossover;
 import bowl.genetic.ElitistSelection;
 import bowl.genetic.EvolutionChamber;
 import bowl.genetic.Filter;
-import bowl.genetic.GrowMutator;
 import bowl.genetic.Individual;
 import bowl.genetic.LowFitnessFilter;
 import bowl.genetic.Mutator;
 import bowl.genetic.RandomSingleCrossover;
 import bowl.genetic.Selection;
-import bowl.genetic.ShrinkMutator;
 import bowl.genetic.SinglePointMutator;
 import gui.Panel3d;
 import gui.SplineType;
@@ -82,8 +80,8 @@ public class BowlMaker extends JComponent {
 
 		List<Mutator> mutators = new ArrayList<>();
 		mutators.add(new SinglePointMutator(0.2, 3));
-		mutators.add(new ShrinkMutator(0.05));
-		mutators.add(new GrowMutator(0.05));
+//		mutators.add(new ShrinkMutator(0.05));
+//		mutators.add(new GrowMutator(0.05));
 
 		Bowl template = new Bowl(type);
 
@@ -107,7 +105,7 @@ public class BowlMaker extends JComponent {
 			@Override public boolean advance() {
 
 				evolutionChamber.advanceEvolution();
-				return generationCounter++ < 1000;
+				return generationCounter++ < 600;
 			}
 
 			@Override public List<Individual> getResult() {

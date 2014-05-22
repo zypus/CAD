@@ -20,22 +20,22 @@ public class SplineSolidOfRevolution implements SplineProperty {
 
 
 		Spline spline = new LinearSpline();
-		spline.add(new DoublePoint(-100, 100));
+		spline.add(new DoublePoint(-50, 100));
 		spline.add(new DoublePoint(0, 0));
-		spline.add(new DoublePoint(100, 100));
+		spline.add(new DoublePoint(50, 100));
 
 		System.out.println("Linear");
 		System.out.println("Result: "+new SplineSolidOfRevolution().getValue(spline));
-		System.out.println("Actual: "+1.0 / 3.0 * Math.PI * 100 * Math.pow(100, 2));
+		System.out.println("Actual: "+1.0 / 3.0 * Math.PI * 100 * Math.pow(50, 2));
 
-		Spline spline2 = new BezierSpline();
+		Spline spline2 = new CubicSpline();
 		spline2.add(new DoublePoint(-100, 100));
 		spline2.add(new DoublePoint(0, 0));
 		spline2.add(new DoublePoint(100, 100));
 
 		System.out.println("Bezier");
 		System.out.println("Result: "+new SplineSolidOfRevolution().getValue(spline2));
-		System.out.println("Actual: "+1.0 / 3.0 * Math.PI * 50 * Math.pow(100, 2));
+		System.out.println("Actual: "+1.0 / 3.0 * Math.PI * 100 * Math.pow(100, 2));
 	}
 
 	@Override public double getValue(Spline spline) {
@@ -53,7 +53,7 @@ public class SplineSolidOfRevolution implements SplineProperty {
 				return Math.pow(fx.evaluate(u), 2)*differentiator.differentiate(fx,fy,u);
 			}
 		};
-		return Math.PI * integrator.integrate(integral, fy, (spline.size()-1) / 2.0, spline.size()-1, steps);
+		return Math.PI * integrator.integrate(integral, fy, (spline.size()-1) / 2.0, spline.size()-1, steps) / 2;
 	}
 
 	@Override public String getName() {

@@ -4,6 +4,7 @@ import gui.Spline2D;
 import gui.SplineType;
 import splines.Point;
 import splines.Spline;
+import splines.SplineArea;
 import splines.SplineProperty;
 
 import java.awt.Rectangle;
@@ -36,16 +37,18 @@ public class RandomBowlHillClimber extends BowlHillClimber {
 		Spline spline = super.getCurrentBestSpline();
 		Spline2D spline2d = new Spline2D(spline, type);
 		Rectangle.Double rectangle = spline2d.getBoundingBox();
+		double area1 = rectangle.width*rectangle.height;
 		Spline2D spline2d2 = new Spline2D(bestSpline, type);
 		Rectangle.Double rectangle2 = spline2d2.getBoundingBox();
-		double num = numerator.getValue(bestSpline);
+		double area2 = rectangle2.width * rectangle2.height;
+		double num = ((numerator instanceof SplineArea) ? area2 - numerator.getValue(bestSpline) : numerator.getValue(bestSpline));
 		double den = denominator.getValue(bestSpline);
 		double ratio = num / den * ((isMonotone(bestSpline)) ? 1 : 0);
-		ratio /= rectangle2.width * rectangle2.height / 1000;
-		double num1 = numerator.getValue(spline);
+//		ratio /= rectangle2.width * rectangle2.height / 100;
+		double num1 = ((numerator instanceof SplineArea) ? area1 - numerator.getValue(spline) : numerator.getValue(spline));
 		double den2 = denominator.getValue(spline);
 		double ratio2 = num1 / den2 * ((isMonotone(spline)) ? 1 : 0);
-		ratio2 /= rectangle.width * rectangle.height / 1000;
+//		ratio2 /= rectangle.width * rectangle.height / 100;
 
 		if (ratio2 > ratio) {
 			bestSpline = spline;
@@ -63,14 +66,15 @@ public class RandomBowlHillClimber extends BowlHillClimber {
 
 		List<Bowl> bowls = new ArrayList<>();
 		HillBowl bowl = new HillBowl(type, bestSpline);
-		double num = numerator.getValue(bestSpline);
-		double den = denominator.getValue(bestSpline);
-		double ratio = num/den * ((isMonotone(bestSpline)) ? 1 : 0);
 		Spline2D spline2d = new Spline2D(bestSpline, type);
 		Rectangle.Double rectangle = spline2d.getBoundingBox();
-		ratio /= rectangle.width * rectangle.height / 1000;
+		double area = rectangle.width * rectangle.height;
+		double num = ((numerator instanceof SplineArea) ? area - numerator.getValue(bestSpline) : numerator.getValue(bestSpline));
+		double den = denominator.getValue(bestSpline);
+		double ratio = num/den * ((isMonotone(bestSpline)) ? 1 : 0);
+		//		ratio /= rectangle.width * rectangle.height / 100;
 		bowl.setCustomInfo(
-				numerator.getName() + ": " + (int)(num*100)/100.0 + "\n" + denominator.getName() + ": " + (int)(den*100)/100.0
+				numerator.getName() + ": " + (long)(num*100)/100.0 + "\n" + denominator.getName() + ": " + (int)(den*100)/100.0
 				+ "\nRatio: "
 				+ (int)(ratio*100)/100.0
 		);

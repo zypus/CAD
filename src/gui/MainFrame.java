@@ -184,7 +184,7 @@ public class MainFrame
 
 				toggle = !toggle;
 				outputComponent.bowlMakerRatio(toggle);
-				rat.setText((toggle) ? "Optimize Length/Area" : "Optimize Volume/Surface");
+				rat.setText((toggle) ? "Optimize Area/Length" : "Optimize Volume/Surface");
 			}
 		});
 
@@ -406,15 +406,7 @@ public class MainFrame
 
 	public void drawPolyLine(ArrayList<Point> points) {
 
-		List<Shape> shape = new ArrayList<>();
-		for (int i = 0; i < points.size() - 1; i++) {
-			shape.add(new Line2D.Double(points.get(i), points
-					.get(i + 1)));
-		}
-		outputComponent.rotateShapes(shape, Math.PI);
-		outputComponent.magnifyShapes(shape);
-		outputComponent.translateShapes(shape, screenSize.width / 2, screenSize.height / 2);
-		outputComponent.addShapes(shape);
+		outputComponent.addShapes(points);
 	}
 
 }

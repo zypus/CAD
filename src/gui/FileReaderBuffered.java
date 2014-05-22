@@ -20,7 +20,7 @@ public abstract class FileReaderBuffered {
 		try {
 			BufferedReader br = new BufferedReader(new FileReader(
 					filePath.toString()));
-			String strLine = "";
+			String strLine = null;
 
 			// Reads header
 			strLine = br.readLine();
@@ -41,7 +41,7 @@ public abstract class FileReaderBuffered {
 				strLine = br.readLine();
 
 			}
-			System.out.println("Reading done!");
+//			System.out.println("Reading done!");
 			br.close();
 		} catch (Exception e) {
 			e.printStackTrace();

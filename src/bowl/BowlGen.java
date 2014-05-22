@@ -38,6 +38,6 @@ public class BowlGen implements Gen<Vector> {
 
 	@Override public void randomize() {
 
-		genotype = new Vector(random.nextDouble() * 150, random.nextDouble() * -300);
+		genotype = new Vector(random.nextDouble() * 125, random.nextDouble() * 150);
 	}
 }

@@ -73,11 +73,6 @@ public class CubicSpline
 		}
 	}
 
-	private boolean isClosed() {
-
-		return get(0).getX() == get(size() - 1).getX() && get(0).getY() == get(size() - 1).getY();
-	}
-
 	private void setCoefficients() {
 
 		setSHValues();

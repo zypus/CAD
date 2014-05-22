@@ -19,4 +19,8 @@ public interface ToolDelegate {
 	public void didUpdate(Tool tool);
 
 	public boolean shouldDraw(Tool tool);
+
+	public int getWidth();
+
+	public int getHeight();
 }

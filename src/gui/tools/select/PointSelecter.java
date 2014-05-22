@@ -4,8 +4,10 @@ import gui.DoublePoint;
 import gui.SelectionType;
 import gui.tools.ToolConstants;
 
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Graphics2D;
 import java.awt.event.MouseEvent;
+import java.awt.geom.AffineTransform;
 import java.awt.geom.Ellipse2D;
 import java.util.ArrayList;
 
@@ -61,9 +63,10 @@ public class PointSelecter extends Selecter {
 
 	@Override public void draw(Graphics2D g2) {
 
-		if (shouldDraw()) {
-			super.draw(g2);
-		}
+		AffineTransform tform = AffineTransform.getTranslateInstance(0, getDelegate().getHeight());
+		tform.scale(1, -1);
+		g2.setTransform(tform);
+		super.draw(g2);
 		java.util.List<Selectable> selectedPoints = getSelectedObjects();
 		g2.setStroke(ToolConstants.INDICATOR_STROKE);
 		g2.setColor(Color.WHITE);
@@ -75,5 +78,7 @@ public class PointSelecter extends Selecter {
 										 ToolConstants.INDICATOR_SIZE);
 			g2.draw(circle);
 		}
+		tform.scale(1, -1);
+		g2.setTransform(tform);
 	}
 }

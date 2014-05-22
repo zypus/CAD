@@ -5,6 +5,7 @@ import bowl.genetic.Individual;
 import gui.Spline2D;
 import splines.Point;
 import splines.Spline;
+import splines.SplineArea;
 import splines.SplineProperty;
 
 import java.awt.*;
@@ -31,23 +32,25 @@ public class BowlEvaluator
 	@Override public void evaluate(Individual individual) {
 		Spline spline = (Spline) individual.getPhenotype();
 		if (isMonotone(spline)) {
-			double nominator = Math.abs(nominatorProperty.getValue(spline));
-			double denominator = Math.abs(denominatorProperty.getValue(spline));
-			double ratio = nominator / denominator;
 			Spline2D spline2d = new Spline2D(spline, ((BowlChromosome) individual.getChromosome()).getType());
 			Rectangle.Double boundingBox = spline2d.getBoundingBox();
-			if (boundingBox.width < 300 && boundingBox.height < 300 && ratio < 100 && ratio >= 0) {
+			double area = boundingBox.width*boundingBox.height;
+			double nominator = ((nominatorProperty instanceof SplineArea) ? area - Math.abs(nominatorProperty.getValue(spline)) :
+								Math.abs(nominatorProperty.getValue(spline))) ;
+			double denominator = Math.abs(denominatorProperty.getValue(spline));
+			double ratio = nominator / denominator;
+			if (boundingBox.width < 250 && boundingBox.height < 150 && ratio < 100 && ratio >= 0) {
 				individual.setFitness(ratio);
 				Bowl bowl = (Bowl) individual;
 				bowl.setCustomInfo(
-						nominatorProperty.getName() + ": " + (int)(nominator*100)/100.0 + "\n" + denominatorProperty.getName() + ": " + (int)(denominator*100)/100.0
+						nominatorProperty.getName() + ": " + (long)(nominator*100)/100.0 + "\n" + denominatorProperty.getName() + ": " + (int)(denominator*100)/100.0
 						+ "\nRatio: "
 						+ (int)(ratio*100)/100.0
 				);
 			} else {
 				individual.setFitness(0);
 				Bowl bowl = (Bowl) individual;
-				bowl.setCustomInfo("To big.");
+				bowl.setCustomInfo("Too big.");
 			}
 		} else {
 			individual.setFitness(0);

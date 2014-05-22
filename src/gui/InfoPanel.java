@@ -15,6 +15,8 @@ import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Rectangle;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -31,6 +33,76 @@ public class InfoPanel
 
 	Spline2D currentlyDrawnSpline = null;
 	List<Spline2D> splines = new ArrayList<>();
+
+	private boolean tracking = false;
+
+	OutputComponent delegate = null;
+
+	public OutputComponent getDelegate() {
+
+		return delegate;
+	}
+
+	public void setDelegate(OutputComponent delegate) {
+
+		this.delegate = delegate;
+	}
+
+	public InfoPanel() {
+		MouseAdapter adapter = new MouseAdapter() {
+			@Override public void mouseEntered(MouseEvent e) {
+
+				super.mouseEntered(e);
+				tracking = true;
+			}
+
+			@Override public void mouseExited(MouseEvent e) {
+
+				super.mouseExited(e);
+				tracking = false;
+				for (Spline2D spline : splines) {
+					spline.setFilled(false);
+				}
+			}
+
+			@Override public void mouseMoved(MouseEvent e) {
+
+				super.mouseMoved(e);
+				if (tracking) {
+					for (Spline2D spline : splines) {
+						spline.setFilled(false);
+					}
+					int index = e.getY() / 52;
+					if (index < splines.size()) {
+						splines.get(index).setFilled(true);
+					}
+					delegate.repaint();
+				}
+			}
+
+			@Override public void mouseClicked(MouseEvent e) {
+
+				super.mouseClicked(e);
+				if (tracking) {
+					int index = e.getY() / 52;
+					if (index < splines.size()) {
+						Spline2D spline2d = splines.get(index);
+						if (spline2d.getType().equals(SplineType.BEZIER)) {
+							spline2d.switchToType(SplineType.CUBIC);
+						} else if (spline2d.getType().equals(SplineType.CUBIC)) {
+							spline2d.switchToType(SplineType.LINEAR);
+						} else if (spline2d.getType().equals(SplineType.LINEAR)) {
+							spline2d.switchToType(SplineType.BEZIER);
+						}
+					}
+					delegate.repaint();
+					repaint();
+				}
+			}
+		};
+		addMouseListener(adapter);
+		addMouseMotionListener(adapter);
+	}
 
 	@SuppressWarnings("unchecked") @Override public void update(List<? extends Selectable> selectables) {
 
@@ -68,15 +140,16 @@ public class InfoPanel
 			g2.setStroke(new BasicStroke(2));
 			g2.setColor(spline2d.getColor());
 			g2.fill(new Rectangle.Double(0, offset, 200, 50));
-			double brightness = spline2d.getColor().getRed() * spline2d.getColor().getGreen() * spline2d.getColor().getBlue();
-			if (brightness > 128 * 128 * 128) {
+			double brightness = spline2d.getColor().getRed() + spline2d.getColor().getGreen() + spline2d.getColor().getBlue();
+			if (brightness > 250) {
 				g2.setColor(Color.BLACK);
 			} else {
 				g2.setColor(Color.WHITE);
 			}
 			g2.draw(new Rectangle.Double(0,offset,200, 50));
-			String info = "Length: "+new SplineLength().getValue(spline2d.getSpline());
-			info += "\nArea: "+new SplineArea().getValue(spline2d.getSpline());
+			String info = spline2d.getType().toString()+"\n";
+			info += "Length: "+(long)(new SplineLength().getValue(spline2d.getSpline())*100)/100.0;
+			info += "\nArea: "+(long)(new SplineArea().getValue(spline2d.getSpline())*100)/100.0;
 			Font font = new Font("Arial", Font.BOLD, 15);
 			FontMetrics metric = g2.getFontMetrics(font);
 			int lineoffset = 0;
@@ -86,7 +159,7 @@ public class InfoPanel
 			int blockHeight = lines.length * (metric.getHeight()-15);
 			for (String line : lines) {
 				int l = metric.stringWidth(line);
-				g2.drawString(line, 100 - l / 2, 25-blockHeight/2+offset+lineoffset);
+				g2.drawString(line, 100 - l / 2, 20-blockHeight/2+offset+lineoffset);
 				lineoffset += metric.getHeight()-5;
 			}
 			offset += 52;

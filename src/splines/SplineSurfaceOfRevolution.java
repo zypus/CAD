@@ -18,13 +18,13 @@ public class SplineSurfaceOfRevolution implements SplineProperty {
 
 	public static void main(String[] args) {
 
-		Spline spline = new BezierSpline();
-		spline.add(new DoublePoint(-100, 100));
+		Spline spline = new LinearSpline();
+		spline.add(new DoublePoint(-150, 300));
 		spline.add(new DoublePoint(0, 0));
-		spline.add(new DoublePoint(100, 100));
+		spline.add(new DoublePoint(150, 300));
 
 		System.out.println(new SplineSurfaceOfRevolution().getValue(spline));
-		System.out.println(Math.PI*100*Math.sqrt(Math.pow(50, 2)+ Math.pow(100, 2)));
+		System.out.println(Math.PI*300*Math.sqrt(Math.pow(300, 2)+ Math.pow(150, 2)));
 	}
 
 	@Override public double getValue(Spline spline) {

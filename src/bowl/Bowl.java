@@ -29,7 +29,7 @@ public class Bowl
 
 	public Bowl(SplineType type) {
 		this.type = type;
-		setChromosome(new BowlChromosome(random.nextInt(5)+1, type));
+		setChromosome(new BowlChromosome(4, type));
 	}
 
 	@Override public Object getPhenotype() {
@@ -59,7 +59,7 @@ public class Bowl
 		g2.setColor(Color.WHITE);
 		Point midPoint = spline.s((spline.size()-1)/2);
 		// render bowl
-		renderer.renderSplineAtPosition(bowl.getSpline(), -midPoint.getX(), 10-midPoint.getY(), true);
+		renderer.renderSplineAtPosition(bowl, -midPoint.getX(), 10-midPoint.getY(), true);
 	}
 
 	public boolean isUpsideDown() {

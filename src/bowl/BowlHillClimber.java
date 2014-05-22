@@ -5,6 +5,7 @@ import gui.Spline2D;
 import gui.SplineType;
 import splines.Point;
 import splines.Spline;
+import splines.SplineArea;
 import splines.SplineProperty;
 
 import java.awt.Rectangle;
@@ -40,19 +41,22 @@ public class BowlHillClimber implements BowlCreator {
 		this.type = type;
 		currentRatio = 0;
 		Rectangle.Double rectangle = new Rectangle.Double();
-		while (currentRatio == 0 || rectangle.width > 300 || rectangle.height > 300) {
+		while (currentRatio == 0 || rectangle.width > 250 || rectangle.height > 150) {
 			currentBestSpline = type.createInstance();
 			currentBestSpline.add(new DoublePoint(0, 0));
-			currentBestSpline.add(new DoublePoint(random.nextInt(150), random.nextInt(300)));
-			currentBestSpline.add(new DoublePoint(random.nextInt(150), random.nextInt(300)));
+			for (int i = 0; i < 4; i++) {
+				currentBestSpline.add(new DoublePoint(1 + random.nextInt(124), random.nextInt(150)));
+			}
+//			currentBestSpline.add(new DoublePoint(1+random.nextInt(124), random.nextInt(250)));
 			//		currentBestSpline.add(new DoublePoint(random.nextInt(200), random.nextInt(200)));
-			num = numerator.getValue(currentBestSpline);
-			den = denominator.getValue(currentBestSpline);
-			currentRatio = num / den * ((isMonotone(currentBestSpline)) ? 1 : 0);
 			Spline completedSpline = makeSplineComplete(currentBestSpline);
 			Spline2D spline2d = new Spline2D(completedSpline, type);
 			rectangle = spline2d.getBoundingBox();
-			currentRatio /= rectangle.width*rectangle.height/1000;
+			double area = rectangle.width*rectangle.height;
+			num = ((numerator instanceof SplineArea) ? area - numerator.getValue(currentBestSpline) : numerator.getValue(currentBestSpline));
+			den = denominator.getValue(currentBestSpline);
+			currentRatio = num / den * ((isMonotone(currentBestSpline)) ? 1 : 0);
+//			currentRatio /= rectangle.width*rectangle.height/100;
 		}
 	}
 
@@ -69,13 +73,14 @@ public class BowlHillClimber implements BowlCreator {
 					Spline completedSpline = makeSplineComplete(testedSpline);
 					Spline2D spline2d = new Spline2D(completedSpline, type);
 					Rectangle.Double rectangle = spline2d.getBoundingBox();
-					if (rectangle.width < 300 && rectangle.height < 300) {
-						double tempNum = numerator.getValue(completedSpline);
+					double area = rectangle.width*rectangle.height;
+					if (rectangle.width < 250 && rectangle.height < 150) {
+						double tempNum = ((numerator instanceof SplineArea) ? area - numerator.getValue(completedSpline) : numerator.getValue(completedSpline)) ;
 						double tempDen = denominator.getValue(completedSpline);
 						double
 								newRatio =
 								tempNum / tempDen * ((isMonotone(completedSpline)) ? 1 : 0);
-						newRatio /= rectangle.width * rectangle.height / 1000;
+//						newRatio /= rectangle.width * rectangle.height / 100;
 						if (newRatio != 0 && newRatio > currentRatio) {
 							System.out.println("rectangle = " + rectangle);
 							currentRatio = newRatio;

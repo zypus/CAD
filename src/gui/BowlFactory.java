@@ -115,12 +115,17 @@ public class BowlFactory {
 				edgesIndices.put((i + 1) + r * interpolatedPoints.size());
 				edgesIndices.put((i + 2) + r * interpolatedPoints.size());
 			}
-			// edge
-			edgesIndices.put(interpolatedPoints.size() + r * interpolatedPoints.size());
-			if (r == 11) {
-				edgesIndices.put(interpolatedPoints.size());
-			} else {
-				edgesIndices.put(interpolatedPoints.size() + (r + 1) * interpolatedPoints.size());
+
+		}
+		for (int r = 0; r < 12; r++) {
+			for (int i = interpolatedPoints.size(); i <= interpolatedPoints.size(); i++) {
+				// edge
+				edgesIndices.put(i + r * interpolatedPoints.size());
+				if (r == 11) {
+					edgesIndices.put(i);
+				} else {
+					edgesIndices.put(i + (r + 1) * interpolatedPoints.size());
+				}
 			}
 		}
 

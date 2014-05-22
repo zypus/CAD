@@ -33,6 +33,7 @@ import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.geom.AffineTransform;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
@@ -105,6 +106,7 @@ public class OutputComponent
 		pointSelecter = new PointSelecter();
 		dragger = new Dragger();
 
+		final OutputComponent reference = this;
 
 		pointSelecter.setDelegate(new ToolDelegate() {
 			@Override public void didFinish(Tool tool) {
@@ -141,6 +143,16 @@ public class OutputComponent
 
 				return !dragger.isDragging();
 			}
+
+			@Override public int getWidth() {
+
+				return reference.getWidth();
+			}
+
+			@Override public int getHeight() {
+
+				return reference.getHeight();
+			}
 		});
 		splineSelecter.setDelegate(new ToolDelegate() {
 			@Override public void didFinish(Tool tool) {
@@ -150,8 +162,8 @@ public class OutputComponent
 				for (Selectable selectable : selectedObjects) {
 					List<Selectable> selectablePoints = new ArrayList<>();
 					Spline2D spline2d = (Spline2D) selectable;
-					for (splines.Point point : spline2d.getSpline()) {
-						selectablePoints.add(new SplinePoint(spline2d, spline2d.getSpline().indexOf(point)));
+					for (int i = 0; i < spline2d.getSpline().size(); i++) {
+						selectablePoints.add(new SplinePoint(spline2d, i));
 					}
 					pointSelecter.addSelectables(selectablePoints);
 				}
@@ -179,8 +191,17 @@ public class OutputComponent
 
 				return !dragger.isDragging();
 			}
-		});
 
+			@Override public int getWidth() {
+
+				return reference.getWidth();
+			}
+
+			@Override public int getHeight() {
+
+				return reference.getHeight();
+			}
+		});
 		drawer.setDelegate(new ToolDelegate() {
 			@Override public void didFinish(Tool tool) {
 				currentSpline = null;
@@ -211,6 +232,16 @@ public class OutputComponent
 			@Override public boolean shouldDraw(Tool tool) {
 
 				return true;
+			}
+
+			@Override public int getWidth() {
+
+				return reference.getWidth();
+			}
+
+			@Override public int getHeight() {
+
+				return reference.getHeight();
 			}
 		});
 
@@ -245,36 +276,51 @@ public class OutputComponent
 
 			public void mousePressed(MouseEvent e) {
 
+				int shift = (getHeight()-e.getY())-e.getY();
+				e.translatePoint(0, shift);
 				for (Tool tool : tools) {
 					tool.mousePressed(e);
 				}
 				repaint();
+				e.translatePoint(0, -shift);
 			}
 
 			public void mouseReleased(MouseEvent e) {
 
+				int shift = (getHeight() - e.getY()) - e.getY();
+				e.translatePoint(0, shift);
 				for (Tool tool : tools) {
 					tool.mouseReleased(e);
 				}
 				repaint();
+				e.translatePoint(0, -shift);
 			}
 
 			public void mouseExited(MouseEvent e) {
 
+				int shift = (getHeight() - e.getY()) - e.getY();
+				e.translatePoint(0, shift);
 				showCoo.resetLabel();
 				for (Tool tool : tools) {
 					tool.mouseExited(e);
 				}
+				e.translatePoint(0, -shift);
 			}
 
 			public void mouseEntered(MouseEvent e) {
 
+				int shift = (getHeight() - e.getY()) - e.getY();
+				e.translatePoint(0, shift);
 				for (Tool tool : tools) {
 					tool.mouseEntered(e);
 				}
+				e.translatePoint(0, -shift);
 			}
 
 			public void mouseDragged(MouseEvent e) {
+
+				int shift = (getHeight() - e.getY()) - e.getY();
+				e.translatePoint(0, shift);
 
 				showCoo.update(e.getX(), e.getY());
 
@@ -285,9 +331,13 @@ public class OutputComponent
 				mousePoint = e.getPoint();
 
 				repaint();
+				e.translatePoint(0, -shift);
 			}
 
 			public void mouseMoved(MouseEvent e) {
+
+				int shift = (getHeight() - e.getY()) - e.getY();
+				e.translatePoint(0, shift);
 
 				showCoo.update(e.getX(), e.getY());
 				mousePoint = e.getPoint();
@@ -298,6 +348,7 @@ public class OutputComponent
 				}
 
 				repaint();
+				e.translatePoint(0, -shift);
 			}
 
 		};
@@ -376,7 +427,7 @@ public class OutputComponent
 		if (toggle) {
 			add(bowlMaker);
 			if (ratioToggle) {
-				bowlMaker.makeBowl(new SplineLength(), new SplineArea());
+				bowlMaker.makeBowl(new SplineArea(), new SplineLength());
 			} else {
 				bowlMaker.makeBowl(new SplineSolidOfRevolution(), new SplineSurfaceOfRevolution());
 			}
@@ -397,7 +448,11 @@ public class OutputComponent
 
 		super.paintComponent(g);
 
-		Graphics2D g2d = (Graphics2D) g;
+		Graphics2D g2d = (Graphics2D) g.create();
+		AffineTransform tform = AffineTransform.getTranslateInstance(0, getHeight());
+		tform.scale(1, -1);
+		g2d.setTransform(tform);
+
 		SplineRenderer splineRenderer = new SplineRenderer(g2d);
 
 //		g2d.setBackground(new Color(0,0,0,255));
@@ -414,13 +469,12 @@ public class OutputComponent
 				if (spline2d == currentSpline) {
 					drawControlPoints = true;
 				}
-				splineRenderer.renderSplineAtPosition(spline2d.getSpline(), 0, 0, drawControlPoints);
+				splineRenderer.renderSplineAtPosition(spline2d, 0, 0, drawControlPoints);
 			}
 			for (int i = 0; i < splineSelecter.getSelectedObjects().size(); i++) {
 				Spline2D spline2d = (Spline2D) splineSelecter.getSelectedObjects().get(i);
 				g2d.setStroke(new BasicStroke(SELECTION_THICKNESS));
-				g2d.setPaint(spline2d.getColor());
-				splineRenderer.renderSplineAtPosition(spline2d.getSpline(), 0, 0, true);
+				splineRenderer.renderSplineAtPosition(spline2d, 0, 0, true);
 				if (showControlPointCoords) {
 					drawCoords(spline2d, g2d);
 				}
@@ -459,10 +513,18 @@ public class OutputComponent
 			}
 		}
 
+		g2d.dispose();
+//		tform.scale(1, -1);
+//		g2d.setTransform(tform);
+
 	}
 
 	private void drawCoords(Spline2D spline2d, Graphics2D g2d) {
 
+		g2d = (Graphics2D) g2d.create();
+		AffineTransform tform = AffineTransform.getTranslateInstance(0, getHeight());
+		tform.scale(1, -1);
+		g2d.transform(tform);
 		g2d.setFont(font);
 		FontMetrics metric = g2d.getFontMetrics(font);
 		for (splines.Point point : spline2d.getSpline()) {
@@ -470,9 +532,10 @@ public class OutputComponent
 			g2d.setPaint(Color.WHITE);
 			String label = "(" + (int) point.getX() + ", " + (int) point.getY() + ")";
 			int length = metric.stringWidth(label);
-			g2d.drawString(label, ((float) point.getX()) - length / 2, ((float) point.getY()) + 20);
+			g2d.drawString(label, ((float) point.getX()) - length / 2, ((float) (getHeight()-point.getY())) + 20);
 			g2d.setPaint(c);
 		}
+		g2d.dispose();
 	}
 
 	@Override
@@ -514,13 +577,12 @@ public class OutputComponent
 		}
 	}
 
-	public void addShapes(List<Shape> shape) {
+	public void addShapes(List<java.awt.Point> points) {
 
 		drawer.finish();
 		Spline spline = currentSplineType.createInstance();
-		for (int i = 0; i < shape.size(); i++) {
-			Line2D.Double line = (Line2D.Double) shape.get(i);
-			spline.add(new DoublePoint(line.getP1()));
+		for (int i = 0; i < points.size(); i++) {
+			spline.add(new DoublePoint(points.get(i)));
 		}
 		Spline2D spline2d = new Spline2D(spline, currentSplineType);
 		spline2d.setColor(COLORS[colorCounter]);
@@ -613,10 +675,20 @@ public class OutputComponent
 			return spline2D.getSpline().get(index);
 		}
 
+		@Override public boolean equals(Object obj) {
+
+			if (obj instanceof  SplinePoint) {
+				SplinePoint p2 = (SplinePoint) obj;
+				return p2.getSpline2D() == getSpline2D() && p2.getIndex() == getIndex();
+			} else {
+				return false;
+			}
+		}
 	}
 
 	public void addSelectionObserver(SelectionObserver observer) {
 		splineSelecter.attachSelectionObserver(observer);
+		((InfoPanel)observer).setDelegate(this);
 	}
 
 	public void removeSelectionObserver(SelectionObserver observer) {

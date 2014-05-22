@@ -26,7 +26,7 @@ public class PolyReader
 	public void processLine(String strLine) {
 
 		int tabIndex = 0;
-		while (strLine.charAt(tabIndex) != '	') {
+		while (strLine.charAt(tabIndex) != ' ') {
 			tabIndex++;
 		}
 		Double d1 = Double.parseDouble(strLine.substring(0, tabIndex));
@@ -36,7 +36,7 @@ public class PolyReader
 		Point p = new Point();
 		p.setLocation(d1, d2);
 		points.add(p);
-		System.out.println(p.getX() + " ... " + p.getY());
+//		System.out.println(p.getX() + " ... " + p.getY());
 	}
 
 	public ArrayList<Point> getPoints() {

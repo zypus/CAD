@@ -3,7 +3,12 @@ package gui;
 import splines.Point;
 import splines.Spline;
 
-import java.awt.*;
+import java.awt.BasicStroke;
+import java.awt.Color;
+import java.awt.Graphics2D;
+import java.awt.Polygon;
+import java.awt.Rectangle;
+import java.awt.Stroke;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Line2D;
 import java.awt.geom.Point2D;
@@ -23,8 +28,39 @@ public class SplineRenderer {
         this.context = context;
     }
 
-    public void renderSplineAtPosition(Spline spline, double x, double y, boolean displayControlPoints) {
+    public void renderSplineAtPosition(Spline2D spline2d, double x, double y, boolean displayControlPoints) {
         context.translate(x,y);
+
+		Spline spline = spline2d.getSpline();
+
+
+
+		if (spline2d.isFilled()) {
+
+			Color fillColor = new Color(spline2d.getColor().getRed(), spline2d.getColor().getGreen(), spline2d.getColor().getBlue(), 80);
+
+			context.setColor(fillColor);
+
+			java.util.List<Point> points = spline2d.getInterpolatedPoints();
+			if (spline.isClosed()) {
+				Polygon polygon = new Polygon();
+				for (Point point : points) {
+					polygon.addPoint((int)point.getX(), (int)point.getY());
+				}
+				context.fill(polygon);
+			} else {
+				Polygon polygon = new Polygon();
+				for (Point point : points) {
+					polygon.addPoint((int) point.getX(), (int) point.getY());
+				}
+				Rectangle.Double rect = spline2d.getBoundingBox();
+				polygon.addPoint((int)(rect.getMinX()+rect.getWidth()),(int)rect.getMinY());
+				polygon.addPoint((int)(rect.getMinX()),(int)rect.getMinY());
+				context.fill(polygon);
+			}
+		}
+
+		context.setColor(spline2d.getColor());
 
 		Point leftPoint = spline.get(0);
 		if (displayControlPoints) {

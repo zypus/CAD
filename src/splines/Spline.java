@@ -14,7 +14,12 @@ public abstract class Spline implements List<Point> {
     private Interval interval = new Interval(1, -1, 1, -1);
 	private List<SplineObserver> observers = new ArrayList<>();
 
-    /**
+	public List<SplineObserver> getObservers() {
+
+		return observers;
+	}
+
+	/**
      * Interpolates the spline at the specified index.
      * @param u The subindex of control points, starting at 0.
      *          Hence 1.5 would specify is the point exactly between control point 1 and 2.
@@ -91,6 +96,11 @@ public abstract class Spline implements List<Point> {
 
 	protected void changed() {
 
+	}
+
+	public boolean isClosed() {
+
+		return get(0).getX() == get(size() - 1).getX() && get(0).getY() == get(size() - 1).getY();
 	}
 
     // All methods of the List interface.

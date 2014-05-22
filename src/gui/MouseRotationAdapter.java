@@ -59,6 +59,7 @@ public class MouseRotationAdapter implements MouseListener, MouseMotionListener 
 
     @Override
     public void mousePressed(MouseEvent e) {
+
         startRotation = currentRotation;
         startPoint = e.getPoint();
 		e.getComponent().addMouseMotionListener(this);

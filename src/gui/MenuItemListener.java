@@ -73,7 +73,7 @@ public class MenuItemListener
 													  "Enter the name of a file");
 
 		try {
-			String canPath = new File(".").getCanonicalPath() + "/";
+			String canPath = new File("./files").getCanonicalPath() + "/";
 			canPath += fileName + ".txt";
 			Path fileSource = Paths.get(canPath);
 			PolyReader pr = new PolyReader(fileSource, false,
