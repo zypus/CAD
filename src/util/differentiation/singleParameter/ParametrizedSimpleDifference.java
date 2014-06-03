@@ -1,4 +1,4 @@
-package util.differentiation;
+package util.differentiation.singleParameter;
 
 import util.Function;
 

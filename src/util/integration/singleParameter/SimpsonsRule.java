@@ -1,4 +1,4 @@
-package util.integration;
+package util.integration.singleParameter;
 
 import util.Function;
 

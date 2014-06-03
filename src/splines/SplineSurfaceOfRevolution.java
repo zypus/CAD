@@ -2,10 +2,10 @@ package splines;
 
 import gui.DoublePoint;
 import util.Function;
-import util.differentiation.ParametrizedDifferentiator;
-import util.differentiation.ParametrizedSimpleDifference;
-import util.integration.ParametrizedIntegrator;
-import util.integration.ParametrizedSimpsonsRule;
+import util.differentiation.singleParameter.ParametrizedDifferentiator;
+import util.differentiation.singleParameter.ParametrizedSimpleDifference;
+import util.integration.singleParameter.ParametrizedIntegrator;
+import util.integration.singleParameter.ParametrizedSimpsonsRule;
 
 /**
  * Author: Fabian Fränz <f.fraenz@t-online.de>

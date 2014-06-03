@@ -1,4 +1,4 @@
-package util.integration;
+package util.differentiation.singleParameter;
 
 import util.Function;
 
@@ -9,7 +9,7 @@ import util.Function;
  * Version: 1.0
  * Description: TODO Add description.
  */
-public interface ParametrizedIntegrator {
+public interface ParametrizedDifferentiator {
 
-	double integrate(Function fx, Function fy, double a, double b, int steps);
+	double differentiate(Function fx, Function fy, double u);
 }

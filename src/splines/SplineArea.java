@@ -1,6 +1,6 @@
 package splines;
 
-import util.integration.ParametrizedTrapezoidRule;
+import util.integration.singleParameter.ParametrizedTrapezoidRule;
 
 import java.awt.Rectangle;
 import java.util.ArrayList;

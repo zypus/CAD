@@ -7,9 +7,9 @@ package splines;
 public class BSpline extends Spline{
 	protected int k = 4;
 	public BSpline(){
-		
+
 	}
-	
+
 	@Override
     public Point s(double u) {
 		int i = 0;
@@ -23,15 +23,15 @@ public class BSpline extends Spline{
 			i = j;
 			}
 		}
-		double y = B(x, i, k);
+		double y = Bx(x, i, k);
 		Point p = null;
 		p.createPoint(x, y);
         return p;
     }
-	public double B(double x, int i, int nk){
+	public double Bx(double u, int i, int nk){
 		double result;
 		if(nk == 0){
-			if(x<= controlPoints.get(i+1).getX()&&x>controlPoints.get(i).getX()){
+			if(u <=i+1 && u>i){
 				result = 1;
 			}
 			else{
@@ -39,8 +39,8 @@ public class BSpline extends Spline{
 			}
 		}
 		else{
-			double firstpart = ((x-controlPoints.get(i).getX())/(controlPoints.get(i+nk).getX()-controlPoints.get(i).getX()))*B(x, i, nk-1);
-			double secondpart = ((controlPoints.get(i+nk+1).getX()-x)/(controlPoints.get(i+k+1).getX()-controlPoints.get(i+1).getX()))*B(x, i+1, nk-1);
+			double firstpart = ((u-controlPoints.get(i).getX())/(controlPoints.get(i+nk).getX()-controlPoints.get(i).getX()))*Bx(u, i, nk-1);
+			double secondpart = ((controlPoints.get(i+nk+1).getX()-u)/(controlPoints.get(i+k+1).getX()-controlPoints.get(i+1).getX()))*Bx(u, i+1, nk-1);
 			result = firstpart + secondpart;
 		}
 		return result;

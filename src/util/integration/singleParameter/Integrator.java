@@ -1,15 +1,15 @@
-package util.differentiation;
+package util.integration.singleParameter;
 
 import util.Function;
 
 /**
  * Author: Fabian Fränz <f.fraenz@t-online.de>
- * Date: 17/05/14
+ * Date: 16/05/14
  * Project: CAD
  * Version: 1.0
  * Description: TODO Add description.
  */
-public interface ParametrizedDifferentiator {
+public interface Integrator {
 
-	double differentiate(Function fx, Function fy, double u);
+	double integrate(Function f, double a, double b, int steps);
 }
