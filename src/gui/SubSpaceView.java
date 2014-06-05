@@ -42,6 +42,8 @@ public class SubSpaceView extends GLJPanel
 
 		this.mask = mask;
 
+		inverseMask = new double[3];
+
 		for (int i = 0; i < mask.length; i++) {
 			if (mask[i] == 0) {
 				inverseMask[i] = 1;
@@ -134,6 +136,7 @@ public class SubSpaceView extends GLJPanel
 		};
 		addMouseListener(adapter);
 		addMouseMotionListener(adapter);
+
 	}
 
 	public MouseAdapter getAdapter() {
@@ -153,14 +156,19 @@ public class SubSpaceView extends GLJPanel
 
 	public void setSolid(Solid solid) {
 
-		this.solid.detachObserver(this);
+		if (this.solid != null) {
+			this.solid.detachObserver(this);
+		}
 		this.solid = solid;
-		solid.attachObserver(this, 3);
+		if (solid != null) {
+			solid.attachObserver(this, 3);
+		}
+		update();
 	}
 
 	@Override public void update() {
 		if (solid != null) {
-			DefaultGeometry geometry = solid.getFactory().createGeometry(canvas);
+			DefaultGeometry geometry = solid.createGeometry(canvas);
 			drawer.setGeometry(geometry);
 			canvas.redraw();
 		}

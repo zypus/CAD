@@ -1,9 +1,16 @@
 package gui;
 
+import surface.Point3d;
+import surface.Polyhedron;
 import surface.Solid;
 
+import javax.swing.JFrame;
 import javax.swing.JPanel;
+import javax.swing.WindowConstants;
+import java.awt.Dimension;
 import java.awt.GridLayout;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Author: Fabian Fränz <f.fraenz@t-online.de>
@@ -13,6 +20,29 @@ import java.awt.GridLayout;
  * Description: TODO Add description.
  */
 public class QuadViewPanel extends JPanel {
+
+	public static void main(String[] args) {
+
+		JFrame frame = new JFrame("Test");
+		frame.setSize(new Dimension(1000, 1000));
+		frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+		QuadViewPanel panel = new QuadViewPanel();
+		frame.setContentPane(panel);
+
+		Solid solid = new Polyhedron();
+		List<Point3d> points = new ArrayList<>();
+		points.add(new Point3d(0,0,0));
+		points.add(new Point3d(100,20,30));
+		points.add(new Point3d(140,40,10));
+		points.add(new Point3d(10,10,10));
+		points.add(new Point3d(100,100,100));
+
+		solid.setAllPoints(points);
+
+		panel.setSolid(solid);
+
+		frame.setVisible(true);
+	}
 
 	private SubSpaceView topLeft;
 	private SubSpaceView topRight;

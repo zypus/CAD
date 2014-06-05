@@ -1,5 +1,9 @@
 package surface;
 
+import org.scilab.forge.scirenderer.Canvas;
+import org.scilab.forge.scirenderer.shapes.geometry.DefaultGeometry;
+
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -12,15 +16,16 @@ import java.util.List;
  */
 public abstract class Solid {
 
-	private List<PriorityObserver> observers;
+	private List<PriorityObserver> observers = new ArrayList<>();
 
-	public abstract  GeometryFactory getFactory();
+	public abstract DefaultGeometry createGeometry(Canvas canvas);
 	public abstract double getArea();
 	public abstract double getVolume();
 
 	public abstract void addPoint(Point3d point3d);
 	public abstract void removePoint(Point3d point3d);
 	public abstract void replacePoint(Point3d point3d, Point3d otherPoint3d);
+	public abstract void setAllPoints(List<Point3d> points);
 	public abstract List<Point3d> getAllPoints();
 
 	// Observer pattern
@@ -44,7 +49,7 @@ public abstract class Solid {
 		}
 	}
 
-	private void notifyObservers() {
+	protected void notifyObservers() {
 
 		for (SolidObserver observer : observers) {
 			observer.update();
