@@ -20,7 +20,7 @@ public class ChansAlgorithm {
 		if (p == NIL || q == NIL || r == NIL) {
 			return INF;
 		} else {
-			return (q.getX() - p.getX()) * (r.getZ() - p.getZ()) - (r.getX() - p.getX()) * (q.getZ() - p.getZ()) / turn(p, q, r);
+			return ((q.getX() - p.getX()) * (r.getZ() - p.getZ()) - (r.getX() - p.getX()) * (q.getZ() - p.getZ())) / turn(p, q, r);
 		}
 	}
 
@@ -36,7 +36,7 @@ public class ChansAlgorithm {
 	private Point sort(List<Point> P, int n) {
 
 		Point a, b, c;
-		Point head = new Point(new Point3d(0, 0, 0));
+		Point head = NIL;
 		if (n == 1) {
 			P.get(0).setNext(NIL);
 			return P.get(0);
@@ -61,15 +61,19 @@ public class ChansAlgorithm {
 
 	private void hull(List<Point> list, int n, PointableArray A, PointableArray B) {
 
+		System.out.println("Start "+list);
+
 		Point u, v, mid;
 		double[] t = new double[6];
 		double oldt, newt;
-		int i, j, k, l, minl = 6;
+		int i, j, k, l, minl = 0;
 
 		if (n == 1) {
 			A.set(0, NIL);
 			list.get(0).setPrev(NIL);
 			list.get(0).setNext(NIL);
+			System.out.println(A.toString());
+			System.out.println("End " + list);
 			return;
 		}
 
@@ -78,7 +82,7 @@ public class ChansAlgorithm {
 		}
 		v = u.getNext();
 		mid = u.getNext();
-		hull(list, n / 2, B.dublicate(), A.dublicate());
+		hull(list.subList(0, n/2), n / 2, B.dublicate(), A.dublicate());
 		PointableArray newB = B.dublicate();
 		PointableArray newA = A.dublicate();
 		newB.setPointer(B.getPointer()+n/2*2);
@@ -94,6 +98,8 @@ public class ChansAlgorithm {
 				break;
 			}
 		}
+
+		System.out.println("u: "+u+" v: "+v);
 
 		for (i = 0, k = 0, j = n/2*2, oldt = -INF; ; oldt = newt) {
 			t[0] = time(B.get(i).getPrev(), B.get(i), B.get(i).getNext());
@@ -146,26 +152,33 @@ public class ChansAlgorithm {
 
 		u.setNext(v); // now go back in time to update pointers
 		v.setPrev(u);
+		System.out.println(k);
 		for (k--; k >= 0; k--) {
 			if (A.get(k).getX() <= u.getX() || A.get(k).getX() >= v.getX()) {
 				A.get(k).act();
 				if (A.get(k) == u) {
+					System.out.println("Test1");
 					u = u.getPrev();
 				} else if (A.get(k) == v) {
+					System.out.println("Test2");
 					v = v.getNext();
 				}
 			} else {
+				System.out.println("Test3");
 				u.setNext(A.get(k));
 				A.get(k).setPrev(u);
 				v.setPrev(A.get(k));
 				A.get(k).setNext(v);
 				if (A.get(k).getX() < mid.getX()) {
+					System.out.println("Test4");
 					u = A.get(k);
 				} else {
+					System.out.println("Test5");
 					v = A.get(k);
 				}
 			}
 		}
+		System.out.println("End " + list);
 	}
 
 	public Triangles computeConvexHull(List<Point3d> points) {
@@ -179,11 +192,15 @@ public class ChansAlgorithm {
 		for (Point next = sort(P, n); next != NIL; next = next.getNext()) {
 			list.add(next);
 		}
+		NIL.setNext(null);
+
 		Point[] A_array = new Point[2*n];
 		Point[] B_array = new Point[2*n];
 		PointableArray A = new PointableArray(A_array);
 		PointableArray B = new PointableArray(B_array);
 		hull(list, n, A, B);
+
+		System.out.println(A.toString());
 
 		List<Integer> indices = new ArrayList<>();
 		for (int i = 0; A.get(i) != NIL; A.get(i++).act()) {
@@ -197,12 +214,20 @@ public class ChansAlgorithm {
 
 	private static class Point {
 
+		private static int idCounter = 0;
 		private Point3d actualPoint;
 		private Point next;
 		private Point prev;
+		private int id = 0;
+
+		public static int getIdCounter() {
+
+			return idCounter;
+		}
 
 		private Point(Point3d actualPoint) {
 
+			id = idCounter++;
 			this.actualPoint = actualPoint;
 			next = null;
 			prev = null;
@@ -252,6 +277,24 @@ public class ChansAlgorithm {
 
 			return actualPoint.getZ();
 		}
+
+		public String toString() {
+
+			String s = "{"+id;
+			if (prev != null) {
+				s+="("+prev.getX()+"|"+prev.getY()+"|"+prev.getZ()+")<-";
+			} else {
+				s += "(null)<-";
+			}
+			s+= "("+getX()+"|"+getY()+"|"+getZ()+")";
+			if (next != null) {
+				s += "->(" + next.getX() + "|" + next.getY() + "|" + next.getZ() + ")";
+			} else {
+				s += "->(null)";
+			}
+			s+= "}";
+			return s;
+		}
 	}
 
 	private class PointableArray {
@@ -290,6 +333,23 @@ public class ChansAlgorithm {
 			pa.setPointer(pointer);
 
 			return pa;
+		}
+
+		public String toString() {
+			String s = "[ ";
+			for (int i = 0; i < array.length; i++) {
+				if (i == pointer) {
+					s+="##";
+				}
+				s += (array[i] == null) ? array[i] : array[i].toString();
+				if (i == pointer) {
+					s+="## ";
+				} else {
+					s+=" ";
+				}
+			}
+			s += "]";
+			return s;
 		}
 	}
 

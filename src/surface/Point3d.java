@@ -46,6 +46,37 @@ public class Point3d {
 		return z;
 	}
 
+	public double get(int i) {
+		switch (i) {
+		case 0:
+			return x;
+		case 1:
+			return y;
+		case 2:
+			return z;
+		default:
+			System.out.println("Should not happen!");
+		}
+		return 0;
+	}
+
+	public void set(int i, double val) {
+
+		switch (i) {
+		case 0:
+			x = val;
+		break;
+		case 1:
+			y = val;
+		break;
+		case 2:
+			z = val;
+		break;
+		default:
+			System.out.println("Should not happen!");
+		}
+	}
+
 	public double distance(Point3d point3d) {
 		double diffX = x-point3d.getX();
 		double diffY = y-point3d.getY();
@@ -62,5 +93,23 @@ public class Point3d {
 	public Point3d mult(Point3d point3d) {
 
 		return new Point3d(x * point3d.getX(), y * point3d.getY(), z * point3d.getZ());
+	}
+
+	public Point3d sub(Point3d point3d) {
+
+		return new Point3d(x - point3d.getX(), y - point3d.getY(), z - point3d.getZ());
+	}
+
+	public Point3d cross(Point3d point3d) {
+
+		double newX = y * point3d.getZ() - z * point3d.getX();
+		double newY = z * point3d.getX() - x * point3d.getZ();
+		double newZ = x * point3d.getY() - y * point3d.getX();
+		return new Point3d(newX, newY, newZ);
+	}
+
+	public String toString() {
+
+		return "( "+x+" "+y+" "+z+" )";
 	}
 }

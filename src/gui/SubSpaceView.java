@@ -62,6 +62,8 @@ public class SubSpaceView extends GLJPanel
 		drawer = new LineDrawer(canvas, mra);
 		canvas.setMainDrawer(drawer);
 
+		final SubSpaceView view = this;
+
 		adapter = new MouseAdapter() {
 
 			private boolean drag = false;
@@ -123,10 +125,10 @@ public class SubSpaceView extends GLJPanel
 				for (int i = 0; i < mask.length; i++) {
 					if (mask[i] == 0) {
 						if (first) {
-							xyz[i] = point.getX();
+							xyz[i] = (-point.getX() + view.getWidth()/2)*0.01;
 							first = false;
 						} else {
-							xyz[i] = point.getY();
+							xyz[i] = (-point.getY() + view.getHeight()/2)*0.01;
 						}
 					}
 				}

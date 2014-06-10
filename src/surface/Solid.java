@@ -1,8 +1,14 @@
 package surface;
 
 import org.scilab.forge.scirenderer.Canvas;
+import org.scilab.forge.scirenderer.buffers.ElementsBuffer;
+import org.scilab.forge.scirenderer.buffers.IndicesBuffer;
 import org.scilab.forge.scirenderer.shapes.geometry.DefaultGeometry;
+import org.scilab.forge.scirenderer.shapes.geometry.Geometry;
+import org.scilab.forge.scirenderer.tranformations.Vector3d;
 
+import java.nio.FloatBuffer;
+import java.nio.IntBuffer;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -16,6 +22,8 @@ import java.util.List;
  */
 public abstract class Solid {
 
+	private final int ELEMENT_SIZE = 4;
+
 	private List<PriorityObserver> observers = new ArrayList<>();
 
 	public abstract DefaultGeometry createGeometry(Canvas canvas);
@@ -27,6 +35,55 @@ public abstract class Solid {
 	public abstract void replacePoint(Point3d point3d, Point3d otherPoint3d);
 	public abstract void setAllPoints(List<Point3d> points);
 	public abstract List<Point3d> getAllPoints();
+
+	protected DefaultGeometry triangulation(Canvas canvas, Triangles triangles) {
+
+		FloatBuffer vertices = FloatBuffer.allocate(ELEMENT_SIZE * triangles.getVertices().size());
+		vertices.rewind();
+		for (Point3d point3d : triangles.getVertices()) {
+			Vector3d vector = new Vector3d(point3d.getX(), point3d.getY(), point3d.getZ());
+			vertices.put(vector.getDataAsFloatArray(ELEMENT_SIZE));
+		}
+		vertices.rewind();
+
+		IntBuffer indices = IntBuffer.allocate(triangles.getIndices().size());
+		indices.rewind();
+		for (Integer index : triangles.getIndices()) {
+			indices.put(index);
+		}
+		indices.rewind();
+
+		IntBuffer edgesIndices = IntBuffer.allocate(2*triangles.getIndices().size());
+		edgesIndices.rewind();
+		for (int i = 0; i < triangles.getIndices().size(); i+=3) {
+			edgesIndices.put(triangles.getIndices().get(i));
+			edgesIndices.put(triangles.getIndices().get(i+1));
+			edgesIndices.put(triangles.getIndices().get(i+1));
+			edgesIndices.put(triangles.getIndices().get(i+2));
+			edgesIndices.put(triangles.getIndices().get(i+2));
+			edgesIndices.put(triangles.getIndices().get(i));
+		}
+		edgesIndices.rewind();
+
+		canvas.getBuffersManager().createElementsBuffer();
+		ElementsBuffer vertexBuffer = canvas.getBuffersManager().createElementsBuffer();
+		IndicesBuffer indicesBuffer = canvas.getBuffersManager().createIndicesBuffer();
+		IndicesBuffer edgesIndicesBuffer = canvas.getBuffersManager().createIndicesBuffer();
+
+		vertexBuffer.setData(vertices, ELEMENT_SIZE);
+		indicesBuffer.setData(indices);
+		edgesIndicesBuffer.setData(edgesIndices);
+
+		DefaultGeometry geometry = new DefaultGeometry();
+		geometry.setFillDrawingMode(Geometry.FillDrawingMode.TRIANGLES);
+		geometry.setLineDrawingMode(Geometry.LineDrawingMode.SEGMENTS);
+		geometry.setPolygonOffsetMode(true);
+		geometry.setWireIndices(edgesIndicesBuffer);
+		geometry.setIndices(indicesBuffer);
+		geometry.setVertices(vertexBuffer);
+
+		return geometry;
+	}
 
 	// Observer pattern
 	public void attachObserver(SolidObserver observer, int priority) {

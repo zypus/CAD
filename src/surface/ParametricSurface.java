@@ -1,5 +1,7 @@
 package surface;
 
+import org.scilab.forge.scirenderer.Canvas;
+import org.scilab.forge.scirenderer.shapes.geometry.DefaultGeometry;
 import util.Bound;
 import util.Function;
 import util.ParametricFunction;
@@ -8,6 +10,9 @@ import util.differentiation.singleParameter.PointDifference;
 import util.integration.multiParameter.MultiIntegrator;
 import util.integration.multiParameter.MultiSimpsonsRule;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Author: Fabian Fränz <f.fraenz@t-online.de>
  * Date: 03/06/14
@@ -15,7 +20,7 @@ import util.integration.multiParameter.MultiSimpsonsRule;
  * Version: 1.0
  * Description: TODO Add description.
  */
-public class ParametricSurface {
+public class ParametricSurface extends Solid {
 
 	private ParametricFunction xFunction;
 	private ParametricFunction yFunction;
@@ -247,4 +252,67 @@ public class ParametricSurface {
 		return integrator.integrate(crossProduct, uBound, vBound, uSteps, vSteps);
 	}
 
+	@Override public DefaultGeometry createGeometry(Canvas canvas) {
+
+		int uSteps = 10;
+		int vSteps = 10;
+
+		List<Point3d> vertices = new ArrayList<>();
+		List<Integer> indices = new ArrayList<>();
+
+		for (int ui = 0; ui <= uSteps; ui++) {
+			double u = getUBound().getLower() + getUBound().getUpper() * (double) ui / (double) uSteps;
+			for (int vi = 0; vi <= vSteps; vi++) {
+				double v = getVBound().getLower() + getVBound().getUpper() * (double) vi / (double) vSteps;
+				Point3d point3d = s(u, v);
+				vertices.add(point3d);
+				System.out.println(point3d);
+				if (ui != uSteps) {
+					if (vi % 2 == 0 && vi != vSteps) {
+						indices.add(ui * vSteps + vi);
+						indices.add(ui * vSteps + vi + 1);
+						indices.add((ui + 1) * vSteps + vi);
+					} else {
+						indices.add(ui * vSteps + vi);
+						indices.add((ui + 1) * vSteps + vi);
+						indices.add((ui + 1) * vSteps + vi - 1);
+					}
+				}
+			}
+		}
+
+		System.out.println(vertices.size());
+		System.out.println(indices.size());
+
+
+		Triangles triangles = new Triangles(vertices, indices);
+
+		return triangulation(canvas, triangles);
+	}
+
+	@Override public double getVolume() {
+
+		return 0;
+	}
+
+	@Override public void addPoint(Point3d point3d) {
+
+	}
+
+	@Override public void removePoint(Point3d point3d) {
+
+	}
+
+	@Override public void replacePoint(Point3d point3d, Point3d otherPoint3d) {
+
+	}
+
+	@Override public void setAllPoints(List<Point3d> points) {
+
+	}
+
+	@Override public List<Point3d> getAllPoints() {
+
+		return null;
+	}
 }

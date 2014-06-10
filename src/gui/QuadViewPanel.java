@@ -1,16 +1,15 @@
 package gui;
 
-import surface.Point3d;
-import surface.Polyhedron;
+import surface.ParametricSurface;
 import surface.Solid;
+import util.Bound;
+import util.ParametricFunction;
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.WindowConstants;
 import java.awt.Dimension;
 import java.awt.GridLayout;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Author: Fabian Fränz <f.fraenz@t-online.de>
@@ -29,15 +28,35 @@ public class QuadViewPanel extends JPanel {
 		QuadViewPanel panel = new QuadViewPanel();
 		frame.setContentPane(panel);
 
-		Solid solid = new Polyhedron();
-		List<Point3d> points = new ArrayList<>();
-		points.add(new Point3d(0,0,0));
-		points.add(new Point3d(100,20,30));
-		points.add(new Point3d(140,40,10));
-		points.add(new Point3d(10,10,10));
-		points.add(new Point3d(100,100,100));
+		ParametricFunction x = new ParametricFunction() {
+			@Override public double getValue(double u, double v) {
 
-		solid.setAllPoints(points);
+				return Math.sin(u) * Math.cos(v);
+			}
+		};
+		ParametricFunction y = new ParametricFunction() {
+			@Override public double getValue(double u, double v) {
+
+				return Math.sin(u) * Math.sin(v);
+			}
+		};
+		ParametricFunction z = new ParametricFunction() {
+			@Override public double getValue(double u, double v) {
+
+				return Math.cos(u);
+			}
+		};
+		Solid solid = new ParametricSurface(x, y, z, new Bound(0, Math.PI / 3), new Bound(0, 2 * Math.PI));
+
+//		Solid solid = new Polyhedron();
+//		List<Point3d> points = new ArrayList<>();
+//		points.add(new Point3d(0,0,0));
+//		points.add(new Point3d(1,10,10));
+//		points.add(new Point3d(9,0,10));
+//		points.add(new Point3d(10,10,10));
+////		points.add(new Point3d(100,100,100));
+//
+//		solid.setAllPoints(points);
 
 		panel.setSolid(solid);
 
@@ -72,6 +91,10 @@ public class QuadViewPanel extends JPanel {
 		topRight.setSolid(solid);
 		botLeft.setSolid(solid);
 		botRight.setSolid(solid);
+	}
+
+	private void toggleDrawLines(boolean toggle) {
+
 	}
 
 }

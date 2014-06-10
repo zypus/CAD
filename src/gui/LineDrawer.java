@@ -103,8 +103,9 @@ public class LineDrawer
 				  .pushRightMultiply(TransformationFactory.getRotationTransformation(mra.getRotation()));
 
 				Appearance appearance = new Appearance();
+				appearance.setFillColor(new Color(1f,1f,1f));
 				appearance.setLineColor(new Color(.2f, .2f, .2f));
-				appearance.setLineWidth(3);
+				appearance.setLineWidth(1);
 				dt.draw(geometry, appearance);
 			} catch (SciRendererException ignored) {
 				// Should not occur.
