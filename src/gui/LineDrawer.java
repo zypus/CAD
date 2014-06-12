@@ -105,7 +105,7 @@ public class LineDrawer
 				Appearance appearance = new Appearance();
 				appearance.setFillColor(new Color(1f,1f,1f));
 				appearance.setLineColor(new Color(.2f, .2f, .2f));
-				appearance.setLineWidth(1);
+				appearance.setLineWidth(0);
 				dt.draw(geometry, appearance);
 			} catch (SciRendererException ignored) {
 				// Should not occur.

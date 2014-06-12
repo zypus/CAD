@@ -1,7 +1,5 @@
 package surface;
 
-import java.util.List;
-
 /**
  * Author: Fabian Fränz <f.fraenz@t-online.de>
  * Date: 10/06/14
@@ -12,9 +10,9 @@ import java.util.List;
 public class TriangulationAlgorithm {
 
 	// Delaunay
-	public Triangles triangulate(List<Point3d> points) {
-
-	}
+//	public Triangles triangulate(List<Point3d> points) {
+//
+//	}
 
 	private void legaliceEdge(Point3d pr, Point3d pi, Point3d pj, Triangles T) {
 
@@ -61,7 +59,7 @@ public class TriangulationAlgorithm {
 		}
 
 
-
+		return false;
 	}
 
 	private Point3d circle(Point3d p1, Point3d p2, Point3d p3) {
@@ -71,6 +69,8 @@ public class TriangulationAlgorithm {
 		Point3d n1 = p2.sub(p1).cross(new Point3d(0, 0, 1));
 		Point3d n2 = p3.sub(p2).cross(new Point3d(0, 0, 1));
 
+
+		return null;
 	}
 
 }

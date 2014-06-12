@@ -70,6 +70,7 @@ public class Panel3d extends GLJPanel {
 
 		canvas = JoGLCanvasFactory.createCanvas(this);
 
+
 		/**
 		 * Add a mouse rotation adapter.
 		 */

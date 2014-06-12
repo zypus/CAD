@@ -12,7 +12,7 @@ import java.util.List;
  * Version: 1.0
  * Description: TODO Add description.
  */
-public class NURBS
+public class NURBSPatchwork
 		extends Solid {
 
 	@Override public double getArea() {

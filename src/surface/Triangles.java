@@ -29,4 +29,20 @@ public class Triangles {
 
 		return indices;
 	}
+
+	private double singedVolumeOfTriangle(Point3d v1, Point3d v2, Point3d v3) {
+
+		return v1.dot(v2.cross(v3)) / 6.0;
+	}
+
+	private double signedVolumeOfMesh() {
+
+		double volume = 0;
+		for (int i = 0; i < indices.size(); i+=3) {
+			volume += singedVolumeOfTriangle(vertices.get(i), vertices.get(i+1), vertices.get(i+2));
+		}
+		return volume;
+	}
+
+
 }

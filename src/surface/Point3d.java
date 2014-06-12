@@ -9,7 +9,7 @@ package surface;
  */
 public class Point3d {
 
-	private double x,y,z;
+	public double x,y,z;
 
 	public Point3d() {
 		x = 0;
@@ -95,6 +95,11 @@ public class Point3d {
 		return new Point3d(x * point3d.getX(), y * point3d.getY(), z * point3d.getZ());
 	}
 
+	public Point3d scalarMult(double scalar) {
+
+		return new Point3d(x * scalar, y * scalar, z * scalar);
+	}
+
 	public Point3d sub(Point3d point3d) {
 
 		return new Point3d(x - point3d.getX(), y - point3d.getY(), z - point3d.getZ());
@@ -106,6 +111,16 @@ public class Point3d {
 		double newY = z * point3d.getX() - x * point3d.getZ();
 		double newZ = x * point3d.getY() - y * point3d.getX();
 		return new Point3d(newX, newY, newZ);
+	}
+
+	public double dot(Point3d point3d) {
+
+		return x*point3d.getX() + y*point3d.getY() + z*point3d.getZ();
+	}
+
+	public double norm() {
+
+		return Math.sqrt(Math.pow(x,2)+ Math.pow(y, 2)+ Math.pow(z, 2));
 	}
 
 	public String toString() {

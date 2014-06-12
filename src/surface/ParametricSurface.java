@@ -254,25 +254,24 @@ public class ParametricSurface extends Solid {
 
 	@Override public DefaultGeometry createGeometry(Canvas canvas) {
 
-		int uSteps = 10;
-		int vSteps = 10;
+		int uSteps = 50;
+		int vSteps = 50;
 
 		List<Point3d> vertices = new ArrayList<>();
 		List<Integer> indices = new ArrayList<>();
 
 		for (int ui = 0; ui <= uSteps; ui++) {
-			double u = getUBound().getLower() + getUBound().getUpper() * (double) ui / (double) uSteps;
+			double u = getUBound().getLower() + (getUBound().getUpper() - getUBound().getLower()) * (double) ui / (double) uSteps;
 			for (int vi = 0; vi <= vSteps; vi++) {
-				double v = getVBound().getLower() + getVBound().getUpper() * (double) vi / (double) vSteps;
+				double v = getVBound().getLower() + (getVBound().getUpper() - getVBound().getLower() ) * (double) vi / (double) vSteps;
 				Point3d point3d = s(u, v);
 				vertices.add(point3d);
 				System.out.println(point3d);
 				if (ui != uSteps) {
-					if (vi % 2 == 0 && vi != vSteps) {
+					if (vi != 0) {
 						indices.add(ui * vSteps + vi);
-						indices.add(ui * vSteps + vi + 1);
-						indices.add((ui + 1) * vSteps + vi);
-					} else {
+						indices.add((ui + 1) * vSteps + vi - 1);
+						indices.add(ui * vSteps + vi - 1);
 						indices.add(ui * vSteps + vi);
 						indices.add((ui + 1) * vSteps + vi);
 						indices.add((ui + 1) * vSteps + vi - 1);
@@ -280,10 +279,6 @@ public class ParametricSurface extends Solid {
 				}
 			}
 		}
-
-		System.out.println(vertices.size());
-		System.out.println(indices.size());
-
 
 		Triangles triangles = new Triangles(vertices, indices);
 
