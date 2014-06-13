@@ -252,7 +252,7 @@ public class ParametricSurface extends Solid {
 		return integrator.integrate(crossProduct, uBound, vBound, uSteps, vSteps);
 	}
 
-	@Override public DefaultGeometry createGeometry(Canvas canvas) {
+	@Override public List<DefaultGeometry> createGeometry(Canvas canvas) {
 
 		int uSteps = 50;
 		int vSteps = 50;
@@ -282,7 +282,10 @@ public class ParametricSurface extends Solid {
 
 		Triangles triangles = new Triangles(vertices, indices);
 
-		return triangulation(canvas, triangles);
+		List<DefaultGeometry> geometries = new ArrayList<>();
+		geometries.add(triangulation(canvas, triangles));
+
+		return geometries;
 	}
 
 	@Override public double getVolume() {

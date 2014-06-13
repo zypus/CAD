@@ -3,6 +3,7 @@ package surface;
 import org.scilab.forge.scirenderer.Canvas;
 import org.scilab.forge.scirenderer.shapes.geometry.DefaultGeometry;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -22,14 +23,16 @@ public class Polyhedron
 
 	private static final int ELEMENT_SIZE = 4;
 
-	@Override public DefaultGeometry createGeometry(Canvas canvas) {
+	@Override public List<DefaultGeometry> createGeometry(Canvas canvas) {
 
 		if (changed) {
 			triangles = new ChansAlgorithm().computeConvexHull(points);
 			changed = false;
 		}
+		List<DefaultGeometry> geometries = new ArrayList<>();
+		geometries.add(triangulation(canvas, triangles));
 
-		return triangulation(canvas, triangles);
+		return geometries;
 	}
 
 	@Override public double getArea() {

@@ -17,8 +17,12 @@ import org.scilab.forge.scirenderer.tranformations.DegenerateMatrixException;
 import org.scilab.forge.scirenderer.tranformations.Transformation;
 import org.scilab.forge.scirenderer.tranformations.TransformationFactory;
 import org.scilab.forge.scirenderer.tranformations.Vector3d;
+import org.scilab.forge.scirenderer.utils.shapes.geometry.SphereFactory;
+import surface.Point3d;
 
 import java.awt.Dimension;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Author: Fabian Fränz <f.fraenz@t-online.de>
@@ -31,9 +35,12 @@ public class LineDrawer
 		implements Drawer {
 
 	private static final String MESSAGE_TEXT = "";//"Press 'F' to switch culling mode";
-	private DefaultGeometry geometry = null;
+	private List<DefaultGeometry> geometry = null;
+	private Geometry sphere;
+	private List<Point3d> controlPoints = new ArrayList<>();
 	private final MouseRotationAdapter mra;
 	private final Texture message;
+	private Canvas canvas;
 
 	/**
 	 * Default constructor.
@@ -45,16 +52,27 @@ public class LineDrawer
 
 		message = createMessage(canvas);
 		mra = mouseRotationAdapter;
+		this.canvas = canvas;
+		sphere = SphereFactory.getSingleton().create(canvas, 0.1f, 0, 0);
 	}
 
-	public DefaultGeometry getGeometry() {
+	public List<DefaultGeometry> getGeometry() {
 
 		return geometry;
 	}
 
-	public void setGeometry(DefaultGeometry geometry) {
+	public void setGeometry(List<DefaultGeometry> geometry) {
 
 		this.geometry = geometry;
+	}
+
+	public void setControlPoints(List<Point3d> points) {
+
+		if (points != null) {
+			controlPoints = points;
+		} else {
+			controlPoints = new ArrayList<>();
+		}
 	}
 
 	/**
@@ -62,13 +80,13 @@ public class LineDrawer
 	 */
 	public void switchFace() {
 
-		switch (geometry.getFaceCullingMode()) {
-		case CCW:
-			geometry.setFaceCullingMode(Geometry.FaceCullingMode.CW);
-			break;
-		default:
-			geometry.setFaceCullingMode(Geometry.FaceCullingMode.CCW);
-		}
+//		switch (geometry.getFaceCullingMode()) {
+//		case CCW:
+//			geometry.setFaceCullingMode(Geometry.FaceCullingMode.CW);
+//			break;
+//		default:
+//			geometry.setFaceCullingMode(Geometry.FaceCullingMode.CCW);
+//		}
 	}
 
 	@Override
@@ -96,7 +114,7 @@ public class LineDrawer
 			try {
 				dt.getTransformationManager()
 				  .getModelViewStack()
-				  .pushRightMultiply(TransformationFactory.getScaleTransformation(.5, .5, .5));
+				  .pushRightMultiply(TransformationFactory.getScaleTransformation(.25, .25, .25));
 
 				dt.getTransformationManager()
 				  .getModelViewStack()
@@ -106,7 +124,16 @@ public class LineDrawer
 				appearance.setFillColor(new Color(1f,1f,1f));
 				appearance.setLineColor(new Color(.2f, .2f, .2f));
 				appearance.setLineWidth(0);
-				dt.draw(geometry, appearance);
+				for (Geometry g : geometry) {
+					dt.draw(g, appearance);
+				}
+				Appearance sphereAppearance = new Appearance();
+				sphereAppearance.setFillColor(new Color(1f,0f,0f));
+				for (Point3d point3d : controlPoints) {
+					dt.getTransformationManager().getModelViewStack().pushRightMultiply(TransformationFactory.getTranslateTransformation(point3d.x, point3d.y, point3d.z));
+					dt.draw(sphere, sphereAppearance);
+					dt.getTransformationManager().getModelViewStack().pop();
+				}
 			} catch (SciRendererException ignored) {
 				// Should not occur.
 				System.out.println("Crashed 3");

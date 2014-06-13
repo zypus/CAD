@@ -3,6 +3,7 @@ package surface;
 import org.scilab.forge.scirenderer.Canvas;
 import org.scilab.forge.scirenderer.shapes.geometry.DefaultGeometry;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -15,19 +16,38 @@ import java.util.List;
 public class NURBSPatchwork
 		extends Solid {
 
+	List<NURBSSurface> surfaces = new ArrayList<>();
+
+	public NURBSPatchwork(List<NURBSSurface> surfaces) {
+
+		this.surfaces = surfaces;
+	}
+
 	@Override public double getArea() {
 
-		return 0;
+		double area = 0;
+		for (NURBSSurface surface : surfaces) {
+			area += surface.getArea();
+		}
+		return area;
 	}
 
 	@Override public double getVolume() {
 
-		return 0;
+		double volume = 0;
+		for (NURBSSurface surface : surfaces) {
+			volume += surface.getVolume();
+		}
+		return volume;
 	}
 
-	@Override public DefaultGeometry createGeometry(Canvas canvas) {
+	@Override public List<DefaultGeometry> createGeometry(Canvas canvas) {
 
-		return null;
+		List<DefaultGeometry> geometries = new ArrayList<>();
+		for (NURBSSurface surface : surfaces) {
+			geometries.add(triangulation(canvas, surface.createTriangles()));
+		}
+		return geometries;
 	}
 
 	@Override public void addPoint(Point3d point3d) {
@@ -40,6 +60,10 @@ public class NURBSPatchwork
 
 	@Override public void replacePoint(Point3d point3d, Point3d otherPoint3d) {
 
+		for (NURBSSurface surface : surfaces) {
+			surface.replacePoint(point3d, otherPoint3d);
+		}
+		notifyObservers();
 	}
 
 	@Override public void setAllPoints(List<Point3d> points) {
@@ -48,6 +72,10 @@ public class NURBSPatchwork
 
 	@Override public List<Point3d> getAllPoints() {
 
-		return null;
+		List<Point3d> point3ds = new ArrayList<>();
+		for (NURBSSurface surface : surfaces) {
+			point3ds.addAll(surface.getAllPoints());
+		}
+		return point3ds;
 	}
 }

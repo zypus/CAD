@@ -20,6 +20,8 @@ public class NURBSSurface extends Solid {
 	List<Double> vKnots = new ArrayList<>();
 	int uOrder = 3;
 	int vOrder = 3;
+	boolean changed = true;
+	Triangles triangles;
 
 	public NURBSSurface(List<List<Point3d>> controls, List<Double> uKnots, List<Double> vKnots) {
 
@@ -116,66 +118,96 @@ public class NURBSSurface extends Solid {
 		return vKnots.get(vKnots.size() - 1);
 	}
 
-	@Override public DefaultGeometry createGeometry(Canvas canvas) {
+	@Override public List<DefaultGeometry> createGeometry(Canvas canvas) {
 
-		int uSteps = 50;
-		int vSteps = 50;
+		List<DefaultGeometry> geometries = new ArrayList<>();
+		geometries.add(triangulation(canvas, createTriangles()));
 
-		List<Point3d> vertices = new ArrayList<>();
-		List<Integer> indices = new ArrayList<>();
+		return geometries;
+	}
 
-		for (int ui = 0; ui <= uSteps; ui++) {
-			double u = getMinU() + (getMaxU()-getMinU()) * (double) ui / (double) uSteps;
-			for (int vi = 0; vi <= vSteps; vi++) {
-				double v = getMinV() + (getMaxV()-getMinU()) * (double) vi / (double) vSteps;
-				Point3d point3d = s(u, v);
-				vertices.add(point3d);
-				if (ui != uSteps) {
-					if (vi != 0) {
-						indices.add(ui * vSteps + vi);
-						indices.add((ui + 1) * vSteps + vi - 1);
-						indices.add(ui * vSteps + vi - 1);
-						indices.add(ui * vSteps + vi);
-						indices.add((ui + 1) * vSteps + vi);
-						indices.add((ui + 1) * vSteps + vi - 1);
+	public Triangles createTriangles() {
+
+		if (changed) {
+			int uSteps = 50;
+			int vSteps = 50;
+
+			List<Point3d> vertices = new ArrayList<>();
+			List<Integer> indices = new ArrayList<>();
+
+			for (int ui = 0; ui <= uSteps; ui++) {
+				double u = getMinU() + (getMaxU() - getMinU()) * (double) ui / (double) uSteps;
+				for (int vi = 0; vi <= vSteps; vi++) {
+					double v = getMinV() + (getMaxV() - getMinU()) * (double) vi / (double) vSteps;
+					Point3d point3d = s(u, v);
+					vertices.add(point3d);
+					if (ui != uSteps) {
+						if (vi != 0) {
+							indices.add(ui * vSteps + vi);
+							indices.add((ui + 1) * vSteps + vi - 1);
+							indices.add(ui * vSteps + vi - 1);
+							indices.add(ui * vSteps + vi);
+							indices.add((ui + 1) * vSteps + vi);
+							indices.add((ui + 1) * vSteps + vi - 1);
+						}
 					}
 				}
 			}
+			triangles = new Triangles(vertices, indices);
+			changed = false;
 		}
 
-		Triangles triangles = new Triangles(vertices, indices);
-
-		return triangulation(canvas, triangles);
+		return triangles;
 	}
 
 	@Override public double getArea() {
 
-		return 0;
+		return createTriangles().getArea();
 	}
 
 	@Override public double getVolume() {
 
-		return 0;
+		return createTriangles().getSignedVolume();
 	}
 
 	@Override public void addPoint(Point3d point3d) {
 
+		changed = true;
+		notifyObservers();
 	}
 
 	@Override public void removePoint(Point3d point3d) {
 
+		changed = true;
+		notifyObservers();
 	}
 
 	@Override public void replacePoint(Point3d point3d, Point3d otherPoint3d) {
+
+		System.out.println("Replacing");
+		for (List<Point3d> list : controls) {
+			if (list.contains(point3d)) {
+				list.set(list.indexOf(point3d), otherPoint3d);
+				changed = true;
+				notifyObservers();
+				break;
+			}
+		}
 
 	}
 
 	@Override public void setAllPoints(List<Point3d> points) {
 
+		changed = true;
+		notifyObservers();
 	}
 
 	@Override public List<Point3d> getAllPoints() {
 
-		return null;
+		List<Point3d> points = new ArrayList<>();
+		for (List<Point3d> list : controls) {
+			points.addAll(list);
+		}
+		return points;
 	}
 }

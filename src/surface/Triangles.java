@@ -30,12 +30,30 @@ public class Triangles {
 		return indices;
 	}
 
+	private double areaOfTriangle(Point3d v1, Point3d v2, Point3d v3) {
+
+		Point3d v12 = v2.sub(v1);
+		Point3d v13 = v3.sub(v1);
+		double angle = v12.dot(v13);
+
+		return 0.5 * v12.norm() * v13.norm() * Math.sin(angle);
+	}
+
+	public double getArea() {
+
+		double area = 0;
+		for (int i = 0; i < indices.size(); i += 3) {
+			area += areaOfTriangle(vertices.get(i), vertices.get(i + 1), vertices.get(i + 2));
+		}
+		return area;
+	}
+
 	private double singedVolumeOfTriangle(Point3d v1, Point3d v2, Point3d v3) {
 
 		return v1.dot(v2.cross(v3)) / 6.0;
 	}
 
-	private double signedVolumeOfMesh() {
+	public double getSignedVolume() {
 
 		double volume = 0;
 		for (int i = 0; i < indices.size(); i+=3) {

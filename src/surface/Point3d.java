@@ -1,5 +1,7 @@
 package surface;
 
+import org.scilab.forge.scirenderer.tranformations.Vector3d;
+
 /**
  * Author: Fabian Fränz <f.fraenz@t-online.de>
  * Date: 03/06/14
@@ -29,6 +31,13 @@ public class Point3d {
 		this.x = vector[0];
 		this.y = vector[1];
 		this.z = vector[2];
+	}
+
+	public Point3d(Vector3d vector3d) {
+
+		this.x = vector3d.getX();
+		this.y = vector3d.getY();
+		this.z = vector3d.getZ();
 	}
 
 	public double getX() {

@@ -26,7 +26,7 @@ public abstract class Solid {
 
 	private List<PriorityObserver> observers = new ArrayList<>();
 
-	public abstract DefaultGeometry createGeometry(Canvas canvas);
+	public abstract List<DefaultGeometry> createGeometry(Canvas canvas);
 	public abstract double getArea();
 	public abstract double getVolume();
 

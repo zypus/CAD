@@ -1,5 +1,6 @@
 package gui;
 
+import surface.NURBSPatchwork;
 import surface.NURBSSurface;
 import surface.Point3d;
 import surface.Solid;
@@ -75,7 +76,60 @@ public class QuadViewPanel extends JPanel {
 		vKnots.add(6.0);
 		vKnots.add(7.0);
 
-		Solid solid = new NURBSSurface(controlPoints, uKnots, vKnots);
+		NURBSSurface solid1 = new NURBSSurface(controlPoints, uKnots, vKnots);
+
+		List<List<Point3d>> controlPoints2 = new ArrayList<>();
+		List<Point3d> set12 = new ArrayList<>();
+		set12.add(new Point3d(1.5, 1.5, -4));
+		set12.add(new Point3d(0.5, 1.5, -2));
+		set12.add(new Point3d(-0.5, 1.5, 1));
+		set12.add(new Point3d(-1.5, 1.5, -2));
+		controlPoints2.add(set12);
+		List<Point3d> set22 = new ArrayList<>();
+		set22.add(new Point3d(1.5, 0.5, -1));
+		set22.add(new Point3d(0.5, 0.5, -3));
+		set22.add(new Point3d(-0.5, 0.5, 0));
+		set22.add(new Point3d(-1.5, 0.5, 1));
+		controlPoints2.add(set22);
+		List<Point3d> set32 = new ArrayList<>();
+		set32.add(new Point3d(1.5, -0.5, -4));
+		set32.add(new Point3d(0.5, -0.5, 0));
+		set32.add(new Point3d(-0.5, -0.5, -3));
+		set32.add(new Point3d(-1.5, -0.5, -4));
+		controlPoints2.add(set32);
+		List<Point3d> set42 = new ArrayList<>();
+		set42.add(new Point3d(1.5, -1.5, 2));
+		set42.add(new Point3d(0.5, -1.5, 2));
+		set42.add(new Point3d(-0.5, -1.5, 0));
+		set42.add(new Point3d(-1.5, -1.5, 1));
+		controlPoints2.add(set42);
+
+		List<Double> uKnots2 = new ArrayList<>();
+		uKnots2.add(0.0);
+		uKnots2.add(1.0);
+		uKnots2.add(2.0);
+		uKnots2.add(3.0);
+		uKnots2.add(4.0);
+		uKnots2.add(5.0);
+		uKnots2.add(6.0);
+		uKnots2.add(7.0);
+
+		List<Double> vKnots2 = new ArrayList<>();
+		vKnots2.add(0.0);
+		vKnots2.add(1.0);
+		vKnots2.add(2.0);
+		vKnots2.add(3.0);
+		vKnots2.add(4.0);
+		vKnots2.add(5.0);
+		vKnots2.add(6.0);
+		vKnots2.add(7.0);
+
+		NURBSSurface solid2 = new NURBSSurface(controlPoints2, uKnots2, vKnots2);
+
+		List<NURBSSurface> surfaces = new ArrayList<>();
+		surfaces.add(solid1);
+		surfaces.add(solid2);
+		Solid solid = new NURBSPatchwork(surfaces);
 
 //		ParametricFunction x = new ParametricFunction() {
 //			@Override public double getValue(double u, double v) {
@@ -125,8 +179,8 @@ public class QuadViewPanel extends JPanel {
 
 		setLayout(new GridLayout(2,2));
 		topLeft = new SubSpaceView(new double[]{0,0,1});
-		topRight = new SubSpaceView(new double[]{1,0,0});
-		botLeft = new SubSpaceView(new double[]{0,1,0});
+		topRight = new SubSpaceView(new double[]{-1,0,0});
+		botLeft = new SubSpaceView(new double[]{0,-1,0});
 		botRight = new FullSpaceView();
 		add(topLeft);
 		add(topRight);

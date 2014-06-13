@@ -25,7 +25,7 @@ public class Triangulation
 		return 0;
 	}
 
-	@Override public DefaultGeometry createGeometry(Canvas canvas) {
+	@Override public List<DefaultGeometry> createGeometry(Canvas canvas) {
 
 		return null;
 	}
