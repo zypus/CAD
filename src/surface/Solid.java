@@ -23,6 +23,7 @@ import java.util.List;
 public abstract class Solid {
 
 	private final int ELEMENT_SIZE = 4;
+	private boolean open = true;
 
 	private List<PriorityObserver> observers = new ArrayList<>();
 
@@ -32,7 +33,7 @@ public abstract class Solid {
 
 	public abstract void addPoint(Point3d point3d);
 	public abstract void removePoint(Point3d point3d);
-	public abstract void replacePoint(Point3d point3d, Point3d otherPoint3d);
+	public abstract Point3d replacePoint(Point3d point3d, Point3d otherPoint3d);
 	public abstract void setAllPoints(List<Point3d> points);
 	public abstract List<Point3d> getAllPoints();
 
@@ -78,6 +79,7 @@ public abstract class Solid {
 		geometry.setFillDrawingMode(Geometry.FillDrawingMode.TRIANGLES);
 		geometry.setLineDrawingMode(Geometry.LineDrawingMode.SEGMENTS);
 		geometry.setPolygonOffsetMode(true);
+		geometry.setFaceCullingMode(Geometry.FaceCullingMode.CW);
 		geometry.setWireIndices(edgesIndicesBuffer);
 		geometry.setIndices(indicesBuffer);
 		geometry.setVertices(vertexBuffer);
@@ -111,6 +113,16 @@ public abstract class Solid {
 		for (SolidObserver observer : observers) {
 			observer.update();
 		}
+	}
+
+	public boolean isOpen() {
+
+		return open;
+	}
+
+	public void setOpen(boolean open) {
+
+		this.open = open;
 	}
 
 	private class PriorityObserver

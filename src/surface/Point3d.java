@@ -116,7 +116,7 @@ public class Point3d {
 
 	public Point3d cross(Point3d point3d) {
 
-		double newX = y * point3d.getZ() - z * point3d.getX();
+		double newX = y * point3d.getZ() - z * point3d.getY();
 		double newY = z * point3d.getX() - x * point3d.getZ();
 		double newZ = x * point3d.getY() - y * point3d.getX();
 		return new Point3d(newX, newY, newZ);

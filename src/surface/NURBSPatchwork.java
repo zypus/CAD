@@ -58,12 +58,16 @@ public class NURBSPatchwork
 
 	}
 
-	@Override public void replacePoint(Point3d point3d, Point3d otherPoint3d) {
+	@Override public Point3d replacePoint(Point3d point3d, Point3d otherPoint3d) {
 
 		for (NURBSSurface surface : surfaces) {
-			surface.replacePoint(point3d, otherPoint3d);
+			Point3d point3d1 = surface.replacePoint(point3d, otherPoint3d);
+			if (point3d1 != null) {
+				notifyObservers();
+				return point3d1;
+			}
 		}
-		notifyObservers();
+		return null;
 	}
 
 	@Override public void setAllPoints(List<Point3d> points) {

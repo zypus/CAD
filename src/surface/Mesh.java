@@ -38,8 +38,9 @@ public class Mesh
 
 	}
 
-	@Override public void replacePoint(Point3d point3d, Point3d otherPoint3d) {
+	@Override public Point3d replacePoint(Point3d point3d, Point3d otherPoint3d) {
 
+		return null;
 	}
 
 	@Override public void setAllPoints(List<Point3d> points) {

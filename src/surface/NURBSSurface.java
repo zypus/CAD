@@ -15,19 +15,33 @@ import java.util.List;
  */
 public class NURBSSurface extends Solid {
 
-	List<List<Point3d>> controls = new ArrayList<>();
+	List<List<HomogeneousPoint3d>> controls = new ArrayList<>();
 	List<Double> uKnots = new ArrayList<>();
 	List<Double> vKnots = new ArrayList<>();
 	int uOrder = 3;
 	int vOrder = 3;
+	int uSteps = 50;
+	int vSteps = 50;
 	boolean changed = true;
 	Triangles triangles;
 
-	public NURBSSurface(List<List<Point3d>> controls, List<Double> uKnots, List<Double> vKnots) {
+	public NURBSSurface(List<List<HomogeneousPoint3d>> controls, List<Double> uKnots, List<Double> vKnots) {
 
 		this.controls = controls;
 		this.uKnots = uKnots;
 		this.vKnots = vKnots;
+	}
+
+	public NURBSSurface(List<List<HomogeneousPoint3d>> controls, List<Double> uKnots, List<Double> vKnots, int order) {
+
+		this(controls, uKnots, vKnots, order, order);
+	}
+
+	public NURBSSurface(List<List<HomogeneousPoint3d>> controls, List<Double> uKnots, List<Double> vKnots, int uOrder, int vOrder) {
+
+		this(controls, uKnots, vKnots);
+		this.uOrder = uOrder;
+		this.vOrder = vOrder;
 	}
 
 	public Point3d s(double u, double v) {
@@ -74,7 +88,7 @@ public class NURBSSurface extends Solid {
 
 	private double w(int i, int j) {
 
-		return 1;
+		return controls.get(i).get(j).w;
 	}
 
 	private double f(int i, int n, double u, List<Double> knots) {
@@ -129,26 +143,24 @@ public class NURBSSurface extends Solid {
 	public Triangles createTriangles() {
 
 		if (changed) {
-			int uSteps = 50;
-			int vSteps = 50;
 
 			List<Point3d> vertices = new ArrayList<>();
 			List<Integer> indices = new ArrayList<>();
 
 			for (int ui = 0; ui <= uSteps; ui++) {
-				double u = getMinU() + (getMaxU() - getMinU()) * (double) ui / (double) uSteps;
+				double u = (ui == uSteps) ? getMaxU()-0.00001 : getMinU() + 0.00001 + (getMaxU() - getMinU()) * (double) ui / (double) uSteps;
 				for (int vi = 0; vi <= vSteps; vi++) {
-					double v = getMinV() + (getMaxV() - getMinU()) * (double) vi / (double) vSteps;
+					double v = (vi == vSteps) ? getMaxV()-0.00001 : getMinV() + 0.00001 + (getMaxV() - getMinV()) * (double) vi / (double) vSteps;
 					Point3d point3d = s(u, v);
 					vertices.add(point3d);
 					if (ui != uSteps) {
 						if (vi != 0) {
-							indices.add(ui * vSteps + vi);
-							indices.add((ui + 1) * vSteps + vi - 1);
-							indices.add(ui * vSteps + vi - 1);
-							indices.add(ui * vSteps + vi);
-							indices.add((ui + 1) * vSteps + vi);
-							indices.add((ui + 1) * vSteps + vi - 1);
+							indices.add(ui * (vSteps+1) + vi);
+							indices.add(ui * (vSteps+1) + vi - 1);
+							indices.add((ui + 1) * (vSteps+1) + vi - 1);
+							indices.add(ui * (vSteps+1) + vi);
+							indices.add((ui + 1) * (vSteps+1) + vi - 1);
+							indices.add((ui + 1) * (vSteps+1) + vi);
 						}
 					}
 				}
@@ -182,18 +194,19 @@ public class NURBSSurface extends Solid {
 		notifyObservers();
 	}
 
-	@Override public void replacePoint(Point3d point3d, Point3d otherPoint3d) {
+	@Override public Point3d replacePoint(Point3d point3d, Point3d otherPoint3d) {
 
 		System.out.println("Replacing");
-		for (List<Point3d> list : controls) {
+		otherPoint3d = new HomogeneousPoint3d(otherPoint3d);
+		for (List<HomogeneousPoint3d> list : controls) {
 			if (list.contains(point3d)) {
-				list.set(list.indexOf(point3d), otherPoint3d);
+				list.set(list.indexOf(point3d), (HomogeneousPoint3d)otherPoint3d);
 				changed = true;
 				notifyObservers();
-				break;
+				return otherPoint3d;
 			}
 		}
-
+		return null;
 	}
 
 	@Override public void setAllPoints(List<Point3d> points) {
@@ -205,9 +218,29 @@ public class NURBSSurface extends Solid {
 	@Override public List<Point3d> getAllPoints() {
 
 		List<Point3d> points = new ArrayList<>();
-		for (List<Point3d> list : controls) {
+		for (List<HomogeneousPoint3d> list : controls) {
 			points.addAll(list);
 		}
 		return points;
+	}
+
+	public int getuSteps() {
+
+		return uSteps;
+	}
+
+	public void setuSteps(int uSteps) {
+
+		this.uSteps = uSteps;
+	}
+
+	public int getvSteps() {
+
+		return vSteps;
+	}
+
+	public void setvSteps(int vSteps) {
+
+		this.vSteps = vSteps;
 	}
 }

@@ -1,15 +1,24 @@
 package gui;
 
+import surface.HomogeneousPoint3d;
 import surface.NURBSPatchwork;
 import surface.NURBSSurface;
-import surface.Point3d;
 import surface.Solid;
+import surface.SolidObserver;
 
+import javax.swing.BoxLayout;
+import javax.swing.JButton;
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.WindowConstants;
+import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.GridLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -28,80 +37,84 @@ public class QuadViewPanel extends JPanel {
 		frame.setSize(new Dimension(1000, 1000));
 		frame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 		QuadViewPanel panel = new QuadViewPanel();
-		frame.setContentPane(panel);
+		frame.add(panel, BorderLayout.CENTER);
 
-		List<List<Point3d>> controlPoints = new ArrayList<>();
-		List<Point3d> set1 = new ArrayList<>();
-		set1.add(new Point3d(-1.5,-1.5,4));
-		set1.add(new Point3d(-0.5,-1.5,2));
-		set1.add(new Point3d(0.5,-1.5,-1));
-		set1.add(new Point3d(1.5,-1.5,2));
+		List<List<HomogeneousPoint3d>> controlPoints = new ArrayList<>();
+		List<HomogeneousPoint3d> set1 = new ArrayList<>();
+		set1.add(new HomogeneousPoint3d(1,0,0,1));
+		List<HomogeneousPoint3d> set2 = new ArrayList<>();
+		set2.add(new HomogeneousPoint3d(1,1,0,Math.sqrt(2)/2));
+		List<HomogeneousPoint3d> set3 = new ArrayList<>();
+		set3.add(new HomogeneousPoint3d(0,1,0,1));
+		List<HomogeneousPoint3d> set4 = new ArrayList<>();
+		set4.add(new HomogeneousPoint3d(-1, 1, 0, Math.sqrt(2) / 2));
+		List<HomogeneousPoint3d> set5 = new ArrayList<>();
+		set5.add(new HomogeneousPoint3d(-1, 0, 0, 1));
+		List<HomogeneousPoint3d> set6 = new ArrayList<>();
+		set6.add(new HomogeneousPoint3d(-1, -1, 0, Math.sqrt(2) / 2));
+		List<HomogeneousPoint3d> set7 = new ArrayList<>();
+		set7.add(new HomogeneousPoint3d(0, -1, 0, 1));
+		List<HomogeneousPoint3d> set8 = new ArrayList<>();
+		set8.add(new HomogeneousPoint3d(1, -1, 0, Math.sqrt(2) / 2));
+		List<HomogeneousPoint3d> set9 = new ArrayList<>();
+		set9.add(new HomogeneousPoint3d(1, 0, 0, 1));
 		controlPoints.add(set1);
-		List<Point3d> set2 = new ArrayList<>();
-		set2.add(new Point3d(-1.5, -0.5, 1));
-		set2.add(new Point3d(-0.5, -0.5, 3));
-		set2.add(new Point3d(0.5, -0.5, 0));
-		set2.add(new Point3d(1.5, -0.5, -1));
 		controlPoints.add(set2);
-		List<Point3d> set3 = new ArrayList<>();
-		set3.add(new Point3d(-1.5, 0.5, 4));
-		set3.add(new Point3d(-0.5, 0.5, 0));
-		set3.add(new Point3d(0.5, 0.5, 3));
-		set3.add(new Point3d(1.5, 0.5, 4));
 		controlPoints.add(set3);
-		List<Point3d> set4 = new ArrayList<>();
-		set4.add(new Point3d(-1.5, 1.5, -2));
-		set4.add(new Point3d(-0.5, 1.5, -2));
-		set4.add(new Point3d(0.5, 1.5, 0));
-		set4.add(new Point3d(1.5, 1.5, -1));
 		controlPoints.add(set4);
+		controlPoints.add(set5);
+		controlPoints.add(set6);
+		controlPoints.add(set7);
+		controlPoints.add(set8);
+		controlPoints.add(set9);
 
 		List<Double> uKnots = new ArrayList<>();
 		uKnots.add(0.0);
-		uKnots.add(1.0);
-		uKnots.add(2.0);
-		uKnots.add(3.0);
-		uKnots.add(4.0);
-		uKnots.add(5.0);
-		uKnots.add(6.0);
-		uKnots.add(7.0);
+		uKnots.add(0.0);
+		uKnots.add(0.0);
+		uKnots.add(Math.PI/2);
+		uKnots.add(Math.PI/2);
+		uKnots.add(Math.PI);
+		uKnots.add(Math.PI);
+		uKnots.add(3*Math.PI/2);
+		uKnots.add(3*Math.PI/2);
+		uKnots.add(2*Math.PI);
+		uKnots.add(2*Math.PI);
+		uKnots.add(2*Math.PI);
 
 		List<Double> vKnots = new ArrayList<>();
 		vKnots.add(0.0);
 		vKnots.add(1.0);
 		vKnots.add(2.0);
-		vKnots.add(3.0);
-		vKnots.add(4.0);
-		vKnots.add(5.0);
-		vKnots.add(6.0);
-		vKnots.add(7.0);
 
-		NURBSSurface solid1 = new NURBSSurface(controlPoints, uKnots, vKnots);
+		NURBSSurface solid1 = new NURBSSurface(controlPoints, uKnots, vKnots, 2, 1);
+		solid1.setuSteps(30);
+		solid1.setvSteps(10);
 
-		List<List<Point3d>> controlPoints2 = new ArrayList<>();
-		List<Point3d> set12 = new ArrayList<>();
-		set12.add(new Point3d(1.5, 1.5, -4));
-		set12.add(new Point3d(0.5, 1.5, -2));
-		set12.add(new Point3d(-0.5, 1.5, 1));
-		set12.add(new Point3d(-1.5, 1.5, -2));
+		List<List<HomogeneousPoint3d>> controlPoints2 = new ArrayList<>();
+		List<HomogeneousPoint3d> set12 = new ArrayList<>();
+		set12.add(new HomogeneousPoint3d(1.5, 1.5, -4));
+		set12.add(new HomogeneousPoint3d(0.5, 1.5, -2));
+		set12.add(new HomogeneousPoint3d(-0.5, 1.5, 1));
+		set12.add(new HomogeneousPoint3d(-1.5, 1.5, -2));
 		controlPoints2.add(set12);
-		List<Point3d> set22 = new ArrayList<>();
-		set22.add(new Point3d(1.5, 0.5, -1));
-		set22.add(new Point3d(0.5, 0.5, -3));
-		set22.add(new Point3d(-0.5, 0.5, 0));
-		set22.add(new Point3d(-1.5, 0.5, 1));
+		List<HomogeneousPoint3d> set22 = new ArrayList<>();
+		set22.add(new HomogeneousPoint3d(1.5, 0.5, -1));
+		set22.add(new HomogeneousPoint3d(0.5, 0.5, -3));
+		set22.add(new HomogeneousPoint3d(-0.5, 0.5, 0));
+		set22.add(new HomogeneousPoint3d(-1.5, 0.5, 1));
 		controlPoints2.add(set22);
-		List<Point3d> set32 = new ArrayList<>();
-		set32.add(new Point3d(1.5, -0.5, -4));
-		set32.add(new Point3d(0.5, -0.5, 0));
-		set32.add(new Point3d(-0.5, -0.5, -3));
-		set32.add(new Point3d(-1.5, -0.5, -4));
+		List<HomogeneousPoint3d> set32 = new ArrayList<>();
+		set32.add(new HomogeneousPoint3d(1.5, -0.5, -4));
+		set32.add(new HomogeneousPoint3d(0.5, -0.5, 0));
+		set32.add(new HomogeneousPoint3d(-0.5, -0.5, -3));
+		set32.add(new HomogeneousPoint3d(-1.5, -0.5, -4));
 		controlPoints2.add(set32);
-		List<Point3d> set42 = new ArrayList<>();
-		set42.add(new Point3d(1.5, -1.5, 2));
-		set42.add(new Point3d(0.5, -1.5, 2));
-		set42.add(new Point3d(-0.5, -1.5, 0));
-		set42.add(new Point3d(-1.5, -1.5, 1));
+		List<HomogeneousPoint3d> set42 = new ArrayList<>();
+		set42.add(new HomogeneousPoint3d(1.5, -1.5, 2));
+		set42.add(new HomogeneousPoint3d(0.5, -1.5, 2));
+		set42.add(new HomogeneousPoint3d(-0.5, -1.5, 0));
+		set42.add(new HomogeneousPoint3d(-1.5, -1.5, 1));
 		controlPoints2.add(set42);
 
 		List<Double> uKnots2 = new ArrayList<>();
@@ -126,9 +139,72 @@ public class QuadViewPanel extends JPanel {
 
 		NURBSSurface solid2 = new NURBSSurface(controlPoints2, uKnots2, vKnots2);
 
+		List<List<HomogeneousPoint3d>> controlPoints3 = new ArrayList<>();
+		List<HomogeneousPoint3d> set13 = new ArrayList<>();
+		set13.add(new HomogeneousPoint3d(1, 0, 0, 1));
+		set13.add(new HomogeneousPoint3d(1, 0, 1, 1));
+		List<HomogeneousPoint3d> set23 = new ArrayList<>();
+		set23.add(new HomogeneousPoint3d(1, 1, 0, Math.sqrt(2) / 2));
+		set23.add(new HomogeneousPoint3d(1, 1, 1, Math.sqrt(2) / 2));
+		List<HomogeneousPoint3d> set33 = new ArrayList<>();
+		set33.add(new HomogeneousPoint3d(0, 1, 0, 1));
+		set33.add(new HomogeneousPoint3d(0, 1, 1, 1));
+		List<HomogeneousPoint3d> set43 = new ArrayList<>();
+		set43.add(new HomogeneousPoint3d(-1, 1, 0, Math.sqrt(2) / 2));
+		set43.add(new HomogeneousPoint3d(-1, 1, 1, Math.sqrt(2) / 2));
+		List<HomogeneousPoint3d> set53 = new ArrayList<>();
+		set53.add(new HomogeneousPoint3d(-1, 0, 0, 1));
+		set53.add(new HomogeneousPoint3d(-1, 0, 1, 1));
+		List<HomogeneousPoint3d> set63 = new ArrayList<>();
+		set63.add(new HomogeneousPoint3d(-1, -1, 0, Math.sqrt(2) / 2));
+		set63.add(new HomogeneousPoint3d(-1, -1, 1, Math.sqrt(2) / 2));
+		List<HomogeneousPoint3d> set73 = new ArrayList<>();
+		set73.add(new HomogeneousPoint3d(0, -1, 0, 1));
+		set73.add(new HomogeneousPoint3d(0, -1, 1, 1));
+		List<HomogeneousPoint3d> set83 = new ArrayList<>();
+		set83.add(new HomogeneousPoint3d(1, -1, 0, Math.sqrt(2) / 2));
+		set83.add(new HomogeneousPoint3d(1, -1, 1, Math.sqrt(2) / 2));
+		List<HomogeneousPoint3d> set93 = new ArrayList<>();
+		set93.add(new HomogeneousPoint3d(1, 0, 0, 1));
+		set93.add(new HomogeneousPoint3d(1, 0, 1, 1));
+		controlPoints3.add(set13);
+		controlPoints3.add(set23);
+		controlPoints3.add(set33);
+		controlPoints3.add(set43);
+		controlPoints3.add(set53);
+		controlPoints3.add(set63);
+		controlPoints3.add(set73);
+		controlPoints3.add(set83);
+		controlPoints3.add(set93);
+
+		List<Double> uKnots3 = new ArrayList<>();
+		uKnots3.add(0.0);
+		uKnots3.add(0.0);
+		uKnots3.add(0.0);
+		uKnots3.add(Math.PI / 2);
+		uKnots3.add(Math.PI / 2);
+		uKnots3.add(Math.PI);
+		uKnots3.add(Math.PI);
+		uKnots3.add(3 * Math.PI / 2);
+		uKnots3.add(3 * Math.PI / 2);
+		uKnots3.add(2 * Math.PI);
+		uKnots3.add(2 * Math.PI);
+		uKnots3.add(2 * Math.PI);
+
+		List<Double> vKnots3 = new ArrayList<>();
+		vKnots3.add(0.0);
+		vKnots3.add(1.0);
+		vKnots3.add(2.0);
+		vKnots3.add(3.0);
+
+		NURBSSurface solid3 = new NURBSSurface(controlPoints3, uKnots3, vKnots3, 2, 1);
+		solid3.setuSteps(12);
+		solid3.setvSteps(1);
+
 		List<NURBSSurface> surfaces = new ArrayList<>();
-		surfaces.add(solid1);
-		surfaces.add(solid2);
+//		surfaces.add(solid1);
+//		surfaces.add(solid2);
+		surfaces.add(solid3);
 		Solid solid = new NURBSPatchwork(surfaces);
 
 //		ParametricFunction x = new ParametricFunction() {
@@ -177,15 +253,71 @@ public class QuadViewPanel extends JPanel {
 
 	private void setup() {
 
-		setLayout(new GridLayout(2,2));
+		setLayout(new BorderLayout());
+		final JPanel quadPanel = new JPanel();
+		quadPanel.setLayout(new GridLayout(2, 2));
 		topLeft = new SubSpaceView(new double[]{0,0,1});
 		topRight = new SubSpaceView(new double[]{-1,0,0});
 		botLeft = new SubSpaceView(new double[]{0,-1,0});
 		botRight = new FullSpaceView();
-		add(topLeft);
-		add(topRight);
-		add(botLeft);
-		add(botRight);
+		quadPanel.add(topLeft);
+		quadPanel.add(topRight);
+		quadPanel.add(botLeft);
+		quadPanel.add(botRight);
+		add(quadPanel, BorderLayout.CENTER);
+
+		JPanel sidePanel = new JPanel();
+		sidePanel.setLayout(new GridLayout(2, 1));
+
+		JPanel infoPanel = new JPanel();
+		infoPanel.setLayout(new BoxLayout(infoPanel, BoxLayout.Y_AXIS));
+		final InfoLabel areaLabel = new InfoLabel() {
+			@Override public void update() {
+				setText("Area: "+solid.getArea());
+			}
+		};
+		areaLabel.setText("Area: unknown");
+		final InfoLabel volumeLabel = new InfoLabel() {
+			@Override public void update() {
+
+				if (!solid.isOpen()) {
+					setText("Volume: " + solid.getVolume());
+				} else {
+					setText("");
+				}
+
+			}
+		};
+		volumeLabel.setText("Volume: unknown");
+
+		infoPanel.add(areaLabel);
+		infoPanel.add(volumeLabel);
+
+		JPanel buttonPanel = new JPanel();
+		buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.Y_AXIS));
+
+		final QuadViewPanel self = this;
+
+		JButton loadButton = new JButton("Load file");
+		loadButton.addActionListener(new ActionListener() {
+			@Override public void actionPerformed(ActionEvent e) {
+
+				JFileChooser chooser = new JFileChooser("./files");
+				int result = chooser.showOpenDialog(quadPanel);
+				if (result == JFileChooser.APPROVE_OPTION) {
+					File file = chooser.getSelectedFile();
+					Solid solid = SolidFileManager.getInstance().load(file);
+					self.setSolid(solid);
+					areaLabel.setSolid(solid);
+					volumeLabel.setSolid(solid);
+				}
+			}
+		});
+		buttonPanel.add(loadButton);
+		sidePanel.add(buttonPanel);
+		sidePanel.add(infoPanel);
+
+		add(sidePanel, BorderLayout.WEST);
 
 	}
 
@@ -197,6 +329,24 @@ public class QuadViewPanel extends JPanel {
 	}
 
 	private void toggleDrawLines(boolean toggle) {
+
+	}
+
+	private abstract class InfoLabel extends JLabel implements SolidObserver {
+
+		Solid solid = null;
+
+		public void setSolid(Solid solid) {
+
+			if (this.solid != null) {
+				this.solid.detachObserver(this);
+			}
+			this.solid = solid;
+			if (solid != null) {
+				solid.attachObserver(this, 3);
+			}
+			update();
+		}
 
 	}
 

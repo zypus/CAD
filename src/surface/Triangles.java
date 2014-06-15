@@ -34,16 +34,16 @@ public class Triangles {
 
 		Point3d v12 = v2.sub(v1);
 		Point3d v13 = v3.sub(v1);
-		double angle = v12.dot(v13);
+		Point3d cross = v12.cross(v13);
 
-		return 0.5 * v12.norm() * v13.norm() * Math.sin(angle);
+		return 0.5 * cross.norm();
 	}
 
 	public double getArea() {
 
 		double area = 0;
 		for (int i = 0; i < indices.size(); i += 3) {
-			area += areaOfTriangle(vertices.get(i), vertices.get(i + 1), vertices.get(i + 2));
+			area += areaOfTriangle(vertices.get(indices.get(i)), vertices.get(indices.get(i+1)), vertices.get(indices.get(i+2)));
 		}
 		return area;
 	}
@@ -57,7 +57,7 @@ public class Triangles {
 
 		double volume = 0;
 		for (int i = 0; i < indices.size(); i+=3) {
-			volume += singedVolumeOfTriangle(vertices.get(i), vertices.get(i+1), vertices.get(i+2));
+			volume += singedVolumeOfTriangle(vertices.get(indices.get(i)), vertices.get(indices.get(i+1)), vertices.get(indices.get(i+2)));
 		}
 		return volume;
 	}
