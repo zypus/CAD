@@ -2,6 +2,13 @@ package surface;
 
 import org.scilab.forge.scirenderer.Canvas;
 import org.scilab.forge.scirenderer.shapes.geometry.DefaultGeometry;
+import util.Bound;
+import util.Function;
+import util.ParametricFunction;
+import util.differentiation.singleParameter.Differentiator;
+import util.differentiation.singleParameter.PointDifference;
+import util.integration.multiParameter.MultiIntegrator;
+import util.integration.multiParameter.MultiSimpsonsRule;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,9 +27,6 @@ public class NURBSSurface extends Solid {
 	List<Double> vKnots = new ArrayList<>();
 	int uOrder = 3;
 	int vOrder = 3;
-	int uSteps = 50;
-	int vSteps = 50;
-	boolean changed = true;
 	Triangles triangles;
 
 	public NURBSSurface(List<List<HomogeneousPoint3d>> controls, List<Double> uKnots, List<Double> vKnots) {
@@ -196,7 +200,6 @@ public class NURBSSurface extends Solid {
 
 	@Override public Point3d replacePoint(Point3d point3d, Point3d otherPoint3d) {
 
-		System.out.println("Replacing");
 		otherPoint3d = new HomogeneousPoint3d(otherPoint3d);
 		for (List<HomogeneousPoint3d> list : controls) {
 			if (list.contains(point3d)) {
@@ -224,23 +227,224 @@ public class NURBSSurface extends Solid {
 		return points;
 	}
 
-	public int getuSteps() {
+	public double getAreaUsingIntegration() {
 
-		return uSteps;
+		ParametricFunction crossProduct = new ParametricFunction() {
+			@Override public double getValue(double u, double v) {
+
+				final double h = 0.1;
+
+				ParametricFunction diffXU = new ParametricFunction() {
+					@Override public double getValue(double u, final double v) {
+
+						Differentiator differentiator = new PointDifference(h);
+						Function diff = new Function() {
+							@Override public double evaluate(double x) {
+
+								return s(x, v).getX();
+							}
+
+							@Override public boolean isBounded() {
+
+								return true;
+							}
+
+							@Override public double leftBound() {
+
+								return getMinU();
+							}
+
+							@Override public double rightBound() {
+
+								return getMaxU();
+							}
+						};
+						return differentiator.differentiate(diff, u);
+					}
+				};
+				ParametricFunction diffYU = new ParametricFunction() {
+					@Override public double getValue(double u, final double v) {
+
+						Differentiator differentiator = new PointDifference(h);
+						Function diff = new Function() {
+							@Override public double evaluate(double x) {
+
+								return s(x, v).getY();
+							}
+
+							@Override public boolean isBounded() {
+
+								return true;
+							}
+
+							@Override public double leftBound() {
+
+								return getMinU();
+							}
+
+							@Override public double rightBound() {
+
+								return getMaxU();
+							}
+						};
+						return differentiator.differentiate(diff, u);
+					}
+				};
+				ParametricFunction diffZU = new ParametricFunction() {
+					@Override public double getValue(double u, final double v) {
+
+						Differentiator differentiator = new PointDifference(h);
+						Function diff = new Function() {
+							@Override public double evaluate(double x) {
+
+								return s(x, v).getZ();
+							}
+
+							@Override public boolean isBounded() {
+
+								return true;
+							}
+
+							@Override public double leftBound() {
+
+								return getMinU();
+							}
+
+							@Override public double rightBound() {
+
+								return getMaxU();
+							}
+						};
+						return differentiator.differentiate(diff, u);
+					}
+				};
+				ParametricFunction diffXV = new ParametricFunction() {
+					@Override public double getValue(final double u, double v) {
+
+						Differentiator differentiator = new PointDifference(h);
+						Function diff = new Function() {
+							@Override public double evaluate(double x) {
+
+								return s(u, x).getX();
+							}
+
+							@Override public boolean isBounded() {
+
+								return true;
+							}
+
+							@Override public double leftBound() {
+
+								return getMinV();
+							}
+
+							@Override public double rightBound() {
+
+								return getMaxV();
+							}
+						};
+						return differentiator.differentiate(diff, v);
+					}
+				};
+				ParametricFunction diffYV = new ParametricFunction() {
+					@Override public double getValue(final double u, double v) {
+
+						Differentiator differentiator = new PointDifference(h);
+						Function diff = new Function() {
+							@Override public double evaluate(double x) {
+
+								return s(u, x).getY();
+							}
+
+							@Override public boolean isBounded() {
+
+								return true;
+							}
+
+							@Override public double leftBound() {
+
+								return getMinV();
+							}
+
+							@Override public double rightBound() {
+
+								return getMaxV();
+							}
+						};
+						return differentiator.differentiate(diff, v);
+					}
+				};
+				ParametricFunction diffZV = new ParametricFunction() {
+					@Override public double getValue(final double u, double v) {
+
+						Differentiator differentiator = new PointDifference(h);
+						Function diff = new Function() {
+							@Override public double evaluate(double x) {
+
+								return s(u, x).getZ();
+							}
+
+							@Override public boolean isBounded() {
+
+								return true;
+							}
+
+							@Override public double leftBound() {
+
+								return getMinV();
+							}
+
+							@Override public double rightBound() {
+
+								return getMaxV();
+							}
+						};
+						return differentiator.differentiate(diff, v);
+					}
+				};
+
+				double cross1 = diffYU.getValue(u, v) * diffZV.getValue(u, v) - diffZU.getValue(u, v) * diffYV.getValue(u, v);
+				double cross2 = diffZU.getValue(u, v) * diffXV.getValue(u, v) - diffXU.getValue(u, v) * diffZV.getValue(u, v);
+				double cross3 = diffXU.getValue(u, v) * diffYV.getValue(u, v) - diffYU.getValue(u, v) * diffXV.getValue(u, v);
+
+				return Math.sqrt(Math.pow(cross1, 2) + Math.pow(cross2, 2) + Math.pow(cross3, 2));
+			}
+		};
+		MultiIntegrator integrator = new MultiSimpsonsRule();
+		int us = (int) (getMaxU() - getMinU());
+		if (us % 2 != 0) {
+			us++;
+		}
+		int vs = (int) (getMaxV() - getMinV());
+		if (vs % 2 != 0) {
+			vs++;
+		}
+
+		return integrator.integrate(crossProduct, new Bound(getMinU(), getMaxU()), new Bound(getMinV(), getMaxV()), us, vs);
 	}
 
-	public void setuSteps(int uSteps) {
+	public List<List<HomogeneousPoint3d>> getControls() {
 
-		this.uSteps = uSteps;
+		return controls;
 	}
 
-	public int getvSteps() {
+	public List<Double> getuKnots() {
 
-		return vSteps;
+		return uKnots;
 	}
 
-	public void setvSteps(int vSteps) {
+	public List<Double> getvKnots() {
 
-		this.vSteps = vSteps;
+		return vKnots;
+	}
+
+	public int getuOrder() {
+
+		return uOrder;
+	}
+
+	public int getvOrder() {
+
+		return vOrder;
 	}
 }

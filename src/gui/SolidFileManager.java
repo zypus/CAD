@@ -5,8 +5,13 @@ import surface.NURBSPatchwork;
 import surface.NURBSSurface;
 import surface.Solid;
 
+import javax.swing.JOptionPane;
+import java.awt.Component;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
@@ -118,4 +123,58 @@ public class SolidFileManager {
 		return instance;
 	}
 
+	public void save(File file, Solid solid, Component owner) {
+
+		try {
+			PrintWriter writer = new PrintWriter(new FileWriter(file));
+			if (solid instanceof NURBSSurface) {
+				NURBSSurface surface = (NURBSSurface) solid;
+				writer.println("NURBSSurface");
+				writer.println(surface.getControls().size());
+				writer.println(surface.getControls().get(0).size());
+				writer.println(surface.getuKnots().size());
+				writer.println(surface.getvKnots().size());
+				writer.println(surface.getuOrder());
+				writer.println(surface.getvOrder());
+				writer.println(surface.getuSteps());
+				writer.println(surface.getvSteps());
+				for (int u = 0; u < surface.getControls().size(); u++) {
+					for (int v = 0; v < surface.getControls().get(0).size(); v++) {
+						HomogeneousPoint3d point3d = surface.getControls().get(u).get(v);
+						writer.printf("%f,%f,%f,%f\n", point3d.x, point3d.y, point3d.z, point3d.w);
+					}
+				}
+				for (int i = 0; i < surface.getuKnots().size(); i++) {
+					writer.print(surface.getuKnots().get(i));
+					if (i != surface.getuKnots().size() - 1) {
+						writer.print(",");
+					}
+				}
+				writer.println();
+				for (int i = 0; i < surface.getvKnots().size(); i++) {
+					writer.print(surface.getvKnots().get(i));
+					if (i != surface.getvKnots().size() - 1) {
+						writer.print(",");
+					}
+				}
+				writer.println();
+				Object[] options = {"Yes", "No"};
+				int
+						optionNumber =
+						JOptionPane.showOptionDialog(owner,
+													 "Is surface closed?",
+													 "Closed/Open",
+													 JOptionPane.YES_NO_OPTION,
+													 JOptionPane.QUESTION_MESSAGE,
+													 null,
+													 options,
+													 options[1]);
+				boolean isOpen = optionNumber == 1;
+				writer.println((isOpen) ? "open" : "closed");
+				writer.flush();
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
 }

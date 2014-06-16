@@ -254,8 +254,8 @@ public class ParametricSurface extends Solid {
 
 	@Override public List<DefaultGeometry> createGeometry(Canvas canvas) {
 
-		int uSteps = 50;
-		int vSteps = 50;
+		int uSteps = 10;
+		int vSteps = 10;
 
 		List<Point3d> vertices = new ArrayList<>();
 		List<Integer> indices = new ArrayList<>();
@@ -266,15 +266,14 @@ public class ParametricSurface extends Solid {
 				double v = getVBound().getLower() + (getVBound().getUpper() - getVBound().getLower() ) * (double) vi / (double) vSteps;
 				Point3d point3d = s(u, v);
 				vertices.add(point3d);
-				System.out.println(point3d);
 				if (ui != uSteps) {
 					if (vi != 0) {
-						indices.add(ui * vSteps + vi);
-						indices.add((ui + 1) * vSteps + vi - 1);
-						indices.add(ui * vSteps + vi - 1);
-						indices.add(ui * vSteps + vi);
-						indices.add((ui + 1) * vSteps + vi);
-						indices.add((ui + 1) * vSteps + vi - 1);
+						indices.add(ui * (vSteps+1) + vi);
+						indices.add((ui + 1) * (vSteps+1) + vi - 1);
+						indices.add(ui * (vSteps+1) + vi - 1);
+						indices.add(ui * (vSteps+1) + vi);
+						indices.add((ui + 1) * (vSteps+1) + vi);
+						indices.add((ui + 1) * (vSteps+1) + vi - 1);
 					}
 				}
 			}

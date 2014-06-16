@@ -1,23 +1,30 @@
 package gui;
 
 import surface.HomogeneousPoint3d;
-import surface.NURBSPatchwork;
 import surface.NURBSSurface;
+import surface.ParametricSurface;
 import surface.Solid;
 import surface.SolidObserver;
+import util.Bound;
+import util.ParametricFunction;
 
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
+import javax.swing.JComponent;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
+import javax.swing.JTextField;
 import javax.swing.WindowConstants;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
@@ -205,27 +212,28 @@ public class QuadViewPanel extends JPanel {
 //		surfaces.add(solid1);
 //		surfaces.add(solid2);
 		surfaces.add(solid3);
-		Solid solid = new NURBSPatchwork(surfaces);
+//		Solid solid = new NURBSPatchwork(surfaces);
 
-//		ParametricFunction x = new ParametricFunction() {
-//			@Override public double getValue(double u, double v) {
-//
-//				return Math.sin(u) * Math.cos(v);
-//			}
-//		};
-//		ParametricFunction y = new ParametricFunction() {
-//			@Override public double getValue(double u, double v) {
-//
-//				return Math.sin(u) * Math.sin(v);
-//			}
-//		};
-//		ParametricFunction z = new ParametricFunction() {
-//			@Override public double getValue(double u, double v) {
-//
-//				return Math.cos(u);
-//			}
-//		};
-//		Solid solid = new ParametricSurface(x, y, z, new Bound(0, Math.PI / 3), new Bound(0, 2 * Math.PI));
+		ParametricFunction x = new ParametricFunction() {
+			@Override public double getValue(double u, double v) {
+
+				return 4*Math.sin(u) * Math.cos(v);
+			}
+		};
+		ParametricFunction y = new ParametricFunction() {
+			@Override public double getValue(double u, double v) {
+
+				return 4*Math.sin(u) * Math.sin(v);
+			}
+		};
+		ParametricFunction z = new ParametricFunction() {
+			@Override public double getValue(double u, double v) {
+
+				return 4*Math.cos(u);
+			}
+		};
+		Solid solid = new ParametricSurface(x, y, z, new Bound(0, Math.PI / 3), new Bound(0, 2 * Math.PI));
+		solid.setOpen(true);
 
 //		Solid solid = new Polyhedron();
 //		List<Point3d> points = new ArrayList<>();
@@ -242,10 +250,16 @@ public class QuadViewPanel extends JPanel {
 		frame.setVisible(true);
 	}
 
+	private JPanel quadPanel;
+
 	private SubSpaceView topLeft;
 	private SubSpaceView topRight;
 	private SubSpaceView botLeft;
 	private SubSpaceView botRight;
+
+	private InfoLabel areaLabel;
+	private InfoLabel volumeLabel;
+	private InfoLabel areaByIntegrationLabel;
 
 	private QuadViewPanel() {
 		setup();
@@ -254,11 +268,11 @@ public class QuadViewPanel extends JPanel {
 	private void setup() {
 
 		setLayout(new BorderLayout());
-		final JPanel quadPanel = new JPanel();
+		quadPanel = new JPanel();
 		quadPanel.setLayout(new GridLayout(2, 2));
 		topLeft = new SubSpaceView(new double[]{0,0,1});
 		topRight = new SubSpaceView(new double[]{-1,0,0});
-		botLeft = new SubSpaceView(new double[]{0,-1,0});
+		botLeft = new SubSpaceView(new double[]{0,1,0});
 		botRight = new FullSpaceView();
 		quadPanel.add(topLeft);
 		quadPanel.add(topRight);
@@ -271,17 +285,17 @@ public class QuadViewPanel extends JPanel {
 
 		JPanel infoPanel = new JPanel();
 		infoPanel.setLayout(new BoxLayout(infoPanel, BoxLayout.Y_AXIS));
-		final InfoLabel areaLabel = new InfoLabel() {
+		areaLabel = new InfoLabel() {
 			@Override public void update() {
-				setText("Area: "+solid.getArea());
+				setText("Area:\n\t"+solid.getArea());
 			}
 		};
 		areaLabel.setText("Area: unknown");
-		final InfoLabel volumeLabel = new InfoLabel() {
+		volumeLabel = new InfoLabel() {
 			@Override public void update() {
 
 				if (!solid.isOpen()) {
-					setText("Volume: " + solid.getVolume());
+					setText("Volume:\n\t" + solid.getVolume());
 				} else {
 					setText("");
 				}
@@ -289,9 +303,21 @@ public class QuadViewPanel extends JPanel {
 			}
 		};
 		volumeLabel.setText("Volume: unknown");
+		areaByIntegrationLabel = new InfoLabel() {
+			@Override public void update() {
+
+				if (solid instanceof NURBSSurface) {
+					NURBSSurface surface = (NURBSSurface) solid;
+					setText("Area by integration:\n\t" + surface.getAreaUsingIntegration());
+				}
+
+			}
+		};
+		areaByIntegrationLabel.setText("");
 
 		infoPanel.add(areaLabel);
 		infoPanel.add(volumeLabel);
+		infoPanel.add(areaByIntegrationLabel);
 
 		JPanel buttonPanel = new JPanel();
 		buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.Y_AXIS));
@@ -302,23 +328,187 @@ public class QuadViewPanel extends JPanel {
 		loadButton.addActionListener(new ActionListener() {
 			@Override public void actionPerformed(ActionEvent e) {
 
-				JFileChooser chooser = new JFileChooser("./files");
-				int result = chooser.showOpenDialog(quadPanel);
-				if (result == JFileChooser.APPROVE_OPTION) {
-					File file = chooser.getSelectedFile();
-					Solid solid = SolidFileManager.getInstance().load(file);
-					self.setSolid(solid);
-					areaLabel.setSolid(solid);
-					volumeLabel.setSolid(solid);
-				}
+				showLoadDialog();
+			}
+		});
+		JButton saveButton = new JButton("Save to file");
+		saveButton.addActionListener(new ActionListener() {
+			@Override public void actionPerformed(ActionEvent e) {
+
+				showSaveDialog();
+			}
+		});
+		JButton planeButton = new JButton("Create planar surface");
+		planeButton.addActionListener(new ActionListener() {
+			@Override public void actionPerformed(ActionEvent e) {
+
+				showPlaneCreationDialog();
+			}
+		});
+		JButton triangleButton = new JButton("Set triangle amount");
+		triangleButton.addActionListener(new ActionListener() {
+			@Override public void actionPerformed(ActionEvent e) {
+
+				showTriangleDialog();
 			}
 		});
 		buttonPanel.add(loadButton);
+		buttonPanel.add(saveButton);
+		buttonPanel.add(planeButton);
+		buttonPanel.add(triangleButton);
 		sidePanel.add(buttonPanel);
 		sidePanel.add(infoPanel);
 
 		add(sidePanel, BorderLayout.WEST);
 
+		addKeyListener(new KeyAdapter() {
+
+			boolean cToggle = true;
+			boolean fToggle = false;
+
+			@Override public void keyPressed(KeyEvent e) {
+
+				if (e.getKeyCode() == KeyEvent.VK_F) {
+					fToggle = !fToggle;
+					if (fToggle) {
+						quadPanel.setEnabled(false);
+						quadPanel.remove(botRight);
+						self.remove(quadPanel);
+						self.add(botRight, BorderLayout.CENTER);
+						self.revalidate();
+						quadPanel.repaint();
+						botRight.repaint();
+					} else {
+						self.remove(botRight);
+						quadPanel.add(botRight);
+						quadPanel.setEnabled(true);
+						self.add(quadPanel, BorderLayout.CENTER);
+						self.revalidate();
+						botRight.repaint();
+						quadPanel.repaint();
+					}
+				} else if (e.getKeyCode() == KeyEvent.VK_C) {
+					cToggle = !cToggle;
+					topLeft.showControlPoints(cToggle);
+					topRight.showControlPoints(cToggle);
+					botLeft.showControlPoints(cToggle);
+					botRight.showControlPoints(cToggle);
+				} else if (e.getKeyChar() == '+') {
+					LineDrawer.zoom += 0.1;
+					topLeft.update();
+					topRight.update();
+					botLeft.update();
+					botRight.update();
+				} else if (e.getKeyChar() == '-') {
+					if (LineDrawer.zoom > 0.05) {
+						LineDrawer.zoom -= 0.1;
+						topLeft.update();
+						topRight.update();
+						botLeft.update();
+						botRight.update();
+					}
+				} else if (e.getKeyCode() == KeyEvent.VK_L) {
+					showLoadDialog();
+				} else if (e.getKeyCode() == KeyEvent.VK_S) {
+					showSaveDialog();
+				}
+			}
+		});
+		setFocusable(true);
+		requestFocus();
+
+	}
+
+	private void showLoadDialog() {
+
+		JFileChooser chooser = new JFileChooser("./files");
+		int result = chooser.showOpenDialog(quadPanel);
+		if (result == JFileChooser.APPROVE_OPTION) {
+			File file = chooser.getSelectedFile();
+			Solid solid = SolidFileManager.getInstance().load(file);
+			setSolid(solid);
+		}
+		requestFocus();
+	}
+
+	private void showSaveDialog() {
+
+		JFileChooser chooser = new JFileChooser("./files");
+		int result = chooser.showSaveDialog(quadPanel);
+		if (result == JFileChooser.APPROVE_OPTION) {
+			File file = chooser.getSelectedFile();
+			if (!file.getName().endsWith(".txt")) {
+				file = new File(file.getAbsolutePath() + ".txt");
+			}
+			SolidFileManager.getInstance().save(file, topLeft.getSolid(), this);
+		}
+		requestFocus();
+	}
+
+	private void showTriangleDialog() {
+
+		JTextField uSteps = new JTextField();
+		JTextField vSteps = new JTextField();
+		final JComponent[] input = {
+				new JLabel("Triangles in u direction"), uSteps,
+				new JLabel("Triangles in v direction"), vSteps
+		};
+		JOptionPane.showMessageDialog(this, input, "Set triangle amounts", JOptionPane.PLAIN_MESSAGE);
+		uSteps.requestFocus();
+		Solid solid = topLeft.getSolid();
+		solid.setuSteps(Integer.parseInt(uSteps.getText()));
+		solid.setvSteps(Integer.parseInt(vSteps.getText()));
+		solid.setChanged();
+		solid.notifyObservers();
+
+		requestFocus();
+	}
+
+	private void showPlaneCreationDialog() {
+
+		JTextField width = new JTextField();
+		JTextField height = new JTextField();
+		JTextField uOrder = new JTextField();
+		JTextField vOrder = new JTextField();
+		final JComponent[] input = {
+				new JLabel("Number of u controls"), width,
+				new JLabel("Number of v controls"), height,
+				new JLabel("Degree in u direction"), uOrder,
+				new JLabel("Degree in v direction"), vOrder
+		};
+		JOptionPane.showMessageDialog(this, input, "Create plane surface", JOptionPane.PLAIN_MESSAGE);
+		Solid solid = createPlane(Integer.parseInt(width.getText()), Integer.parseInt(height.getText()), Integer.parseInt(uOrder.getText()),
+								  Integer.parseInt(vOrder.getText()));
+		width.requestFocus();
+		setSolid(solid);
+
+		requestFocus();
+	}
+
+	private NURBSSurface createPlane(int width, int height, int uOrder, int vOrder) {
+
+		List<List<HomogeneousPoint3d>> controlPoints = new ArrayList<>();
+		int w = width - 1;
+		int h = height - 1;
+		for (int i = 0; i <= w; i++) {
+			List<HomogeneousPoint3d> vRow = new ArrayList<>();
+			for (int j = 0; j <= h; j++) {
+				vRow.add(new HomogeneousPoint3d(3*(double)i/w-1.5, 3*(double)j/h-1.5, 0));
+			}
+			controlPoints.add(vRow);
+		}
+		List<Double> uKnots = new ArrayList<>();
+		for (int i = 0; i <= width + uOrder; i++) {
+			uKnots.add(new Double(i));
+		}
+		List<Double> vKnots = new ArrayList<>();
+		for (int i = 0; i <= height + vOrder; i++) {
+			vKnots.add(new Double(i));
+		}
+		NURBSSurface surface = new NURBSSurface(controlPoints, uKnots, vKnots, uOrder, vOrder);
+		surface.setuSteps(width+2);
+		surface.setvSteps(height+2);
+		return surface;
 	}
 
 	private void setSolid(Solid solid) {
@@ -326,6 +516,9 @@ public class QuadViewPanel extends JPanel {
 		topRight.setSolid(solid);
 		botLeft.setSolid(solid);
 		botRight.setSolid(solid);
+		areaLabel.setSolid(solid);
+		volumeLabel.setSolid(solid);
+//		areaByIntegrationLabel.setSolid(solid);
 	}
 
 	private void toggleDrawLines(boolean toggle) {

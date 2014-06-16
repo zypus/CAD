@@ -24,6 +24,9 @@ public abstract class Solid {
 
 	private final int ELEMENT_SIZE = 4;
 	private boolean open = true;
+	protected int uSteps;
+	protected int vSteps;
+	protected boolean changed = true;
 
 	private List<PriorityObserver> observers = new ArrayList<>();
 
@@ -108,7 +111,7 @@ public abstract class Solid {
 		}
 	}
 
-	protected void notifyObservers() {
+	public void notifyObservers() {
 
 		for (SolidObserver observer : observers) {
 			observer.update();
@@ -123,6 +126,30 @@ public abstract class Solid {
 	public void setOpen(boolean open) {
 
 		this.open = open;
+	}
+
+	public int getuSteps() {
+
+		return uSteps;
+	}
+
+	public void setuSteps(int uSteps) {
+
+		this.uSteps = uSteps;
+	}
+
+	public int getvSteps() {
+
+		return vSteps;
+	}
+
+	public void setvSteps(int vSteps) {
+
+		this.vSteps = vSteps;
+	}
+
+	public void setChanged() {
+		changed = true;
 	}
 
 	private class PriorityObserver

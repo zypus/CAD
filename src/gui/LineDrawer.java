@@ -34,10 +34,12 @@ import java.util.List;
 public class LineDrawer
 		implements Drawer {
 
+	public static double zoom = 0.25;
 	private static final String MESSAGE_TEXT = "";//"Press 'F' to switch culling mode";
 	private List<DefaultGeometry> geometry = null;
 	private Geometry sphere;
 	private List<Point3d> controlPoints = new ArrayList<>();
+	private static Point3d selectedPoint = null;
 	private final MouseRotationAdapter mra;
 	private final Texture message;
 	private Canvas canvas;
@@ -73,6 +75,11 @@ public class LineDrawer
 		} else {
 			controlPoints = new ArrayList<>();
 		}
+	}
+
+	public void setSelectedPoint(Point3d point) {
+
+		selectedPoint = point;
 	}
 
 	/**
@@ -114,7 +121,7 @@ public class LineDrawer
 			try {
 				dt.getTransformationManager()
 				  .getModelViewStack()
-				  .pushRightMultiply(TransformationFactory.getScaleTransformation(.25, .25, .25));
+				  .pushRightMultiply(TransformationFactory.getScaleTransformation(zoom, zoom, zoom));
 
 				dt.getTransformationManager()
 				  .getModelViewStack()
@@ -128,8 +135,12 @@ public class LineDrawer
 					dt.draw(g, appearance);
 				}
 				Appearance sphereAppearance = new Appearance();
-				sphereAppearance.setFillColor(new Color(1f,0f,0f));
 				for (Point3d point3d : controlPoints) {
+					if (selectedPoint != null && point3d == selectedPoint) {
+						sphereAppearance.setFillColor(new Color(0f,1f,0f));
+					} else {
+						sphereAppearance.setFillColor(new Color(1f, 0f, 0f));
+					}
 					dt.getTransformationManager().getModelViewStack().pushRightMultiply(TransformationFactory.getTranslateTransformation(point3d.x, point3d.y, point3d.z));
 					dt.draw(sphere, sphereAppearance);
 					dt.getTransformationManager().getModelViewStack().pop();

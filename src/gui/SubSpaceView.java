@@ -2,8 +2,6 @@ package gui;
 
 import org.scilab.forge.scirenderer.Canvas;
 import org.scilab.forge.scirenderer.implementation.jogl.JoGLCanvasFactory;
-import org.scilab.forge.scirenderer.picking.PickingTask;
-import org.scilab.forge.scirenderer.picking.PickingTools;
 import org.scilab.forge.scirenderer.shapes.geometry.DefaultGeometry;
 import org.scilab.forge.scirenderer.tranformations.Rotation;
 import org.scilab.forge.scirenderer.tranformations.Vector3d;
@@ -41,17 +39,18 @@ public class SubSpaceView extends GLJPanel
 	protected Canvas canvas;
 	protected LineDrawer drawer;
 
-	private Point3d pointInSpace = null;
+	boolean showControlPoints = true;
 
 	public SubSpaceView(final double[] viewingVector) {
 
 		this.mask = new double[3];
-		for (int i = 0; i < 3; i++) {
-			if (viewingVector[i] != 0) {
-				this.mask[i] = 1;
-			}
+		if (viewingVector[0] != 0) {
+			mask[1] = 1;
+		} else if (viewingVector[1] != 0) {
+			mask[0] = 1;
+		} else if (viewingVector[2] != 0) {
+			mask[2] = 1;
 		}
-
 
 		inverseMask = new double[3];
 
@@ -78,59 +77,44 @@ public class SubSpaceView extends GLJPanel
 		adapter = new MouseAdapter() {
 
 			private boolean drag = false;
+			private final double precision = 0.2;
 
 			@Override public void mousePressed(final MouseEvent e) {
 
 				if (solid != null && catchedMouse) {
 
-					PickingTask task = new PickingTask() {
-						@Override public void perform(PickingTools pickingTools) {
-
-							//							Point3d mousePoint = new Point3d(pickingTools.getUnderlyingPoint(e.getPoint()));
-							Point3d mousePoint = translateMousePoint(e.getPoint());
-							System.out.println(mousePoint);
-							if (selectedPoint != null && selectedPoint.mult(new Point3d(inverseMask)).distance(mousePoint) < 0.1) {
-								drag = true;
-							} else {
-								double smallestDistance = 10000;
-								selectedPoint = null;
-								if (solid.getAllPoints() != null) {
-									for (Point3d point3d : solid.getAllPoints()) {
-										double distance = point3d.mult(new Point3d(inverseMask)).distance(mousePoint);
-										if (distance < 10 && distance < smallestDistance) {
-											selectedPoint = point3d;
-											smallestDistance = distance;
-										}
-									}
-									if (selectedPoint != null) {
-										drag = true;
-									} else {
-										solid.addPoint(mousePoint);
-									}
+					Point3d mousePoint = translateMousePoint(e.getPoint());
+					if (selectedPoint != null && selectedPoint.mult(new Point3d(inverseMask)).distance(mousePoint) < precision) {
+						drag = true;
+					} else {
+						double smallestDistance = 10000;
+						selectedPoint = null;
+						if (solid.getAllPoints() != null) {
+							for (Point3d point3d : solid.getAllPoints()) {
+								double distance = point3d.mult(new Point3d(inverseMask)).distance(mousePoint);
+								if (distance < precision && distance < smallestDistance) {
+									selectedPoint = point3d;
+									smallestDistance = distance;
 								}
 							}
+							if (selectedPoint != null) {
+								drag = true;
+							} else {
+								solid.addPoint(mousePoint);
+							}
 						}
-					};
-					canvas.getPickingManager().addPickingTask(task);
-
+					}
+					solid.notifyObservers();
 				}
 			}
 
 			@Override public void mouseDragged(final MouseEvent e) {
 
 				if (drag) {
-					PickingTask task = new PickingTask() {
-						@Override public void perform(PickingTools pickingTools) {
-
-							//							Point3d mousePoint = new Point3d(pickingTools.getUnderlyingPoint(e.getPoint()));
-							Point3d mousePoint = translateMousePoint(e.getPoint());
-							Point3d newPoint = mousePoint.mult(new Point3d(inverseMask)).add(selectedPoint.mult(new Point3d(mask)));
-							System.out.println(translateMousePoint(e.getPoint()) + " " + mousePoint);
-							solid.replacePoint(selectedPoint, newPoint);
-							selectedPoint = newPoint;
-						}
-					};
-					canvas.getPickingManager().addPickingTask(task);
+					Point3d mousePoint = translateMousePoint(e.getPoint());
+					Point3d newPoint = mousePoint.mult(new Point3d(inverseMask)).add(selectedPoint.mult(new Point3d(mask)));
+					selectedPoint = solid.replacePoint(selectedPoint, newPoint);
+					solid.notifyObservers();
 				}
 			}
 
@@ -153,16 +137,17 @@ public class SubSpaceView extends GLJPanel
 
 				double[] xyz = { 0, 0, 0 };
 				boolean first = true;
-				for (int i = mask.length-1; i >= 0; i--) {
-					if (mask[i] == 0) {
-						if (first) {
-							xyz[i] = (2 * point.getX() / view.getWidth() - 1) * 4;
-							first = false;
-						} else {
-							xyz[i] = (2 * point.getY() / view.getHeight()) * 4;
-						}
-					}
+				if (mask[0] == 1) {
+					xyz[2] = -(2 * point.getX() / view.getWidth() - 1) * 1/LineDrawer.zoom;
+					xyz[1] = -(2 * point.getY() / view.getHeight() - 1) * 1 / LineDrawer.zoom;
+				} else if (mask[1] == 1) {
+					xyz[0] = (2 * point.getX() / view.getWidth() - 1) * 1 / LineDrawer.zoom;
+					xyz[2] = (2 * point.getY() / view.getHeight() - 1) * 1 / LineDrawer.zoom;
+				} else if (mask[2] == 1) {
+					xyz[1] = (2 * point.getX() / view.getWidth() - 1) * 1 / LineDrawer.zoom;
+					xyz[0] = (2 * point.getY() / view.getHeight() - 1) * 1 / LineDrawer.zoom;
 				}
+
 
 				return new Point3d(xyz[0], xyz[1], xyz[2]);
 			}
@@ -199,11 +184,21 @@ public class SubSpaceView extends GLJPanel
 		update();
 	}
 
+	public void showControlPoints(boolean show) {
+		showControlPoints = show;
+		update();
+	}
+
 	@Override public void update() {
 		if (solid != null) {
 			List<DefaultGeometry> geometry = solid.createGeometry(canvas);
 			drawer.setGeometry(geometry);
-			drawer.setControlPoints(solid.getAllPoints());
+			if (showControlPoints) {
+				drawer.setControlPoints(solid.getAllPoints());
+			} else {
+				drawer.setControlPoints(null);
+			}
+			drawer.setSelectedPoint(selectedPoint);
 			canvas.redraw();
 		}
 	}
