@@ -26,6 +26,8 @@ public abstract class Solid {
 	private boolean open = true;
 	protected int uSteps;
 	protected int vSteps;
+	protected int integrationStepsU = 20;
+	protected int integrationStepsV = 20;
 	protected boolean changed = true;
 
 	private List<PriorityObserver> observers = new ArrayList<>();
@@ -150,6 +152,26 @@ public abstract class Solid {
 
 	public void setChanged() {
 		changed = true;
+	}
+
+	public int getIntegrationStepsU() {
+
+		return integrationStepsU;
+	}
+
+	public void setIntegrationStepsU(int integrationStepsU) {
+
+		this.integrationStepsU = integrationStepsU;
+	}
+
+	public int getIntegrationStepsV() {
+
+		return integrationStepsV;
+	}
+
+	public void setIntegrationStepsV(int integrationStepsV) {
+
+		this.integrationStepsV = integrationStepsV;
 	}
 
 	private class PriorityObserver

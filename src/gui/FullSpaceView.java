@@ -9,9 +9,9 @@ package gui;
  */
 public class FullSpaceView extends SubSpaceView {
 
-	public FullSpaceView() {
+	public FullSpaceView(QuadViewPanel owner) {
 
-		super(new double[]{0,0,1});
+		super(new double[]{0,0,1}, owner);
 		removeMouseListener(getAdapter());
 		removeMouseMotionListener(getAdapter());
 

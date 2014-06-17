@@ -40,6 +40,7 @@ public class LineDrawer
 	private static int drawMode = 0;
 	private List<DefaultGeometry> geometry = null;
 	private Geometry sphere;
+	private Geometry selectedSphere;
 	private List<Point3d> controlPoints = new ArrayList<>();
 	private static Point3d selectedPoint = null;
 	private final MouseRotationAdapter mra;
@@ -58,6 +59,7 @@ public class LineDrawer
 		mra = mouseRotationAdapter;
 		this.canvas = canvas;
 		sphere = SphereFactory.getSingleton().create(canvas, 0.1f, 0, 0);
+		selectedSphere = SphereFactory.getSingleton().create(canvas, 0.15f, 0, 0);
 	}
 
 	public List<DefaultGeometry> getGeometry() {
@@ -169,13 +171,16 @@ public class LineDrawer
 				}
 				Appearance sphereAppearance = new Appearance();
 				for (Point3d point3d : controlPoints) {
+					Geometry marker;
 					if (selectedPoint != null && point3d == selectedPoint) {
 						sphereAppearance.setFillColor(new Color(0f,1f,0f));
+						marker = selectedSphere;
 					} else {
 						sphereAppearance.setFillColor(new Color(1f, 0f, 0f));
+						marker = sphere;
 					}
 					dt.getTransformationManager().getModelViewStack().pushRightMultiply(TransformationFactory.getTranslateTransformation(point3d.x, point3d.y, point3d.z));
-					dt.draw(sphere, sphereAppearance);
+					dt.draw(marker, sphereAppearance);
 					dt.getTransformationManager().getModelViewStack().pop();
 				}
 			} catch (SciRendererException ignored) {

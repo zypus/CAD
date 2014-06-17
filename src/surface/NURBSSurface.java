@@ -148,29 +148,43 @@ public class NURBSSurface extends Solid {
 
 		if (changed) {
 
+			long then = System.currentTimeMillis();
+
 			List<Point3d> vertices = new ArrayList<>();
 			List<Integer> indices = new ArrayList<>();
 
 			for (int ui = 0; ui <= uSteps; ui++) {
-				double u = (ui == uSteps) ? getMaxU()-0.00001 : getMinU() + 0.00001 + (getMaxU() - getMinU()) * (double) ui / (double) uSteps;
+				double
+						u =
+						(ui == uSteps) ?
+						getMaxU() - 0.00001 :
+						getMinU() + 0.00001 + (getMaxU() - getMinU()) * (double) ui / (double) uSteps;
 				for (int vi = 0; vi <= vSteps; vi++) {
-					double v = (vi == vSteps) ? getMaxV()-0.00001 : getMinV() + 0.00001 + (getMaxV() - getMinV()) * (double) vi / (double) vSteps;
+					double
+							v =
+							(vi == vSteps) ?
+							getMaxV() - 0.00001 :
+							getMinV() + 0.00001 + (getMaxV() - getMinV()) * (double) vi / (double) vSteps;
 					Point3d point3d = s(u, v);
 					vertices.add(point3d);
 					if (ui != uSteps) {
 						if (vi != 0) {
-							indices.add(ui * (vSteps+1) + vi);
-							indices.add(ui * (vSteps+1) + vi - 1);
-							indices.add((ui + 1) * (vSteps+1) + vi - 1);
-							indices.add(ui * (vSteps+1) + vi);
-							indices.add((ui + 1) * (vSteps+1) + vi - 1);
-							indices.add((ui + 1) * (vSteps+1) + vi);
+							indices.add(ui * (vSteps + 1) + vi);
+							indices.add(ui * (vSteps + 1) + vi - 1);
+							indices.add((ui + 1) * (vSteps + 1) + vi - 1);
+							indices.add(ui * (vSteps + 1) + vi);
+							indices.add((ui + 1) * (vSteps + 1) + vi - 1);
+							indices.add((ui + 1) * (vSteps + 1) + vi);
 						}
 					}
 				}
 			}
 			triangles = new Triangles(vertices, indices);
 			changed = false;
+
+			long now = System.currentTimeMillis();
+
+			System.out.println("uSteps: "+uSteps+" vSteps: "+vSteps+" Triangulation time: "+(now-then)+"ms");
 		}
 
 		return triangles;
@@ -178,18 +192,26 @@ public class NURBSSurface extends Solid {
 
 	@Override public double getArea() {
 
-		return createTriangles().getArea();
+		long then = System.nanoTime();
+		double area = createTriangles().getArea();
+		long now = System.nanoTime();
+		System.out.println("Area time: "+(now-then)/1000+"µs");
+		return area;
 	}
 
 	@Override public double getVolume() {
 
-		return createTriangles().getSignedVolume();
+		long then = System.nanoTime();
+		double signedVolume = createTriangles().getSignedVolume();
+		long now = System.nanoTime();
+		System.out.println("Volume time: " + (now - then)/1000+"µs");
+		return signedVolume;
 	}
 
 	@Override public void addPoint(Point3d point3d) {
 
-		changed = true;
-		notifyObservers();
+//		changed = true;
+//		notifyObservers();
 	}
 
 	@Override public void removePoint(Point3d point3d) {
@@ -205,7 +227,7 @@ public class NURBSSurface extends Solid {
 			if (list.contains(point3d)) {
 				list.set(list.indexOf(point3d), (HomogeneousPoint3d)otherPoint3d);
 				changed = true;
-				notifyObservers();
+//				notifyObservers();
 				return otherPoint3d;
 			}
 		}
@@ -411,16 +433,26 @@ public class NURBSSurface extends Solid {
 			}
 		};
 		MultiIntegrator integrator = new MultiSimpsonsRule();
-		int us = (int) (getMaxU() - getMinU() * 10);
-		if (us % 2 != 0) {
-			us++;
-		}
-		int vs = (int) (getMaxV() - getMinV() * 10);
-		if (vs % 2 != 0) {
-			vs++;
-		}
+//		int us = (int) (getMaxU() - getMinU())*10;
+//		if (us % 2 != 0) {
+//			us++;
+//		}
+//		int vs = (int) (getMaxV() - getMinV())*10;
+//		if (vs % 2 != 0) {
+//			vs++;
+//		}
+		int us = integrationStepsU;
+		int vs = integrationStepsV;
 
-		return integrator.integrate(crossProduct, new Bound(getMinU()+0.0001, getMaxU()-0.0001), new Bound(getMinV()+0.0001, getMaxV()-0.0001), us, vs);
+		long then = System.currentTimeMillis();
+
+		double area = integrator.integrate(crossProduct, new Bound(getMinU()+0.0001, getMaxU()-0.0001), new Bound(getMinV()+0.0001, getMaxV()-0.0001), us, vs);
+
+		long now = System.currentTimeMillis();
+
+		System.out.println("uSteps: "+us+" vSteps: "+vs+" Area integration time: "+(now-then)+"ms");
+
+		return area;
 	}
 
 	public double getVolumeUsingIntegration() {
@@ -549,20 +581,32 @@ public class NURBSSurface extends Solid {
 			}
 		};
 		MultiIntegrator integrator = new MultiSimpsonsRule();
-		int us = (int) (getMaxU() - getMinU() * 10);
-		if (us % 2 != 0) {
-			us++;
-		}
-		int vs = (int) (getMaxV() - getMinV() * 10);
-		if (vs % 2 != 0) {
-			vs++;
-		}
+//		int us = (int) (getMaxU() - getMinU())*10;
+//		if (us % 2 != 0) {
+//			us++;
+//		}
+//		int vs = (int) (getMaxV() - getMinV())*10;
+//		if (vs % 2 != 0) {
+//			vs++;
+//		}
+		int us = integrationStepsU;
+		int vs = integrationStepsV;
 
-		return integrator.integrate(crossProduct,
-									new Bound(getMinU() + 0.0001, getMaxU() - 0.0001),
-									new Bound(getMinV() + 0.0001, getMaxV() - 0.0001),
-									us,
-									vs);
+		long then = System.currentTimeMillis();
+
+		double
+				volume =
+				integrator.integrate(crossProduct,
+									 new Bound(getMinU() + 0.0001, getMaxU() - 0.0001),
+									 new Bound(getMinV() + 0.0001, getMaxV() - 0.0001),
+									 us,
+									 vs);
+
+		long now = System.currentTimeMillis();
+
+		System.out.println("uSteps: "+us+" vSteps: "+vs+" Volume integration time: " + (now - then)+"ms");
+
+		return volume;
 	}
 
 	public List<List<HomogeneousPoint3d>> getControls() {

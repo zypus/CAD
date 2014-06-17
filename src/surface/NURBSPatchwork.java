@@ -41,6 +41,15 @@ public class NURBSPatchwork
 		return volume;
 	}
 
+	public double getAreaUsingIntegration() {
+
+		double area = 0;
+		for (NURBSSurface surface : surfaces) {
+			area += surface.getAreaUsingIntegration();
+		}
+		return area;
+	}
+
 	@Override public List<DefaultGeometry> createGeometry(Canvas canvas) {
 
 		List<DefaultGeometry> geometries = new ArrayList<>();
@@ -48,6 +57,15 @@ public class NURBSPatchwork
 			geometries.add(triangulation(canvas, surface.createTriangles()));
 		}
 		return geometries;
+	}
+
+	@Override public void setChanged() {
+
+		super.setChanged();
+		for (NURBSSurface surface : surfaces) {
+			surface.setChanged();
+		}
+
 	}
 
 	@Override public void addPoint(Point3d point3d) {
@@ -81,5 +99,21 @@ public class NURBSPatchwork
 			point3ds.addAll(surface.getAllPoints());
 		}
 		return point3ds;
+	}
+
+	@Override public void setvSteps(int vSteps) {
+
+		super.setvSteps(vSteps);
+		for (NURBSSurface surface : surfaces) {
+			surface.setvSteps(vSteps);
+		}
+	}
+
+	@Override public void setuSteps(int uSteps) {
+
+		super.setuSteps(uSteps);
+		for (NURBSSurface surface : surfaces) {
+			surface.setuSteps(uSteps);
+		}
 	}
 }

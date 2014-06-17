@@ -41,7 +41,11 @@ public class SubSpaceView extends GLJPanel
 
 	boolean showControlPoints = true;
 
-	public SubSpaceView(final double[] viewingVector) {
+	private  QuadViewPanel owner;
+
+	public SubSpaceView(final double[] viewingVector, final QuadViewPanel owner) {
+
+		this.owner = owner;
 
 		this.mask = new double[3];
 		if (viewingVector[0] != 0) {
@@ -78,6 +82,7 @@ public class SubSpaceView extends GLJPanel
 
 			private boolean drag = false;
 			private final double precision = 0.2;
+			public boolean dragged = false;
 
 			@Override public void mousePressed(final MouseEvent e) {
 
@@ -104,22 +109,28 @@ public class SubSpaceView extends GLJPanel
 							}
 						}
 					}
-					solid.notifyObservers();
+					owner.update();
 				}
 			}
 
 			@Override public void mouseDragged(final MouseEvent e) {
 
 				if (drag) {
+					dragged = true;
 					Point3d mousePoint = translateMousePoint(e.getPoint());
 					Point3d newPoint = mousePoint.mult(new Point3d(inverseMask)).add(selectedPoint.mult(new Point3d(mask)));
 					selectedPoint = solid.replacePoint(selectedPoint, newPoint);
-					solid.notifyObservers();
+					solid.setChanged();
+					owner.update();
 				}
 			}
 
 			@Override public void mouseReleased(MouseEvent e) {
 
+				if (dragged) {
+					owner.setSolid(solid);
+				}
+				dragged = false;
 				drag = false;
 			}
 

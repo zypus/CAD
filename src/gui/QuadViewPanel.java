@@ -1,6 +1,7 @@
 package gui;
 
 import surface.HomogeneousPoint3d;
+import surface.NURBSPatchwork;
 import surface.NURBSSurface;
 import surface.ParametricSurface;
 import surface.Solid;
@@ -262,6 +263,8 @@ public class QuadViewPanel extends JPanel {
 	private InfoLabel areaByIntegrationLabel;
 	private InfoLabel volumeByIntegrationLabel;
 
+	private Thread computationThread = null;
+
 	private QuadViewPanel() {
 		setup();
 	}
@@ -271,10 +274,10 @@ public class QuadViewPanel extends JPanel {
 		setLayout(new BorderLayout());
 		quadPanel = new JPanel();
 		quadPanel.setLayout(new GridLayout(2, 2));
-		topLeft = new SubSpaceView(new double[]{0,0,1});
-		topRight = new SubSpaceView(new double[]{-1,0,0});
-		botLeft = new SubSpaceView(new double[]{0,1,0});
-		botRight = new FullSpaceView();
+		topLeft = new SubSpaceView(new double[]{0,0,1}, this);
+		topRight = new SubSpaceView(new double[]{-1,0,0}, this);
+		botLeft = new SubSpaceView(new double[]{0,1,0}, this);
+		botRight = new FullSpaceView(this);
 		quadPanel.add(topLeft);
 		quadPanel.add(topRight);
 		quadPanel.add(botLeft);
@@ -288,6 +291,8 @@ public class QuadViewPanel extends JPanel {
 		infoPanel.setLayout(new BoxLayout(infoPanel, BoxLayout.Y_AXIS));
 		areaLabel = new InfoLabel() {
 			@Override public void update() {
+
+				setText("Area : Computing...");
 				setText("Area:\n\t"+solid.getArea());
 			}
 		};
@@ -295,6 +300,7 @@ public class QuadViewPanel extends JPanel {
 		volumeLabel = new InfoLabel() {
 			@Override public void update() {
 
+				setText("Volume: Computing...");
 				if (!solid.isOpen()) {
 					setText("Volume:\n\t" + solid.getVolume());
 				} else {
@@ -307,24 +313,36 @@ public class QuadViewPanel extends JPanel {
 		areaByIntegrationLabel = new InfoLabel() {
 			@Override public void update() {
 
-				if (solid instanceof NURBSSurface) {
-					NURBSSurface surface = (NURBSSurface) solid;
-					setText("Area by integration:\n\t" + surface.getAreaUsingIntegration());
+				if (!Thread.currentThread().isInterrupted()) {
+					setText("Area by integration : Computing...");
+					if (solid instanceof NURBSSurface) {
+						NURBSSurface surface = (NURBSSurface) solid;
+						setText("Area by integration:\n\t" + surface.getAreaUsingIntegration());
+					} else if (solid instanceof NURBSPatchwork) {
+						NURBSPatchwork surface = (NURBSPatchwork) solid;
+						setText("Area by integration:\n\t" + surface.getAreaUsingIntegration());
+					} else {
+						setText("");
+					}
 				}
-
 			}
 		};
 		areaByIntegrationLabel.setText("");
 		volumeByIntegrationLabel = new InfoLabel() {
 			@Override public void update() {
 
-				if (!solid.isOpen()) {
-					if (solid instanceof NURBSSurface) {
-						NURBSSurface surface = (NURBSSurface) solid;
-						setText("Volume by integration:\n\t" + surface.getVolumeUsingIntegration());
+				if (!Thread.currentThread().isInterrupted()) {
+					if (!solid.isOpen()) {
+						if (solid instanceof NURBSSurface) {
+							setText("Volume by integration : Computing...");
+							NURBSSurface surface = (NURBSSurface) solid;
+							setText("Volume by integration:\n\t" + surface.getVolumeUsingIntegration());
+						} else {
+							setText("");
+						}
+					} else {
+						setText("");
 					}
-				} else {
-					setText("");
 				}
 
 			}
@@ -369,10 +387,18 @@ public class QuadViewPanel extends JPanel {
 				showTriangleDialog();
 			}
 		});
+		JButton integrationButton = new JButton("Integration settings");
+		integrationButton.addActionListener(new ActionListener() {
+			@Override public void actionPerformed(ActionEvent e) {
+
+				showIntegrationDialog();
+			}
+		});
 		buttonPanel.add(loadButton);
 		buttonPanel.add(saveButton);
 		buttonPanel.add(planeButton);
 		buttonPanel.add(triangleButton);
+		buttonPanel.add(integrationButton);
 		sidePanel.add(buttonPanel);
 		sidePanel.add(infoPanel);
 
@@ -448,6 +474,36 @@ public class QuadViewPanel extends JPanel {
 
 	}
 
+	private void showIntegrationDialog() {
+
+		JTextField uSteps = new JTextField();
+		JTextField vSteps = new JTextField();
+		final JComponent[] input = {
+				new JLabel("Steps in u direction"), uSteps,
+				new JLabel("Steps in v direction"), vSteps
+		};
+		JOptionPane.showMessageDialog(this, input, "Integration settings", JOptionPane.PLAIN_MESSAGE);
+		uSteps.requestFocus();
+		Solid solid = topLeft.getSolid();
+		solid.setIntegrationStepsU(Integer.parseInt(uSteps.getText()));
+		solid.setIntegrationStepsV(Integer.parseInt(vSteps.getText()));
+		areaByIntegrationLabel.setText("Area by integration : Recomputing...");
+		if (!solid.isOpen()) {
+			volumeByIntegrationLabel.setText("Volume by integration : Recomputing...");
+		}
+		Thread thread = new Thread(new Runnable() {
+			@Override public void run() {
+
+				areaByIntegrationLabel.update();
+				volumeByIntegrationLabel.update();
+			}
+		});
+		thread.start();
+
+
+		requestFocus();
+	}
+
 	private void showLoadDialog() {
 
 		JFileChooser chooser = new JFileChooser("./files");
@@ -488,7 +544,12 @@ public class QuadViewPanel extends JPanel {
 		solid.setuSteps(Integer.parseInt(uSteps.getText()));
 		solid.setvSteps(Integer.parseInt(vSteps.getText()));
 		solid.setChanged();
-		solid.notifyObservers();
+		topLeft.update();
+		topRight.update();
+		botLeft.update();
+		botRight.update();
+		areaLabel.update();
+		volumeLabel.update();
 
 		requestFocus();
 	}
@@ -540,19 +601,32 @@ public class QuadViewPanel extends JPanel {
 		return surface;
 	}
 
-	private void setSolid(Solid solid) {
+	public void setSolid(final Solid solid) {
+		if (computationThread != null && computationThread.isAlive()) {
+			computationThread.interrupt();
+		}
 		topLeft.setSolid(solid);
 		topRight.setSolid(solid);
 		botLeft.setSolid(solid);
 		botRight.setSolid(solid);
-		areaLabel.setSolid(solid);
-		volumeLabel.setSolid(solid);
-		areaByIntegrationLabel.setSolid(solid);
-		volumeByIntegrationLabel.setSolid(solid);
+		computationThread = new Thread(new Runnable() {
+			@Override public void run() {
+
+				areaLabel.setSolid(solid);
+				volumeLabel.setSolid(solid);
+				areaByIntegrationLabel.setSolid(solid);
+				volumeByIntegrationLabel.setSolid(solid);
+			}
+		});
+		computationThread.start();
 	}
 
-	private void toggleDrawLines(boolean toggle) {
+	public void update() {
 
+		topLeft.update();
+		topRight.update();
+		botLeft.update();
+		botRight.update();
 	}
 
 	private abstract class InfoLabel extends JLabel implements SolidObserver {

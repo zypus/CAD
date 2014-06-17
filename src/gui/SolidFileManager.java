@@ -52,6 +52,7 @@ public class SolidFileManager {
 		int patchAmount = scanner.nextInt();
 		List<NURBSSurface> patches = new ArrayList<>();
 		for (int i = 0; i < patchAmount; i++) {
+			scanner.next();
 			patches.add(createNurbsSurface(scanner));
 		}
 		String isOpen = scanner.next();
