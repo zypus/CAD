@@ -35,7 +35,9 @@ public class LineDrawer
 		implements Drawer {
 
 	public static double zoom = 0.25;
+	private static Geometry.FaceCullingMode mode = Geometry.FaceCullingMode.CW;
 	private static final String MESSAGE_TEXT = "";//"Press 'F' to switch culling mode";
+	private static int drawMode = 0;
 	private List<DefaultGeometry> geometry = null;
 	private Geometry sphere;
 	private List<Point3d> controlPoints = new ArrayList<>();
@@ -85,15 +87,31 @@ public class LineDrawer
 	/**
 	 * Switch culled face.
 	 */
-	public void switchFace() {
+	public static void switchFace() {
 
-//		switch (geometry.getFaceCullingMode()) {
-//		case CCW:
-//			geometry.setFaceCullingMode(Geometry.FaceCullingMode.CW);
-//			break;
-//		default:
-//			geometry.setFaceCullingMode(Geometry.FaceCullingMode.CCW);
-//		}
+		switch (mode) {
+		case CW:
+			mode = Geometry.FaceCullingMode.CCW;
+			break;
+		case CCW:
+			mode = Geometry.FaceCullingMode.BOTH;
+			break;
+		default:
+			mode = Geometry.FaceCullingMode.CW;
+		}
+	}
+
+	public static void switchDrawMode() {
+		switch (drawMode) {
+		case 0:
+			drawMode = 1;
+			break;
+		case 1:
+			drawMode = 2;
+			break;
+		default:
+			drawMode = 0;
+		}
 	}
 
 	@Override
@@ -132,6 +150,21 @@ public class LineDrawer
 				appearance.setLineColor(new Color(.2f, .2f, .2f));
 				appearance.setLineWidth(0);
 				for (Geometry g : geometry) {
+					DefaultGeometry dg = (DefaultGeometry) g;
+					dg.setFaceCullingMode(mode);
+					switch (drawMode) {
+					case 0:
+						dg.setFillDrawingMode(Geometry.FillDrawingMode.TRIANGLES);
+						dg.setLineDrawingMode(Geometry.LineDrawingMode.SEGMENTS);
+						break;
+					case 1:
+						dg.setFillDrawingMode(Geometry.FillDrawingMode.TRIANGLES);
+						dg.setLineDrawingMode(Geometry.LineDrawingMode.NONE);
+						break;
+					case 2:
+						dg.setFillDrawingMode(Geometry.FillDrawingMode.NONE);
+						dg.setLineDrawingMode(Geometry.LineDrawingMode.SEGMENTS);
+					}
 					dt.draw(g, appearance);
 				}
 				Appearance sphereAppearance = new Appearance();

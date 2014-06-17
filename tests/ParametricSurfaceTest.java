@@ -7,6 +7,17 @@ import org.junit.Assert;
 
 public class ParametricSurfaceTest {
 
+	public static void main(String[] args) {
+		ParametricSurfaceTest test = new ParametricSurfaceTest();
+		try {
+			test.setUp();
+			test.testGetArea();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+	}
+
 	private ParametricSurface surface;
 
 	@Before
@@ -14,7 +25,7 @@ public class ParametricSurfaceTest {
 		ParametricFunction x = new ParametricFunction() {
 			@Override public double getValue(double u, double v) {
 
-				return 4*Math.sin(u)*Math.cos(v);
+				return 4 * Math.sin(u)*Math.cos(v);
 			}
 		};
 		ParametricFunction y = new ParametricFunction() {

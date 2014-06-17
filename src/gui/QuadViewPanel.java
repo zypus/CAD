@@ -260,6 +260,7 @@ public class QuadViewPanel extends JPanel {
 	private InfoLabel areaLabel;
 	private InfoLabel volumeLabel;
 	private InfoLabel areaByIntegrationLabel;
+	private InfoLabel volumeByIntegrationLabel;
 
 	private QuadViewPanel() {
 		setup();
@@ -314,10 +315,26 @@ public class QuadViewPanel extends JPanel {
 			}
 		};
 		areaByIntegrationLabel.setText("");
+		volumeByIntegrationLabel = new InfoLabel() {
+			@Override public void update() {
+
+				if (!solid.isOpen()) {
+					if (solid instanceof NURBSSurface) {
+						NURBSSurface surface = (NURBSSurface) solid;
+						setText("Volume by integration:\n\t" + surface.getVolumeUsingIntegration());
+					}
+				} else {
+					setText("");
+				}
+
+			}
+		};
+		volumeByIntegrationLabel.setText("");
 
 		infoPanel.add(areaLabel);
 		infoPanel.add(volumeLabel);
 		infoPanel.add(areaByIntegrationLabel);
+		infoPanel.add(volumeByIntegrationLabel);
 
 		JPanel buttonPanel = new JPanel();
 		buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.Y_AXIS));
@@ -411,6 +428,18 @@ public class QuadViewPanel extends JPanel {
 					showLoadDialog();
 				} else if (e.getKeyCode() == KeyEvent.VK_S) {
 					showSaveDialog();
+				} else if (e.getKeyCode() == KeyEvent.VK_R) {
+					LineDrawer.switchFace();
+					topLeft.update();
+					topRight.update();
+					botLeft.update();
+					botRight.update();
+				} else if (e.getKeyCode() == KeyEvent.VK_D) {
+					LineDrawer.switchDrawMode();
+					topLeft.update();
+					topRight.update();
+					botLeft.update();
+					botRight.update();
 				}
 			}
 		});
@@ -518,7 +547,8 @@ public class QuadViewPanel extends JPanel {
 		botRight.setSolid(solid);
 		areaLabel.setSolid(solid);
 		volumeLabel.setSolid(solid);
-//		areaByIntegrationLabel.setSolid(solid);
+		areaByIntegrationLabel.setSolid(solid);
+		volumeByIntegrationLabel.setSolid(solid);
 	}
 
 	private void toggleDrawLines(boolean toggle) {

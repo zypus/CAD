@@ -7,6 +7,15 @@ import util.ParametricFunction;
 
 public class MultiSimpsonsRuleTest {
 
+	public static void main(String[] args) {
+
+		try {
+			new MultiSimpsonsRuleTest().testIntegrate();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
 	@Test
 	public void testIntegrate() throws Exception {
 

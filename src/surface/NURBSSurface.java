@@ -232,7 +232,7 @@ public class NURBSSurface extends Solid {
 		ParametricFunction crossProduct = new ParametricFunction() {
 			@Override public double getValue(double u, double v) {
 
-				final double h = 0.1;
+				final double h = 0.01;
 
 				ParametricFunction diffXU = new ParametricFunction() {
 					@Override public double getValue(double u, final double v) {
@@ -251,12 +251,12 @@ public class NURBSSurface extends Solid {
 
 							@Override public double leftBound() {
 
-								return getMinU();
+								return getMinU()+0.0001;
 							}
 
 							@Override public double rightBound() {
 
-								return getMaxU();
+								return getMaxU()-0.0001;
 							}
 						};
 						return differentiator.differentiate(diff, u);
@@ -279,12 +279,12 @@ public class NURBSSurface extends Solid {
 
 							@Override public double leftBound() {
 
-								return getMinU();
+								return getMinU()+0.0001;
 							}
 
 							@Override public double rightBound() {
 
-								return getMaxU();
+								return getMaxU()-0.0001;
 							}
 						};
 						return differentiator.differentiate(diff, u);
@@ -307,12 +307,12 @@ public class NURBSSurface extends Solid {
 
 							@Override public double leftBound() {
 
-								return getMinU();
+								return getMinU()+0.0001;
 							}
 
 							@Override public double rightBound() {
 
-								return getMaxU();
+								return getMaxU()-0.0001;
 							}
 						};
 						return differentiator.differentiate(diff, u);
@@ -335,12 +335,12 @@ public class NURBSSurface extends Solid {
 
 							@Override public double leftBound() {
 
-								return getMinV();
+								return getMinV()+0.0001;
 							}
 
 							@Override public double rightBound() {
 
-								return getMaxV();
+								return getMaxV()-0.0001;
 							}
 						};
 						return differentiator.differentiate(diff, v);
@@ -363,12 +363,12 @@ public class NURBSSurface extends Solid {
 
 							@Override public double leftBound() {
 
-								return getMinV();
+								return getMinV()+0.0001;
 							}
 
 							@Override public double rightBound() {
 
-								return getMaxV();
+								return getMaxV()-0.0001;
 							}
 						};
 						return differentiator.differentiate(diff, v);
@@ -391,12 +391,12 @@ public class NURBSSurface extends Solid {
 
 							@Override public double leftBound() {
 
-								return getMinV();
+								return getMinV()+0.0001;
 							}
 
 							@Override public double rightBound() {
 
-								return getMaxV();
+								return getMaxV()-0.0001;
 							}
 						};
 						return differentiator.differentiate(diff, v);
@@ -411,16 +411,158 @@ public class NURBSSurface extends Solid {
 			}
 		};
 		MultiIntegrator integrator = new MultiSimpsonsRule();
-		int us = (int) (getMaxU() - getMinU());
+		int us = (int) (getMaxU() - getMinU() * 10);
 		if (us % 2 != 0) {
 			us++;
 		}
-		int vs = (int) (getMaxV() - getMinV());
+		int vs = (int) (getMaxV() - getMinV() * 10);
 		if (vs % 2 != 0) {
 			vs++;
 		}
 
-		return integrator.integrate(crossProduct, new Bound(getMinU(), getMaxU()), new Bound(getMinV(), getMaxV()), us, vs);
+		return integrator.integrate(crossProduct, new Bound(getMinU()+0.0001, getMaxU()-0.0001), new Bound(getMinV()+0.0001, getMaxV()-0.0001), us, vs);
+	}
+
+	public double getVolumeUsingIntegration() {
+
+		ParametricFunction crossProduct = new ParametricFunction() {
+			@Override public double getValue(double u, double v) {
+
+				final double h = 0.01;
+
+				ParametricFunction diffXU = new ParametricFunction() {
+					@Override public double getValue(double u, final double v) {
+
+						Differentiator differentiator = new PointDifference(h);
+						Function diff = new Function() {
+							@Override public double evaluate(double x) {
+
+								return s(x, v).getX();
+							}
+
+							@Override public boolean isBounded() {
+
+								return true;
+							}
+
+							@Override public double leftBound() {
+
+								return getMinU() + 0.0001;
+							}
+
+							@Override public double rightBound() {
+
+								return getMaxU() - 0.0001;
+							}
+						};
+						return differentiator.differentiate(diff, u);
+					}
+				};
+				ParametricFunction diffYU = new ParametricFunction() {
+					@Override public double getValue(double u, final double v) {
+
+						Differentiator differentiator = new PointDifference(h);
+						Function diff = new Function() {
+							@Override public double evaluate(double x) {
+
+								return s(x, v).getY();
+							}
+
+							@Override public boolean isBounded() {
+
+								return true;
+							}
+
+							@Override public double leftBound() {
+
+								return getMinU() + 0.0001;
+							}
+
+							@Override public double rightBound() {
+
+								return getMaxU() - 0.0001;
+							}
+						};
+						return differentiator.differentiate(diff, u);
+					}
+				};
+				ParametricFunction diffXV = new ParametricFunction() {
+					@Override public double getValue(final double u, double v) {
+
+						Differentiator differentiator = new PointDifference(h);
+						Function diff = new Function() {
+							@Override public double evaluate(double x) {
+
+								return s(u, x).getX();
+							}
+
+							@Override public boolean isBounded() {
+
+								return true;
+							}
+
+							@Override public double leftBound() {
+
+								return getMinV() + 0.0001;
+							}
+
+							@Override public double rightBound() {
+
+								return getMaxV() - 0.0001;
+							}
+						};
+						return differentiator.differentiate(diff, v);
+					}
+				};
+				ParametricFunction diffYV = new ParametricFunction() {
+					@Override public double getValue(final double u, double v) {
+
+						Differentiator differentiator = new PointDifference(h);
+						Function diff = new Function() {
+							@Override public double evaluate(double x) {
+
+								return s(u, x).getY();
+							}
+
+							@Override public boolean isBounded() {
+
+								return true;
+							}
+
+							@Override public double leftBound() {
+
+								return getMinV() + 0.0001;
+							}
+
+							@Override public double rightBound() {
+
+								return getMaxV() - 0.0001;
+							}
+						};
+						return differentiator.differentiate(diff, v);
+					}
+				};
+
+				double cross = diffXU.getValue(u, v) * diffYV.getValue(u, v) - diffYU.getValue(u, v) * diffXV.getValue(u, v);
+
+				return s(u,v).getZ()*cross;
+			}
+		};
+		MultiIntegrator integrator = new MultiSimpsonsRule();
+		int us = (int) (getMaxU() - getMinU() * 10);
+		if (us % 2 != 0) {
+			us++;
+		}
+		int vs = (int) (getMaxV() - getMinV() * 10);
+		if (vs % 2 != 0) {
+			vs++;
+		}
+
+		return integrator.integrate(crossProduct,
+									new Bound(getMinU() + 0.0001, getMaxU() - 0.0001),
+									new Bound(getMinV() + 0.0001, getMaxV() - 0.0001),
+									us,
+									vs);
 	}
 
 	public List<List<HomogeneousPoint3d>> getControls() {
