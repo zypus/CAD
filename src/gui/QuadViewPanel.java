@@ -292,16 +292,18 @@ public class QuadViewPanel extends JPanel {
 		areaLabel = new InfoLabel() {
 			@Override public void update() {
 
-				setText("Area : Computing...");
-				setText("Area:\n\t"+solid.getArea());
+				if (!(solid instanceof ParametricSurface)) {
+					setText("Area : Computing...");
+					setText("Area:\n\t" + solid.getArea());
+				}
 			}
 		};
-		areaLabel.setText("Area: unknown");
+		areaLabel.setText("");
 		volumeLabel = new InfoLabel() {
 			@Override public void update() {
 
-				setText("Volume: Computing...");
 				if (!solid.isOpen()) {
+					setText("Volume: Computing...");
 					setText("Volume:\n\t" + solid.getVolume());
 				} else {
 					setText("");
@@ -309,7 +311,7 @@ public class QuadViewPanel extends JPanel {
 
 			}
 		};
-		volumeLabel.setText("Volume: unknown");
+		volumeLabel.setText("");
 		areaByIntegrationLabel = new InfoLabel() {
 			@Override public void update() {
 
@@ -321,7 +323,9 @@ public class QuadViewPanel extends JPanel {
 					} else if (solid instanceof NURBSPatchwork) {
 						NURBSPatchwork surface = (NURBSPatchwork) solid;
 						setText("Area by integration:\n\t" + surface.getAreaUsingIntegration());
-					} else {
+					} else if (solid instanceof ParametricSurface) {
+						setText("Area by integration:\n\t" + solid.getArea());
+				   	}else {
 						setText("");
 					}
 				}

@@ -253,7 +253,14 @@ public class ParametricSurface extends Solid {
 		int us = integrationStepsU;
 		int vs = integrationStepsV;
 
-		return integrator.integrate(crossProduct, uBound, vBound, us, vs);
+		long then = System.currentTimeMillis();
+
+		double area = integrator.integrate(crossProduct, uBound, vBound, us, vs);
+
+		long now = System.currentTimeMillis();
+		System.out.println("uSteps: " + us + " vSteps: " + vs + " Area integration time: " + (now - then) + "ms");
+
+		return area;
 	}
 
 	@Override public List<DefaultGeometry> createGeometry(Canvas canvas) {
