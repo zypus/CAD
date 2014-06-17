@@ -294,7 +294,9 @@ public class QuadViewPanel extends JPanel {
 
 				if (!(solid instanceof ParametricSurface)) {
 					setText("Area : Computing...");
-					setText("Area:\n\t" + solid.getArea());
+					double area = solid.getArea();
+					setText("Area:\n\t" + area);
+					System.out.println("area = " + area);
 				}
 			}
 		};
@@ -304,7 +306,9 @@ public class QuadViewPanel extends JPanel {
 
 				if (!solid.isOpen()) {
 					setText("Volume: Computing...");
-					setText("Volume:\n\t" + solid.getVolume());
+					double volume = solid.getVolume();
+					setText("Volume:\n\t" + volume);
+					System.out.println("volume = " + volume);
 				} else {
 					setText("");
 				}
@@ -319,12 +323,18 @@ public class QuadViewPanel extends JPanel {
 					setText("Area by integration : Computing...");
 					if (solid instanceof NURBSSurface) {
 						NURBSSurface surface = (NURBSSurface) solid;
-						setText("Area by integration:\n\t" + surface.getAreaUsingIntegration());
+						double areaUsingIntegration = surface.getAreaUsingIntegration();
+						setText("Area by integration:\n\t" + areaUsingIntegration);
+						System.out.println("areaUsingIntegration = " + areaUsingIntegration);
 					} else if (solid instanceof NURBSPatchwork) {
 						NURBSPatchwork surface = (NURBSPatchwork) solid;
-						setText("Area by integration:\n\t" + surface.getAreaUsingIntegration());
+						double areaUsingIntegration = surface.getAreaUsingIntegration();
+						setText("Area by integration:\n\t" + areaUsingIntegration);
+						System.out.println("areaUsingIntegration = " + areaUsingIntegration);
 					} else if (solid instanceof ParametricSurface) {
-						setText("Area by integration:\n\t" + solid.getArea());
+						double area = solid.getArea();
+						setText("Area by integration:\n\t" + area);
+						System.out.println("area = " + area);
 				   	}else {
 						setText("");
 					}
@@ -340,7 +350,9 @@ public class QuadViewPanel extends JPanel {
 						if (solid instanceof NURBSSurface) {
 							setText("Volume by integration : Computing...");
 							NURBSSurface surface = (NURBSSurface) solid;
-							setText("Volume by integration:\n\t" + surface.getVolumeUsingIntegration());
+							double volumeUsingIntegration = surface.getVolumeUsingIntegration();
+							setText("Volume by integration:\n\t" + volumeUsingIntegration);
+							System.out.println("volumeUsingIntegration = " + volumeUsingIntegration);
 						} else {
 							setText("");
 						}

@@ -36,7 +36,7 @@ public class LineDrawer
 
 	public static double zoom = 0.25;
 	private static Geometry.FaceCullingMode mode = Geometry.FaceCullingMode.CW;
-	private static final String MESSAGE_TEXT = "";//"Press 'F' to switch culling mode";
+	private static String messageText = "";//"Press 'F' to switch culling mode";
 	private static int drawMode = 0;
 	private List<DefaultGeometry> geometry = null;
 	private Geometry sphere;
@@ -44,7 +44,7 @@ public class LineDrawer
 	private List<Point3d> controlPoints = new ArrayList<>();
 	private static Point3d selectedPoint = null;
 	private final MouseRotationAdapter mra;
-	private final Texture message;
+	private Texture message;
 	private Canvas canvas;
 
 	/**
@@ -113,6 +113,14 @@ public class LineDrawer
 			break;
 		default:
 			drawMode = 0;
+		}
+	}
+
+	public void setMessageText(String text) {
+
+		if (!text.equals("") || !messageText.equals("")) {
+			messageText = text;
+			message = createMessage(canvas);
 		}
 	}
 
@@ -204,7 +212,8 @@ public class LineDrawer
 	 */
 	private Texture createMessage(final Canvas canvas) {
 
-		final TextEntity text = new TextEntity(MESSAGE_TEXT);
+		final TextEntity text = new TextEntity(messageText);
+		text.setTextColor(new Color(1f,1f,1f));
 		Texture texture = canvas.getTextureManager().createTexture();
 		texture.setDrawer(new TextureDrawer() {
 

@@ -142,6 +142,26 @@ public class SubSpaceView extends GLJPanel
 			@Override public void mouseExited(MouseEvent e) {
 
 				catchedMouse = false;
+				drawer.setMessageText("");
+				canvas.redraw();
+			}
+
+			@Override public void mouseMoved(MouseEvent e) {
+
+				String message = "";
+				if (catchedMouse) {
+					Point3d mousePoint = translateMousePoint(e.getPoint());
+
+					if (mask[0] == 1) {
+						message = "(y: "+((int)(mousePoint.getY()*100)/100.0)+" ; z: "+ ((int) (mousePoint.getZ() * 100) / 100.0)+")";
+					} else if (mask[1] == 1) {
+						message = "(x: " + ((int) (mousePoint.getX() * 100) / 100.0) + " ; z: " + ((int) (mousePoint.getZ() * 100) / 100.0)+")";
+					} else if (mask[2] == 1) {
+						message = "(x: " + ((int) (mousePoint.getX() * 100) / 100.0) + " ; y: " + ((int) (mousePoint.getY() * 100) / 100.0)+")";
+					}
+				}
+				drawer.setMessageText(message);
+				canvas.redraw();
 			}
 
 			private Point3d translateMousePoint(Point point) {
@@ -149,14 +169,14 @@ public class SubSpaceView extends GLJPanel
 				double[] xyz = { 0, 0, 0 };
 				boolean first = true;
 				if (mask[0] == 1) {
-					xyz[2] = -(2 * point.getX() / view.getWidth() - 1) * 1/LineDrawer.zoom;
-					xyz[1] = -(2 * point.getY() / view.getHeight() - 1) * 1 / LineDrawer.zoom;
+					xyz[2] = -(2 * point.getX() / view.getWidth() - 1) /LineDrawer.zoom;
+					xyz[1] = -(2 * point.getY() / view.getHeight() - 1) / LineDrawer.zoom;
 				} else if (mask[1] == 1) {
-					xyz[0] = (2 * point.getX() / view.getWidth() - 1) * 1 / LineDrawer.zoom;
-					xyz[2] = (2 * point.getY() / view.getHeight() - 1) * 1 / LineDrawer.zoom;
+					xyz[0] = (2 * point.getX() / view.getWidth() - 1) / LineDrawer.zoom;
+					xyz[2] = (2 * point.getY() / view.getHeight() - 1) / LineDrawer.zoom;
 				} else if (mask[2] == 1) {
-					xyz[1] = (2 * point.getX() / view.getWidth() - 1) * 1 / LineDrawer.zoom;
-					xyz[0] = (2 * point.getY() / view.getHeight() - 1) * 1 / LineDrawer.zoom;
+					xyz[1] = (2 * point.getX() / view.getWidth() - 1) / LineDrawer.zoom;
+					xyz[0] = (2 * point.getY() / view.getHeight() - 1) / LineDrawer.zoom;
 				}
 
 
