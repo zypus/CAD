@@ -483,23 +483,23 @@ public class QuadViewPanel extends JPanel {
 				new JLabel("Steps in v direction"), vSteps
 		};
 		JOptionPane.showMessageDialog(this, input, "Integration settings", JOptionPane.PLAIN_MESSAGE);
-		uSteps.requestFocus();
-		Solid solid = topLeft.getSolid();
-		solid.setIntegrationStepsU(Integer.parseInt(uSteps.getText()));
-		solid.setIntegrationStepsV(Integer.parseInt(vSteps.getText()));
-		areaByIntegrationLabel.setText("Area by integration : Recomputing...");
-		if (!solid.isOpen()) {
-			volumeByIntegrationLabel.setText("Volume by integration : Recomputing...");
-		}
-		Thread thread = new Thread(new Runnable() {
-			@Override public void run() {
-
-				areaByIntegrationLabel.update();
-				volumeByIntegrationLabel.update();
+		if (!uSteps.getText().equals("") && !vSteps.getText().equals("")) {
+			Solid solid = topLeft.getSolid();
+			solid.setIntegrationStepsU(Integer.parseInt(uSteps.getText()));
+			solid.setIntegrationStepsV(Integer.parseInt(vSteps.getText()));
+			areaByIntegrationLabel.setText("Area by integration : Recomputing...");
+			if (!solid.isOpen()) {
+				volumeByIntegrationLabel.setText("Volume by integration : Recomputing...");
 			}
-		});
-		thread.start();
+			Thread thread = new Thread(new Runnable() {
+				@Override public void run() {
 
+					areaByIntegrationLabel.update();
+					volumeByIntegrationLabel.update();
+				}
+			});
+			thread.start();
+		}
 
 		requestFocus();
 	}
@@ -539,17 +539,19 @@ public class QuadViewPanel extends JPanel {
 				new JLabel("Triangles in v direction"), vSteps
 		};
 		JOptionPane.showMessageDialog(this, input, "Set triangle amounts", JOptionPane.PLAIN_MESSAGE);
-		uSteps.requestFocus();
-		Solid solid = topLeft.getSolid();
-		solid.setuSteps(Integer.parseInt(uSteps.getText()));
-		solid.setvSteps(Integer.parseInt(vSteps.getText()));
-		solid.setChanged();
-		topLeft.update();
-		topRight.update();
-		botLeft.update();
-		botRight.update();
-		areaLabel.update();
-		volumeLabel.update();
+		if (!uSteps.getText().equals("") && !vSteps.getText().equals("")) {
+			Solid solid = topLeft.getSolid();
+			solid.setuSteps(Integer.parseInt(uSteps.getText()));
+			solid.setvSteps(Integer.parseInt(vSteps.getText()));
+			solid.setChanged();
+			topLeft.update();
+			topRight.update();
+			botLeft.update();
+			botRight.update();
+			areaLabel.update();
+			volumeLabel.update();
+		}
+
 
 		requestFocus();
 	}
@@ -567,10 +569,14 @@ public class QuadViewPanel extends JPanel {
 				new JLabel("Degree in v direction"), vOrder
 		};
 		JOptionPane.showMessageDialog(this, input, "Create plane surface", JOptionPane.PLAIN_MESSAGE);
-		Solid solid = createPlane(Integer.parseInt(width.getText()), Integer.parseInt(height.getText()), Integer.parseInt(uOrder.getText()),
-								  Integer.parseInt(vOrder.getText()));
-		width.requestFocus();
-		setSolid(solid);
+		if (!width.getText().equals("") && !height.getText().equals("") && !uOrder.getText().equals("") && !vOrder.getText().equals("")) {
+			Solid
+					solid =
+					createPlane(Integer.parseInt(width.getText()), Integer.parseInt(height.getText()), Integer.parseInt(uOrder.getText()),
+								Integer.parseInt(vOrder.getText()));
+			width.requestFocus();
+			setSolid(solid);
+		}
 
 		requestFocus();
 	}

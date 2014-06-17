@@ -36,6 +36,8 @@ public class ParametricSurface extends Solid {
 		this.zFunction = zFunction;
 		this.uBound = uBound;
 		this.vBound = vBound;
+		uSteps = 10;
+		vSteps = 10;
 	}
 
 	public Point3d s(double u, double v) {
@@ -240,22 +242,21 @@ public class ParametricSurface extends Solid {
 			}
 		};
 		MultiIntegrator integrator = new MultiSimpsonsRule();
-		int uSteps = (int)(uBound.getUpper()-uBound.getLower())*10;
-		if (uSteps % 2 != 0) {
-			uSteps++;
-		}
-		int vSteps = (int) (vBound.getUpper() - vBound.getLower())*10;
-		if (vSteps % 2 != 0) {
-			vSteps++;
-		}
+//		int uSteps = (int)(uBound.getUpper()-uBound.getLower())*10;
+//		if (uSteps % 2 != 0) {
+//			uSteps++;
+//		}
+//		int vSteps = (int) (vBound.getUpper() - vBound.getLower())*10;
+//		if (vSteps % 2 != 0) {
+//			vSteps++;
+//		}
+		int us = integrationStepsU;
+		int vs = integrationStepsV;
 
-		return integrator.integrate(crossProduct, uBound, vBound, uSteps, vSteps);
+		return integrator.integrate(crossProduct, uBound, vBound, us, vs);
 	}
 
 	@Override public List<DefaultGeometry> createGeometry(Canvas canvas) {
-
-		int uSteps = 10;
-		int vSteps = 10;
 
 		List<Point3d> vertices = new ArrayList<>();
 		List<Integer> indices = new ArrayList<>();
