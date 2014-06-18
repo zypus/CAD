@@ -233,7 +233,7 @@ public class QuadViewPanel extends JPanel {
 				return 4*Math.cos(u);
 			}
 		};
-		Solid solid = new ParametricSurface(x, y, z, new Bound(0, Math.PI / 3), new Bound(0, 2 * Math.PI));
+		Solid solid = new ParametricSurface(x, y, z, new Bound(0, 2 * Math.PI), new Bound(0, 2 * Math.PI));
 		solid.setOpen(true);
 
 //		Solid solid = new Polyhedron();
@@ -463,7 +463,7 @@ public class QuadViewPanel extends JPanel {
 					topRight.showControlPoints(cToggle);
 					botLeft.showControlPoints(cToggle);
 					botRight.showControlPoints(cToggle);
-				} else if (e.getKeyChar() == '+') {
+				} else if (e.getKeyChar() == '+' || e.getKeyChar() == '=') {
 					LineDrawer.zoom += 0.1;
 					topLeft.update();
 					topRight.update();
