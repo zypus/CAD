@@ -26,8 +26,8 @@ public abstract class Solid {
 	private boolean open = true;
 	protected int uSteps;
 	protected int vSteps;
-	protected int integrationStepsU = 20;
-	protected int integrationStepsV = 20;
+	protected int integrationStepsU = 30;
+	protected int integrationStepsV = 30;
 	protected boolean changed = true;
 
 	private List<PriorityObserver> observers = new ArrayList<>();

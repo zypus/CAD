@@ -11,7 +11,7 @@ public class FullSpaceView extends SubSpaceView {
 
 	public FullSpaceView(QuadViewPanel owner) {
 
-		super(new double[]{0,0,1}, owner);
+		super(new double[]{0,0,1}, owner, true);
 		removeMouseListener(getAdapter());
 		removeMouseMotionListener(getAdapter());
 

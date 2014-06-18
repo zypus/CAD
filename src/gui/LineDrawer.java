@@ -4,6 +4,7 @@ import org.scilab.forge.scirenderer.Canvas;
 import org.scilab.forge.scirenderer.Drawer;
 import org.scilab.forge.scirenderer.DrawingTools;
 import org.scilab.forge.scirenderer.SciRendererException;
+import org.scilab.forge.scirenderer.lightning.Light;
 import org.scilab.forge.scirenderer.shapes.appearance.Appearance;
 import org.scilab.forge.scirenderer.shapes.appearance.Color;
 import org.scilab.forge.scirenderer.shapes.geometry.DefaultGeometry;
@@ -14,12 +15,15 @@ import org.scilab.forge.scirenderer.texture.Texture;
 import org.scilab.forge.scirenderer.texture.TextureDrawer;
 import org.scilab.forge.scirenderer.texture.TextureDrawingTools;
 import org.scilab.forge.scirenderer.tranformations.DegenerateMatrixException;
+import org.scilab.forge.scirenderer.tranformations.Rotation;
 import org.scilab.forge.scirenderer.tranformations.Transformation;
 import org.scilab.forge.scirenderer.tranformations.TransformationFactory;
 import org.scilab.forge.scirenderer.tranformations.Vector3d;
 import org.scilab.forge.scirenderer.utils.shapes.geometry.SphereFactory;
 import surface.Point3d;
 
+import javax.swing.Icon;
+import javax.swing.ImageIcon;
 import java.awt.Dimension;
 import java.util.ArrayList;
 import java.util.List;
@@ -46,6 +50,9 @@ public class LineDrawer
 	private final MouseRotationAdapter mra;
 	private Texture message;
 	private Canvas canvas;
+	private boolean lightEnabled = false;
+	private int dir = 0;
+	private Texture iconTexture;
 
 	/**
 	 * Default constructor.
@@ -53,6 +60,13 @@ public class LineDrawer
 	 * @param canvas               the canvas where the drawing will be performed.
 	 * @param mouseRotationAdapter the used for interactivity.
 	 */
+	public LineDrawer(Canvas canvas, MouseRotationAdapter mouseRotationAdapter, int dir) {
+
+		this(canvas, mouseRotationAdapter);
+		this.dir = dir;
+		iconTexture = createCoordinateSystem(canvas);
+	}
+
 	public LineDrawer(Canvas canvas, MouseRotationAdapter mouseRotationAdapter) {
 
 		message = createMessage(canvas);
@@ -60,6 +74,7 @@ public class LineDrawer
 		this.canvas = canvas;
 		sphere = SphereFactory.getSingleton().create(canvas, 0.1f, 0, 0);
 		selectedSphere = SphereFactory.getSingleton().create(canvas, 0.15f, 0, 0);
+		iconTexture = createCoordinateSystem(canvas);
 	}
 
 	public List<DefaultGeometry> getGeometry() {
@@ -84,6 +99,10 @@ public class LineDrawer
 	public void setSelectedPoint(Point3d point) {
 
 		selectedPoint = point;
+	}
+
+	public void setLighting(boolean enable) {
+		lightEnabled = enable;
 	}
 
 	/**
@@ -129,6 +148,21 @@ public class LineDrawer
 
 		dt.clear(new Color(0f, 0f, 0f));
 
+		if (lightEnabled) {
+			Light light = dt.getLightManager().getLight(0);
+//			light.setPosition(new Vector3d(0.5f,0.5f,1f));
+			light.setPosition(mra.getRotation().getVectorY().times(-1));
+			light.setSpotDirection(mra.getRotation().getVectorY());
+			light.setAmbientColor(new Color(0.5f,0.5f,0.5f));
+			light.setDiffuseColor(new Color(0.5f,0.5f,0.5f));
+//			light.setSpecularColor(new Color(0.5f, 0.5f, 0.5f));
+			light.setEnable(true);
+			dt.getLightManager().setLightningEnable(true);
+		} else {
+			dt.getLightManager().setLightningEnable(false);
+		}
+
+
 		if (geometry != null) {
 			try {
 				Transformation
@@ -141,9 +175,15 @@ public class LineDrawer
 			}
 
 			try {
-				dt.draw(message, AnchorPosition.UPPER_LEFT, new Vector3d(-.95, .95, 0));
+				dt.draw(iconTexture, AnchorPosition.UPPER_LEFT, new Vector3d(-1, 1, 0));
 			} catch (SciRendererException ignored) {
 				System.out.println("Crashed 2");
+			}
+
+			try {
+				dt.draw(message, AnchorPosition.UPPER_LEFT, new Vector3d(-.95, 1.1, 0));
+			} catch (SciRendererException ignored) {
+				System.out.println("Crashed 3");
 			}
 
 			try {
@@ -154,6 +194,11 @@ public class LineDrawer
 				dt.getTransformationManager()
 				  .getModelViewStack()
 				  .pushRightMultiply(TransformationFactory.getRotationTransformation(mra.getRotation()));
+				if (dir == 3) {
+					dt.getTransformationManager()
+					  .getModelViewStack()
+					  .pushRightMultiply(TransformationFactory.getRotationTransformation(new Rotation(Math.PI, new Vector3d(0,0,1))));
+				}
 
 				Appearance appearance = new Appearance();
 				appearance.setFillColor(new Color(1f,1f,1f));
@@ -227,6 +272,48 @@ public class LineDrawer
 			public Dimension getTextureSize() {
 
 				return text.getSize();
+			}
+
+			@Override
+			public OriginPosition getOriginPosition() {
+
+				return OriginPosition.UPPER_LEFT;
+			}
+		});
+
+		return texture;
+	}
+
+	private Texture createCoordinateSystem(final Canvas canvas) {
+		String fileName = "./images/";
+		switch(dir) {
+		case 0:
+			fileName += "3D.png";
+			break;
+		case 1:
+			fileName += "Coordinate Cross XY.png";
+			break;
+		case 2:
+			fileName += "Coordinate Cross XZ.png";
+			break;
+		case 3:
+			fileName += "Coordinate Cross YZ.png";
+			break;
+		}
+		final Icon icon = new ImageIcon(fileName);
+		Texture texture = canvas.getTextureManager().createTexture();
+		texture.setDrawer(new TextureDrawer() {
+
+			@Override
+			public void draw(TextureDrawingTools drawingTools) {
+
+				drawingTools.draw(icon, 0, 0);
+			}
+
+			@Override
+			public Dimension getTextureSize() {
+
+				return new Dimension(icon.getIconWidth(), icon.getIconHeight());
 			}
 
 			@Override

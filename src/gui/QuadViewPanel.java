@@ -274,9 +274,9 @@ public class QuadViewPanel extends JPanel {
 		setLayout(new BorderLayout());
 		quadPanel = new JPanel();
 		quadPanel.setLayout(new GridLayout(2, 2));
-		topLeft = new SubSpaceView(new double[]{0,0,1}, this);
-		topRight = new SubSpaceView(new double[]{-1,0,0}, this);
-		botLeft = new SubSpaceView(new double[]{0,1,0}, this);
+		topLeft = new SubSpaceView(new double[]{0,0,1}, this, false);
+		topRight = new SubSpaceView(new double[]{-1,0,0}, this, false);
+		botLeft = new SubSpaceView(new double[]{0,-1,0}, this, false);
 		botRight = new FullSpaceView(this);
 		quadPanel.add(topLeft);
 		quadPanel.add(topRight);
@@ -293,9 +293,9 @@ public class QuadViewPanel extends JPanel {
 			@Override public void update() {
 
 				if (!(solid instanceof ParametricSurface)) {
-					setText("Area : Computing...");
+					setText("  Area : Computing...");
 					double area = solid.getArea();
-					setText("Area:\n\t" + area);
+					setText("  Area:\n\t" + area);
 					System.out.println("area = " + area);
 				}
 			}
@@ -305,9 +305,9 @@ public class QuadViewPanel extends JPanel {
 			@Override public void update() {
 
 				if (!solid.isOpen()) {
-					setText("Volume: Computing...");
+					setText("  Volume: Computing...");
 					double volume = solid.getVolume();
-					setText("Volume:\n\t" + volume);
+					setText("  Volume:\n\t" + volume);
 					System.out.println("volume = " + volume);
 				} else {
 					setText("");
@@ -320,20 +320,20 @@ public class QuadViewPanel extends JPanel {
 			@Override public void update() {
 
 				if (!Thread.currentThread().isInterrupted()) {
-					setText("Area by integration : Computing...");
+					setText("  Area by integration : Computing...");
 					if (solid instanceof NURBSSurface) {
 						NURBSSurface surface = (NURBSSurface) solid;
 						double areaUsingIntegration = surface.getAreaUsingIntegration();
-						setText("Area by integration:\n\t" + areaUsingIntegration);
+						setText("  Area by integration:\n\t" + areaUsingIntegration);
 						System.out.println("areaUsingIntegration = " + areaUsingIntegration);
 					} else if (solid instanceof NURBSPatchwork) {
 						NURBSPatchwork surface = (NURBSPatchwork) solid;
 						double areaUsingIntegration = surface.getAreaUsingIntegration();
-						setText("Area by integration:\n\t" + areaUsingIntegration);
+						setText("  Area by integration:\n\t" + areaUsingIntegration);
 						System.out.println("areaUsingIntegration = " + areaUsingIntegration);
 					} else if (solid instanceof ParametricSurface) {
 						double area = solid.getArea();
-						setText("Area by integration:\n\t" + area);
+						setText("  Area by integration:\n\t" + area);
 						System.out.println("area = " + area);
 				   	}else {
 						setText("");
@@ -348,10 +348,10 @@ public class QuadViewPanel extends JPanel {
 				if (!Thread.currentThread().isInterrupted()) {
 					if (!solid.isOpen()) {
 						if (solid instanceof NURBSSurface) {
-							setText("Volume by integration : Computing...");
+							setText("  Volume by integration : Computing...");
 							NURBSSurface surface = (NURBSSurface) solid;
 							double volumeUsingIntegration = surface.getVolumeUsingIntegration();
-							setText("Volume by integration:\n\t" + volumeUsingIntegration);
+							setText("  Volume by integration:\n\t" + volumeUsingIntegration);
 							System.out.println("volumeUsingIntegration = " + volumeUsingIntegration);
 						} else {
 							setText("");
@@ -375,14 +375,14 @@ public class QuadViewPanel extends JPanel {
 
 		final QuadViewPanel self = this;
 
-		JButton loadButton = new JButton("Load file");
+		JButton loadButton = new JButton("(L)oad file");
 		loadButton.addActionListener(new ActionListener() {
 			@Override public void actionPerformed(ActionEvent e) {
 
 				showLoadDialog();
 			}
 		});
-		JButton saveButton = new JButton("Save to file");
+		JButton saveButton = new JButton("(S)ave to file");
 		saveButton.addActionListener(new ActionListener() {
 			@Override public void actionPerformed(ActionEvent e) {
 
@@ -415,6 +415,16 @@ public class QuadViewPanel extends JPanel {
 		buttonPanel.add(planeButton);
 		buttonPanel.add(triangleButton);
 		buttonPanel.add(integrationButton);
+
+		buttonPanel.add(new JLabel("  HOTKEYS:"));
+		buttonPanel.add(new JLabel("  F toggle Quadview/3D-View"));
+		buttonPanel.add(new JLabel("  C toggle control points"));
+		buttonPanel.add(new JLabel("  R switch face culling CW/CCW/BOTH"));
+		buttonPanel.add(new JLabel("  D switch render mode"));
+		buttonPanel.add(new JLabel("  T toggle light"));
+		buttonPanel.add(new JLabel("  + zoom in"));
+		buttonPanel.add(new JLabel("  - zoom out"));
+
 		sidePanel.add(buttonPanel);
 		sidePanel.add(infoPanel);
 
@@ -424,6 +434,7 @@ public class QuadViewPanel extends JPanel {
 
 			boolean cToggle = true;
 			boolean fToggle = false;
+			boolean tToggle = false;
 
 			@Override public void keyPressed(KeyEvent e) {
 
@@ -482,6 +493,10 @@ public class QuadViewPanel extends JPanel {
 					topRight.update();
 					botLeft.update();
 					botRight.update();
+				} else if (e.getKeyCode() == KeyEvent.VK_T) {
+					tToggle = !tToggle;
+					botRight.drawer.setLighting(tToggle);
+					botRight.update();
 				}
 			}
 		});
@@ -503,9 +518,9 @@ public class QuadViewPanel extends JPanel {
 			Solid solid = topLeft.getSolid();
 			solid.setIntegrationStepsU(Integer.parseInt(uSteps.getText()));
 			solid.setIntegrationStepsV(Integer.parseInt(vSteps.getText()));
-			areaByIntegrationLabel.setText("Area by integration : Recomputing...");
+			areaByIntegrationLabel.setText("  Area by integration : Recomputing...");
 			if (!solid.isOpen()) {
-				volumeByIntegrationLabel.setText("Volume by integration : Recomputing...");
+				volumeByIntegrationLabel.setText("  Volume by integration : Recomputing...");
 			}
 			Thread thread = new Thread(new Runnable() {
 				@Override public void run() {
@@ -611,11 +626,11 @@ public class QuadViewPanel extends JPanel {
 		}
 		List<Double> uKnots = new ArrayList<>();
 		for (int i = 0; i <= width + uOrder; i++) {
-			uKnots.add(new Double(i));
+			uKnots.add((double) i);
 		}
 		List<Double> vKnots = new ArrayList<>();
 		for (int i = 0; i <= height + vOrder; i++) {
-			vKnots.add(new Double(i));
+			vKnots.add((double) i);
 		}
 		NURBSSurface surface = new NURBSSurface(controlPoints, uKnots, vKnots, uOrder, vOrder);
 		surface.setuSteps(width+2);

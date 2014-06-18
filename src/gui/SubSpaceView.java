@@ -43,7 +43,7 @@ public class SubSpaceView extends GLJPanel
 
 	private  QuadViewPanel owner;
 
-	public SubSpaceView(final double[] viewingVector, final QuadViewPanel owner) {
+	public SubSpaceView(final double[] viewingVector, final QuadViewPanel owner, boolean threeD) {
 
 		this.owner = owner;
 
@@ -73,7 +73,19 @@ public class SubSpaceView extends GLJPanel
 				canvas
 		);
 
-		drawer = new LineDrawer(canvas, mra);
+		if (threeD) {
+			drawer = new LineDrawer(canvas, mra);
+		} else {
+			int dir = 0;
+			if (viewingVector[0] != 0) {
+				dir = 2;
+			} else if (viewingVector[1] != 0) {
+				dir = 3;
+			} else if (viewingVector[2] != 0) {
+				dir = 1;
+			}
+			drawer = new LineDrawer(canvas, mra, dir);
+		}
 		canvas.setMainDrawer(drawer);
 
 		final SubSpaceView view = this;
@@ -169,8 +181,8 @@ public class SubSpaceView extends GLJPanel
 				double[] xyz = { 0, 0, 0 };
 				boolean first = true;
 				if (mask[0] == 1) {
-					xyz[2] = -(2 * point.getX() / view.getWidth() - 1) /LineDrawer.zoom;
-					xyz[1] = -(2 * point.getY() / view.getHeight() - 1) / LineDrawer.zoom;
+					xyz[2] = (2 * point.getX() / view.getWidth() - 1) /LineDrawer.zoom;
+					xyz[1] = (2 * point.getY() / view.getHeight() - 1) / LineDrawer.zoom;
 				} else if (mask[1] == 1) {
 					xyz[0] = (2 * point.getX() / view.getWidth() - 1) / LineDrawer.zoom;
 					xyz[2] = (2 * point.getY() / view.getHeight() - 1) / LineDrawer.zoom;

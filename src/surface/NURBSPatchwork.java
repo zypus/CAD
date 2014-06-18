@@ -116,4 +116,20 @@ public class NURBSPatchwork
 			surface.setuSteps(uSteps);
 		}
 	}
+
+	@Override public void setIntegrationStepsU(int integrationStepsU) {
+
+		super.setIntegrationStepsU(integrationStepsU);
+		for (NURBSSurface surface : surfaces) {
+			surface.setIntegrationStepsU(integrationStepsU);
+		}
+	}
+
+	@Override public void setIntegrationStepsV(int integrationStepsV) {
+
+		super.setIntegrationStepsV(integrationStepsV);
+		for (NURBSSurface surface : surfaces) {
+			surface.setIntegrationStepsV(integrationStepsV);
+		}
+	}
 }
