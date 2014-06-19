@@ -5,19 +5,19 @@
 	<classpathentry kind="src" path="tests"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/Extensions"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/-4.11.jar"/>
-	<classpathentry kind="lib" path="C:/Users/Nathan/Documents/Required Jars/gluegen-rt.jar"/>
-	<classpathentry kind="lib" path="C:/Users/Nathan/Documents/Required Jars/gluegen-rt-natives-macosx-universal.jar"/>
-	<classpathentry kind="lib" path="C:/Users/Nathan/Documents/Required Jars/gluegen-rt-natives-windows-amd64.jar"/>
-	<classpathentry kind="lib" path="C:/Users/Nathan/Documents/Required Jars/gluegen-rt-natives-windows-i586.jar"/>
-	<classpathentry kind="lib" path="C:/Users/Nathan/Documents/Required Jars/joal.jar"/>
-	<classpathentry kind="lib" path="C:/Users/Nathan/Documents/Required Jars/joal-natives-macosx-universal.jar"/>
-	<classpathentry kind="lib" path="C:/Users/Nathan/Documents/Required Jars/joal-natives-windows-amd64.jar"/>
-	<classpathentry kind="lib" path="C:/Users/Nathan/Documents/Required Jars/joal-natives-windows-i586.jar"/>
-	<classpathentry kind="lib" path="C:/Users/Nathan/Documents/Required Jars/jogl-all.jar"/>
-	<classpathentry kind="lib" path="C:/Users/Nathan/Documents/Required Jars/jogl-all-natives-macosx-universal.jar"/>
-	<classpathentry kind="lib" path="C:/Users/Nathan/Documents/Required Jars/jogl-all-natives-windows-amd64.jar"/>
-	<classpathentry kind="lib" path="C:/Users/Nathan/Documents/Required Jars/jogl-all-natives-windows-i586.jar"/>
-	<classpathentry kind="lib" path="C:/Users/Nathan/Documents/Required Jars/scirenderer-1.1.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="C:/Users/Nathan/Documents/Required Jars/gluegen-rt.jar"/>
+	<classpathentry exported="true" kind="lib" path="C:/Users/Nathan/Documents/Required Jars/gluegen-rt-natives-macosx-universal.jar"/>
+	<classpathentry exported="true" kind="lib" path="C:/Users/Nathan/Documents/Required Jars/gluegen-rt-natives-windows-amd64.jar"/>
+	<classpathentry exported="true" kind="lib" path="C:/Users/Nathan/Documents/Required Jars/gluegen-rt-natives-windows-i586.jar"/>
+	<classpathentry exported="true" kind="lib" path="C:/Users/Nathan/Documents/Required Jars/joal.jar"/>
+	<classpathentry exported="true" kind="lib" path="C:/Users/Nathan/Documents/Required Jars/joal-natives-macosx-universal.jar"/>
+	<classpathentry exported="true" kind="lib" path="C:/Users/Nathan/Documents/Required Jars/joal-natives-windows-amd64.jar"/>
+	<classpathentry exported="true" kind="lib" path="C:/Users/Nathan/Documents/Required Jars/joal-natives-windows-i586.jar"/>
+	<classpathentry exported="true" kind="lib" path="C:/Users/Nathan/Documents/Required Jars/jogl-all.jar"/>
+	<classpathentry exported="true" kind="lib" path="C:/Users/Nathan/Documents/Required Jars/jogl-all-natives-macosx-universal.jar"/>
+	<classpathentry exported="true" kind="lib" path="C:/Users/Nathan/Documents/Required Jars/jogl-all-natives-windows-amd64.jar"/>
+	<classpathentry exported="true" kind="lib" path="C:/Users/Nathan/Documents/Required Jars/jogl-all-natives-windows-i586.jar"/>
+	<classpathentry exported="true" kind="lib" path="C:/Users/Nathan/Documents/Required Jars/scirenderer-1.1.0.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/4"/>
 	<classpathentry kind="output" path="out/production/CAD"/>
 </classpath>

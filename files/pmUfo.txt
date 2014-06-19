@@ -1,0 +1,9 @@
+ParametricSurface
+30
+30
+cos(u) * cos(v) * cos(u)
+cos(u) * sin(v)
+u
+0,6.283185307
+0,6.283185307
+open

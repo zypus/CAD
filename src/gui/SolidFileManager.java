@@ -3,8 +3,14 @@ package gui;
 import surface.HomogeneousPoint3d;
 import surface.NURBSPatchwork;
 import surface.NURBSSurface;
+import surface.ParametricSurface;
 import surface.Solid;
+import util.Bound;
+import util.ParametricFunction;
 
+import javax.script.ScriptEngine;
+import javax.script.ScriptEngineManager;
+import javax.script.ScriptException;
 import javax.swing.JOptionPane;
 import java.awt.Component;
 import java.io.File;
@@ -38,6 +44,8 @@ public class SolidFileManager {
 				solid = createNurbsSurface(scanner);
 			} else if (type.equals("NURBSPatchwork")) {
 				solid = createNurbsPatchwork(scanner);
+			} else if (type.equals("ParametricSurface")) {
+				solid = createParametricSurface(scanner);
 			}
 
 		} catch (FileNotFoundException e) {
@@ -45,6 +53,90 @@ public class SolidFileManager {
 		}
 
 		return solid;
+	}
+
+	private Solid createParametricSurface(Scanner scanner) {
+
+		int uSteps = scanner.nextInt();
+		int vSteps = scanner.nextInt();
+		scanner.nextLine();
+
+		ScriptEngineManager mgr = new ScriptEngineManager();
+		final ScriptEngine engine = mgr.getEngineByName("JavaScript");
+		String startScript = "importPackage(java.util); sin = Math.sin; cos = Math.cos;";
+		try {
+			engine.eval(startScript);
+		} catch (ScriptException e) {
+			e.printStackTrace();
+		}
+
+
+		final String xString = scanner.nextLine();
+		final String yString = scanner.nextLine();
+		final String zString = scanner.nextLine();
+
+		System.out.println(xString);
+		System.out.println(yString);
+		System.out.println(zString);
+
+		String uBound = scanner.nextLine();
+		String vBound = scanner.nextLine();
+
+		String[] uBoundComp = uBound.split(",");
+		String[] vBoundComp = vBound.split(",");
+
+		double lowerU = Double.parseDouble(uBoundComp[0]);
+		double upperU = Double.parseDouble(uBoundComp[1]);
+		double lowerV = Double.parseDouble(vBoundComp[0]);
+		double upperV = Double.parseDouble(vBoundComp[1]);
+
+		String isOpen = scanner.next();
+		boolean open = isOpen.equals("open");
+
+		ParametricFunction x = new ParametricFunction() {
+			@Override public double getValue(double u, double v) {
+
+				try {
+					engine.eval("u = " + u);
+					engine.eval("v = " + v);
+					return (double) engine.eval(xString);
+				} catch (ScriptException e) {
+					e.printStackTrace();
+				}
+				return 0;
+			}
+		};
+		ParametricFunction y = new ParametricFunction() {
+			@Override public double getValue(double u, double v) {
+
+				try {
+					engine.eval("u = " + u);
+					engine.eval("v = " + v);
+					return (double) engine.eval(yString);
+				} catch (ScriptException e) {
+					e.printStackTrace();
+				}
+				return 0;
+			}
+		};
+		ParametricFunction z = new ParametricFunction() {
+			@Override public double getValue(double u, double v) {
+
+				try {
+					engine.eval("u = " + u);
+					engine.eval("v = " + v);
+					return (double) engine.eval(zString);
+				} catch (ScriptException e) {
+					e.printStackTrace();
+				}
+				return 0;
+			}
+		};
+		ParametricSurface parametricSurface = new ParametricSurface(x, y, z, new Bound(lowerU, upperU), new Bound(lowerV, upperV));
+		parametricSurface.setuSteps(uSteps);
+		parametricSurface.setvSteps(vSteps);
+		parametricSurface.setOpen(open);
+		return parametricSurface;
 	}
 
 	private Solid createNurbsPatchwork(Scanner scanner) {
