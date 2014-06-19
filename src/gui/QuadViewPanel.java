@@ -50,27 +50,27 @@ public class QuadViewPanel extends JPanel {
 		ParametricFunction x = new ParametricFunction() {
 			@Override public double getValue(double u, double v) {
 
-				return 4*Math.cos(u)+2*Math.cos(v)*Math.cos(u);
+				return 4*Math.sin(v)*Math.cos(u);
 			}
 		};
 		ParametricFunction y = new ParametricFunction() {
 			@Override public double getValue(double u, double v) {
 
-				return 4*Math.sin(u)+2*Math.cos(v)*Math.sin(u);
+				return -4*Math.sin(v)*Math.sin(u);
 			}
 		};
 		ParametricFunction z = new ParametricFunction() {
 			@Override public double getValue(double u, double v) {
 
-				return 2*Math.sin(v);
+				return -4*Math.cos(v);
 			}
 		};
 
-		Solid solid = new ParametricSurface(x, y, z, new Bound(0, 2 * Math.PI), new Bound(0, 2 * Math.PI));
-		
+		Solid solid = new ParametricSurface(x, y, z, new Bound(0, 2*Math.PI), new Bound(0, Math.PI/3));
+
 		solid.setOpen(true);
-		solid.setuSteps(60);
-		solid.setvSteps(60);
+		solid.setuSteps(20);
+		solid.setvSteps(20);
 
 //		Solid solid = new Polyhedron();
 //		List<Point3d> points = new ArrayList<>();
