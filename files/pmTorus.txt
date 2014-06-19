@@ -1,6 +1,6 @@
 ParametricSurface
-50
-50
+30
+30
 4 * cos(u) + 2 * cos(v) * cos(u)
 4 * sin(u) + 2 * cos(v) * sin(u)
 2 * sin(v)
